@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const mongooseDelete = require('mongoose-delete');
 const Timezone = require('mongoose-timezone');
 const ObjectId = mongoose.Types.ObjectId;
-const authSchema = require('../model/shema/auth');
+const authSchema = require('../shema/auth');
 
 const UserSchema = new mongoose.Schema({
     username: {

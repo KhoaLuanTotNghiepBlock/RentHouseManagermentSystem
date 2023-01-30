@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Timezone = require('mongoose-timezone');
-const User = require('./user.model');
+const User = require('./user/user.model');
 
 const walletSchema = new mongoose.Schema(
     {

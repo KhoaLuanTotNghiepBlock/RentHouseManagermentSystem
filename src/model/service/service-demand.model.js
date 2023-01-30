@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Timezone = require('mongoose-timezone');
 const ObjectId = mongoose.Schema.ObjectId;
 
-const serviceExpenseSchema = new mongoose.Schema(
+const serviceDemandSchema = new mongoose.Schema(
     {
         oldIndicator: {
             type: Number,
@@ -36,10 +36,6 @@ const serviceExpenseSchema = new mongoose.Schema(
             type: Number,
             default: 1
         },
-        user: {
-            type: ObjectId,
-            ref: 'User'
-        },
         enable: {
             type: Boolean,
             default: true
@@ -51,7 +47,7 @@ const serviceExpenseSchema = new mongoose.Schema(
     }
 );
 
-serviceExpenseSchema.plugin(Timezone);
+serviceDemandSchema.plugin(Timezone);
 
-const ServiceExpense = mongoose.model('ServiceExpense', serviceExpenseSchema);
+const ServiceExpense = mongoose.model('ServiceDemand', serviceDemandSchema);
 module.exports = ServiceExpense;

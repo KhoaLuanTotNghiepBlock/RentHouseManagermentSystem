@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const ulity = require('./shema/utility');
 const Timezone = require('mongoose-timezone');
+const attachment = require('./shema/attachment');
 
 const roomSchema = new mongoose.Schema(
     {
@@ -50,7 +51,7 @@ const roomSchema = new mongoose.Schema(
             type: String,
             default: ""
         },
-        imgRoom: [],
+        roomAttachment: attachment,
         enable: {
             type: Boolean,
             default: true

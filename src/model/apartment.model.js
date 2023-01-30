@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
 const Timezone = require('mongoose-timezone');
 const uility = require('../model/shema/utility');
-const address = require();
+const address = require('./shema/address');
+const apartmentAttatchment = require('./shema/attachment');
+
 const apartmentSchema = new mongoose.Schema(
     {
         name: {
@@ -57,11 +59,7 @@ const apartmentSchema = new mongoose.Schema(
         },
         amentilities: uility,
         address: address,
-        imageAvatar: {
-            type: String,
-            default: " "
-        },
-        imageRoom: [],
+        apartmentAttachment: apartmentAttatchment,
         enable: {
             type: Boolean,
             default: true
@@ -74,6 +72,6 @@ const apartmentSchema = new mongoose.Schema(
 );
 
 apartmentSchema.plugin(Timezone);
- 
+
 const Apartment = mongoose.model('Apartment', apartmentSchema);
 module.exports = Apartment;

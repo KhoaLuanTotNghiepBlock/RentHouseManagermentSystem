@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Timezone = require('mongoose-timezone');
-const Schema = mongoose.Types.ObjectId;
+const ObjectId = mongoose.Types.ObjectId;
 
 const serviceSchema = new mongoose.Schema(
     {
@@ -15,6 +15,10 @@ const serviceSchema = new mongoose.Schema(
         basePrice: {
             type: Number,
             default: " "
+        },
+        unit: {
+            type: ObjectId,
+            ref: 'Unit'
         },
         enable: {
             type: Boolean,
