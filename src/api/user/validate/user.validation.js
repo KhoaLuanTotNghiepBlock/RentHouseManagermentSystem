@@ -1,6 +1,8 @@
 const User = require('../../../model/user/user.model');
 const bcrypt = require('bcryptjs');
 const { isEmpty } = require('../../../utils/common.helper');
+const commonHelper = require('../../../utils/common.helper');
+const dateHelper = require('../../../utils/datetime.helper');
 
 const NAME_INVALID = 'Name invalid';
 const USERNAME_INVALID = 'Username invalid';
@@ -130,6 +132,31 @@ const userValidate = {
 
         return { name, username, password, contactInfo, identity, error };
     },
+
+    validateProfile: async (profile) => {
+        const { name, dob, gender } = profile;
+
+        const error = {};
+
+        if (!name || !NAME_REGEX.test(name))
+            error.name = NAME_INVALID;
+
+        if (!(gender === 'Orther' || gender === 'Female' || gender === 'Man'))
+            error.gender = GENDER_INVALID;
+
+        if (!dob)
+            error.dob = DATE_INVALID;
+
+        if (commonHelper.isEmpty(error)) {
+            console.log("🚀 ~ file: user.validation.js:147 ~ validateProfile: ~ error", error);
+            return false;
+        }
+        return {
+            name,
+            dob: dateHelper.toObject(dob),
+            gender
+        };
+    }
 };
 
 module.exports = userValidate;

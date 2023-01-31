@@ -97,6 +97,44 @@ UserSchema.statics.checkById = async (_id) => {
     return user;
 };
 
+UserSchema.statics.getById = async (_id) => {
+    const user = await User.findById(_id);
+
+    if (!user)
+        throw new Error('user not found!');
+
+    const {
+        name,
+        email,
+        username,
+        phone,
+        identity,
+        auth,
+        gender,
+        dob,
+        avatar,
+        notifications,
+        enable,
+        otp, otpTime,
+        socketId
+    } = user;
+
+    return {
+        name,
+        email,
+        username,
+        phone,
+        identity,
+        isAdmin: auth.isAdmin,
+        gender,
+        dob,
+        avatar,
+        notifications,
+        enable,
+        otp, otpTime,
+        socketId
+    }
+};
 
 const User = mongoose.model('User', UserSchema);
 
