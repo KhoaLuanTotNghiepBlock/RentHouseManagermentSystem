@@ -46,15 +46,16 @@ const UserSchema = new mongoose.Schema({
             ref: 'Notification'
         }
     ],
-    roles: {
-        type: String,
-        enum: ['LANDLORD', 'TENANT'],
-        default: 'TENANT'
-    },
     enable: {
         type: Boolean,
         default: true
     },
+    apartments: [
+        {
+            type: ObjectId,
+            ref: 'Apartment'
+        }
+    ],
     otp: String,
     otpTime: Date,
     socketId: {
@@ -95,6 +96,7 @@ UserSchema.statics.checkById = async (_id) => {
 
     return user;
 };
+
 
 const User = mongoose.model('User', UserSchema);
 

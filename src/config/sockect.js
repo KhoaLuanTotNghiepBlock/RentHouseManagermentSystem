@@ -1,4 +1,4 @@
-const User = require('../model/user.model');
+const User = require('../model/user/user.model');
 
 const addSokectIdToUser = async (socketId, userId) => {
     const user = await User.findById(userId);

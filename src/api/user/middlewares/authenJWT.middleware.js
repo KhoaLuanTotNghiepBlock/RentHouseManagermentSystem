@@ -1,6 +1,6 @@
 const dotenv = require('dotenv').config();
 const jwt = require('jsonwebtoken');
-const User = require('../../../model/user.model');
+const User = require('../../../model/user/user.model');
 
 module.exports = {
     async api(req, res, next) {
@@ -11,6 +11,7 @@ module.exports = {
             if (!token) throw new Error('Token is not provided');
 
             let payload = await jwt.verify(token, process.env.SECRET_KEY);
+
             if (payload.isAdmin)
                 throw new Error('Admin is not allowed to access');
             else

@@ -3,6 +3,7 @@ const Timezone = require('mongoose-timezone');
 const uility = require('../model/shema/utility');
 const address = require('./shema/address');
 const apartmentAttatchment = require('./shema/attachment');
+const ObjectId = mongoose.Schema.ObjectId;
 
 const apartmentSchema = new mongoose.Schema(
     {

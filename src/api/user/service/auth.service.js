@@ -1,7 +1,7 @@
 const dotenv = require('dotenv').config();
 const jwt = require('jsonwebtoken');
-const User = require('../../../model/user.model');
-const Token = require('../../../model/token.model');
+const User = require('../../../model/user/user.model');
+const Token = require('../../../model/user/token.model');
 const mongooseHelper = require('../../../utils/mongoose.helper');
 const mailHelper = require('../../../utils/nodemailer.helper');
 const crypto = require('../../../utils/crypto.hepler');
@@ -131,7 +131,7 @@ class AuthService {
 
          return {
             status: true,
-            message: error.message,
+            message: 'login success',
             errorCode: 200,
             data: {
                accessToken,
