@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
+const Timezone = require('mongoose-timezone');
 
-const streetSchema = new mongoose.Schema(
+const wardSchema = new mongoose.Schema(
     {
         code: {
             type: Number,
@@ -22,18 +23,13 @@ const streetSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
-        parent_code_ditrict: {
-            type: Number,
-            required: true
-        },
         parent_code_city: {
             type: Number,
             required: true
         }
-    }, {
-    versionKey: false
-}
+    },
+    {
+        versionKey: false,
+        timestamps: true
+    }
 );
-
-const Street = mongoose.model('Street', streetSchema, 'Street')
-module.exports = Street;

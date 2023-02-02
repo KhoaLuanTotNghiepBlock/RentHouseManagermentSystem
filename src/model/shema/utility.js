@@ -47,7 +47,10 @@ const utilitySchema = new mongoose.Schema(
         },
         isPrivateWC: {
             type: Boolean
-        }
+        },
+        isSecurity: Boolean,
+        isNoCurfew: Boolean,
+        isBalcony: Boolean
     },
     {
         _id: false,

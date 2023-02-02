@@ -20,7 +20,7 @@ const apartmentSchema = new mongoose.Schema(
             type: Number,
             require: true
         },
-        arcreage: {
+        acreage: {
             type: Number,
             require: true
         },
@@ -50,7 +50,7 @@ const apartmentSchema = new mongoose.Schema(
             type: Number,
             default: 0
         },
-        nbRoomAvaiable: {
+        nbRoomAvailable: {
             type: Number,
             default: 0
         },

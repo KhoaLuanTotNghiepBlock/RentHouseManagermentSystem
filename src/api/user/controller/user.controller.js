@@ -1,8 +1,19 @@
 const { uploadFile } = require('../../../utils/aws-s3-service.helper');
 const userService = require('../service/user.service');
+const multer = require('multer');
+
+const storage = multer.memoryStorage({
+    destination: (req, file, cb) => {
+        cb(null, "");
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + "-" + file.originalname);
+    },
+});
 const upload = multer({ storage, limits: { fileSize: 20000000 } }).single(
     "file"
 );
+
 class UserController {
     constructor(io) {
         this.io = io;
@@ -75,6 +86,7 @@ class UserController {
                 if (!user)
                     throw new Error('Update avatar => change avatar fail!');
 
+                ww
             });
         } catch (error) {
 

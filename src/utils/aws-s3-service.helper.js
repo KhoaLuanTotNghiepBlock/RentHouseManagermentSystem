@@ -1,9 +1,9 @@
 const fs = require('fs');
 const S3 = require('aws-sdk/clients/s3');
-const MyError = require('../exception/MyError');
 const BucketName = 'imagecanhcut';
 const CLOUD_FRONT_URL = 'https://d2rd596stqiu8q.cloudfront.net/';
 const FILE_SIZE = parseInt(20971520);
+const AWS = require('aws-sdk');
 
 // config aws
 AWS.config.update({

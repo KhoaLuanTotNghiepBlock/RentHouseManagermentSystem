@@ -5,20 +5,8 @@ const User = require('../../../model/user/user.model');
 // const awss3helper = require('../../../utils/awss3.helper');
 const userValidate = require('../validate/user.validation');
 const awsS3ServiceHelper = require('../../../utils/aws-s3-service.helper');
-
-// const storage = multer.memoryStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, "");
-//     },
-//     filename: (req, file, cb) => {
-//         cb(null, Date.now() + "-" + file.originalname);
-//     },
-// });
-// const upload = multer({ storage, limits: { fileSize: 20000000 } }).single(
-//     "file"
-// );
-
-
+const City = require('../../../model/city.model');
+const addressService = require('../service/address.service');
 class UserService {
 
     checkImage(file) {
@@ -87,7 +75,6 @@ class UserService {
                 avatar: avatarUrl
             }
         );
-
         if (updateUser.modifiedCount < 1) throw new Error('Update data fail!');
         return user;
     }

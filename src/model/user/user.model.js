@@ -133,7 +133,7 @@ UserSchema.statics.getById = async (_id) => {
         enable,
         otp, otpTime,
         socketId
-    }
+    };
 };
 
 const User = mongoose.model('User', UserSchema);
