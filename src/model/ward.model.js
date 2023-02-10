@@ -1,35 +1,40 @@
-const mongoose = require('mongoose');
-const Timezone = require('mongoose-timezone');
+const mongoose = require("mongoose");
+const Timezone = require("mongoose-timezone");
+
+const { ObjectId } = mongoose.Schema;
 
 const wardSchema = new mongoose.Schema(
-    {
-        code: {
-            type: Number,
-            required: true
-        },
-        name: {
-            type: String,
-            required: true
-        },
-        type: {
-            type: String,
-            required: true
-        },
-        typename: {
-            type: String,
-            required: true
-        },
-        parent_code: {
-            type: Number,
-            required: true
-        },
-        parent_code_city: {
-            type: Number,
-            required: true
-        }
+  {
+    name: {
+      type: String,
+      required: true,
     },
-    {
-        versionKey: false,
-        timestamps: true
-    }
+    type: {
+      type: String,
+      required: true,
+    },
+    typename: {
+      type: String,
+      required: true,
+    },
+    parent_code: {
+      type: ObjectId,
+      required: true,
+      ref: "Dictrict",
+    },
+    parent_code_city: {
+      type: ObjectId,
+      required: true,
+      ref: "City",
+    },
+  },
+  {
+    versionKey: false,
+    timestamps: true,
+  },
 );
+
+wardSchema.plugin(Timezone);
+
+const Ward = mongoose.model("Ward", wardSchema);
+module.exports = Ward;

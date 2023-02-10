@@ -1,31 +1,32 @@
-const mongoose = require('mongoose');
-const Timezone = require('mongoose-timezone');
-const ObjectId = mongoose.Schema.ObjectId;
+const mongoose = require("mongoose");
+const Timezone = require("mongoose-timezone");
+
+const { ObjectId } = mongoose.Schema;
 
 const roomServiceSchema = new mongoose.Schema(
-    {
-        service: [
-            {
-                type: ObjectId,
-                ref: 'Service'
-            }
-        ],
-        room: {
-            type: ObjectId,
-            ref: 'Room'
-        },
-        enable: {
-            type: Boolean,
-            default: true
-        }
+  {
+    service: [
+      {
+        type: ObjectId,
+        ref: "Service",
+      },
+    ],
+    room: {
+      type: ObjectId,
+      ref: "Room",
     },
-    {
-        timestamps: true,
-        versionKey: false
-    }
+    enable: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  {
+    timestamps: true,
+    versionKey: false,
+  },
 );
 
 roomServiceSchema.plugin(Timezone);
 
-const RoomService = mongoose.model('RoomService', roomServiceSchema);
+const RoomService = mongoose.model("RoomService", roomServiceSchema);
 module.exports = RoomService;

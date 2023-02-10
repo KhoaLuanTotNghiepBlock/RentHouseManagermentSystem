@@ -1,35 +1,36 @@
-const bcrypt = require('bcryptjs');
+const bcrypt = require("bcryptjs");
 
 const commonHelper = {
-    isEmpty: (obj) => {
-        if (!obj) return true;
-        return Object.keys(obj).length === 0;
-    },
+  isEmpty: (obj) => {
+    if (!obj) return true;
+    return Object.keys(obj).length === 0;
+  },
 
-    getRandomInt: (min, max) => {
-        min = Math.ceil(min);
-        max = Math.floor(max);
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    },
+  getRandomInt: (min, max) => {
+    const minRan = Math.ceil(min);
+    const maxRan = Math.floor(max);
+    return Math.floor(Math.random() * (maxRan - minRan + 1)) + minRan;
+  },
 
-    getRandomOTP: function () {
-        return this.getRandomInt(100000, 999999);
-    },
-    hashPassword: async (value) => {
-        if (!value) return null;
+  getRandomOTP() {
+    return this.getRandomInt(100000, 999999);
+  },
 
-        return await bcrypt.hash(value, 8);
-    },
+  hashPassword: (value) => {
+    if (!value) return null;
 
-    getPagination: (page, size, total) => {
-        const totalPages = Math.ceil(total / size);
-        const skip = page * size;
-        return {
-            skip,
-            limit: size,
-            totalPages,
-        };
-    }
+    return bcrypt.hash(value, 8);
+  },
+
+  getPagination: (page, size, total) => {
+    const totalPages = Math.ceil(total / size);
+    const skip = page * size;
+    return {
+      skip,
+      limit: size,
+      totalPages,
+    };
+  },
 };
 
 module.exports = commonHelper;

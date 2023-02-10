@@ -1,39 +1,25 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const streetSchema = new mongoose.Schema(
-    {
-        code: {
-            type: Number,
-            required: true
-        },
-        name: {
-            type: String,
-            required: true
-        },
-        type: {
-            type: String,
-            required: true
-        },
-        typename: {
-            type: String,
-            required: true
-        },
-        parent_code: {
-            type: Number,
-            required: true
-        },
-        parent_code_ditrict: {
-            type: Number,
-            required: true
-        },
-        parent_code_city: {
-            type: Number,
-            required: true
-        }
-    }, {
-    versionKey: false
-}
-);
+const { ObjectId } = mongoose.Schema;
 
-const Street = mongoose.model('Street', streetSchema, 'Street')
+const streetSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  parent_code: {
+    type: ObjectId,
+    required: true,
+    ref: "Dictrict",
+  },
+  parent_code_city: {
+    type: ObjectId,
+    required: true,
+    ref: "City",
+  },
+}, {
+  versionKey: false,
+});
+
+const Street = mongoose.model("Street", streetSchema);
 module.exports = Street;

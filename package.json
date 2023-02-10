@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start-user": "nodemon src/api/user/server.js",
     "start": "node src/api/user/server.js",
-    "start-admin": "nodemon src/api/admin/server.js"
+    "start-admin": "nodemon src/api/admin/server.js",
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
@@ -30,6 +31,7 @@
     "generate-password": "^1.7.0",
     "jsonwebtoken": "^9.0.0",
     "mogoose": "^0.0.1-security",
+    "mongoose": "^6.9.1",
     "mongoose-delete": "^0.5.4",
     "mongoose-timezone": "^1.3.0",
     "morgan": "^1.10.0",
@@ -40,6 +42,9 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "eslint": "^8.33.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.27.5",
     "morgan": "^1.10.0",
     "nodemon": "^2.0.20"
   }

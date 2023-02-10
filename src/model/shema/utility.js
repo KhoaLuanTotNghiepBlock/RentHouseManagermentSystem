@@ -1,61 +1,85 @@
-const mongoose = require('mongoose');
-const Timezone = require('mongoose-timezone');
+const mongoose = require("mongoose");
+const Timezone = require("mongoose-timezone");
 
 const utilitySchema = new mongoose.Schema(
-    {
-        isWifi: {
-            type: Boolean
-        },
-        isMezzanine: {
-            type: Boolean
-        },
-        isCamera: {
-            type: Boolean
-        },
-        isParking: {
-            type: Boolean
-        },
-        isFrigde: {
-            type: Boolean
-        },
-        isWasingMachine: {
-            type: Boolean
-        },
-        isTelevison: {
-            type: Boolean
-        },
-        isAirCoditional: {
-            type: Boolean
-        },
-        isElevator: {
-            type: Boolean
-        },
-        isPool: {
-            type: Boolean
-        },
-        isWardrobe: {
-            type: Boolean
-        },
-        isPet: {
-            type: Boolean
-        },
-        isCooking: {
-            type: Boolean
-        },
-        isBed: {
-            type: Boolean
-        },
-        isPrivateWC: {
-            type: Boolean
-        },
-        isSecurity: Boolean,
-        isNoCurfew: Boolean,
-        isBalcony: Boolean
+  {
+    isWifi: {
+      type: Boolean,
+      default: false,
     },
-    {
-        _id: false,
-        autoCreate: false
-    }
+    isMezzanine: {
+      type: Boolean,
+      default: false,
+    },
+    isCamera: {
+      type: Boolean,
+      default: false,
+    },
+    isParking: {
+      type: Boolean,
+      default: false,
+    },
+    isFrigde: {
+      type: Boolean,
+      default: false,
+    },
+    isWasingMachine: {
+      type: Boolean,
+      default: false,
+    },
+    isTelevison: {
+      type: Boolean,
+      default: false,
+    },
+    isAirCoditional: {
+      type: Boolean,
+      default: false,
+    },
+    isElevator: {
+      type: Boolean,
+      default: false,
+    },
+    isPool: {
+      type: Boolean,
+      default: false,
+    },
+    isWardrobe: {
+      type: Boolean,
+      default: false,
+    },
+    isPet: {
+      type: Boolean,
+      default: false,
+    },
+    isCooking: {
+      type: Boolean,
+      default: false,
+    },
+    isBed: {
+      type: Boolean,
+      default: false,
+    },
+    isPrivateWC: {
+      type: Boolean,
+      default: false,
+    },
+    isSecurity: {
+      type: Boolean,
+      default: false,
+    },
+    isNoCurfew: {
+      type: Boolean,
+      default: false,
+    },
+    isBalcony: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  {
+    _id: false,
+    autoCreate: false,
+  },
 );
 
 utilitySchema.plugin(Timezone);
