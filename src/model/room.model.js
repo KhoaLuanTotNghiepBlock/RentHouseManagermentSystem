@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const ObjectId = mongoose.Schema.ObjectId;
 const { Schema } = mongoose;
 const Timezone = require("mongoose-timezone");
 const ulity = require("./shema/utility");
@@ -26,15 +26,20 @@ const roomSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    gender: {
+      type: String,
+      enum: ['Male', 'Female', 'All'],
+      default: 'All'
+    },
     deposit: {
       type: Number,
       default: 0,
     },
     description:
-        {
-          type: String,
-          default: "",
-        },
+    {
+      type: String,
+      default: "",
+    },
     floor: {
       type: Number,
       default: 0,
@@ -53,6 +58,12 @@ const roomSchema = new mongoose.Schema(
       default: "",
     },
     roomAttachment: attachment,
+    service: [
+      {
+        type: ObjectId,
+        ref: "Service"
+      }
+    ],
     enable: {
       type: Boolean,
       default: true,

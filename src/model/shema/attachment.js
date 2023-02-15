@@ -4,7 +4,10 @@ const Timezone = require("mongoose-timezone");
 const attatchSchema = new mongoose.Schema(
   {
     url: [],
-    enable: Boolean,
+    enable: {
+      type: Boolean,
+      default: true
+    },
   },
   {
     _id: false,

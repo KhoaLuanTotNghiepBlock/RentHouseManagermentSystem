@@ -1,6 +1,8 @@
 const multer = require("multer");
 const { uploadFile } = require("../../../utils/aws-s3-service.helper");
 const userService = require("../service/user.service");
+const addressService = require('../service/address.service');
+const Street = require("../../../model/street.model");
 
 const storage = multer.memoryStorage({
   destination: (req, file, cb) => {
@@ -22,7 +24,6 @@ class UserController {
   // [GET] /bughouse/user/me/profile
   async getProfile(req, res, next) {
     const id = req.auth.userId;
-
     try {
       const user = await userService.getProfile(id);
 

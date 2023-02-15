@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs");
+const MyError = require("../exception/MyError");
 
 const commonHelper = {
   isEmpty: (obj) => {
@@ -31,6 +32,20 @@ const commonHelper = {
       totalPages,
     };
   },
+  convertToNumber: (value) => {
+    value = Number(value);
+
+    if (value === undefined || value === null)
+      throw new MyError('missing value');
+
+    if (isNaN(value))
+      throw new MyError('Value must be number');
+
+    if (value < 0) {
+      throw new Error("Number of floor cannot be negative");
+    }
+    return value;
+  }
 };
 
 module.exports = commonHelper;

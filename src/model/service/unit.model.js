@@ -5,7 +5,10 @@ const unitSchema = new mongoose.Schema(
   {
     description: String,
     name: String,
-    enable: Boolean,
+    enable: {
+      type: Boolean,
+      default: true
+    },
   },
   {
     timestamps: true,

@@ -42,7 +42,15 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    identityImg: [],
+    identityImg: [
+      {
+        url: String,
+        type: {
+          type: String,
+          enum: ['cccd_chip_front', 'cccd_chip_back']
+        }
+      }
+    ],
     notifications: [
       {
         type: ObjectId,
@@ -65,6 +73,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    wishList: []
   },
   {
     timestamps: true,
@@ -100,42 +109,35 @@ UserSchema.statics.checkById = async (_id) => {
   return user;
 };
 
-UserSchema.statics.getById = async (_id) => {
-  const user = await User.findById(_id);
+UserSchema.statics.getById = async (id) => {
+  const user = await User.findById(id);
 
   if (!user) { throw new Error("user not found!"); }
 
   const {
+    _id,
     name,
     email,
     username,
     phone,
     identity,
-    auth,
     gender,
     dob,
     avatar,
-    notifications,
-    enable,
-    otp, otpTime,
-    socketId,
+    enable
   } = user;
 
   return {
+    _id,
     name,
     email,
     username,
     phone,
     identity,
-    isAdmin: auth.isAdmin,
     gender,
     dob,
     avatar,
-    notifications,
-    enable,
-    otp,
-    otpTime,
-    socketId,
+    enable
   };
 };
 

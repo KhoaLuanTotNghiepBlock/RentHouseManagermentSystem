@@ -3,7 +3,7 @@ const Timezone = require("mongoose-timezone");
 const uility = require("./shema/utility");
 const address = require("./shema/address");
 const apartmentAttatchment = require("./shema/attachment");
-
+const ObjectId = mongoose.Schema.ObjectId;
 const apartmentSchema = new mongoose.Schema(
   {
     name: {
@@ -59,6 +59,12 @@ const apartmentSchema = new mongoose.Schema(
     },
     amentilities: uility,
     address,
+    service: [
+      {
+        type: ObjectId,
+        ref: "Service"
+      }
+    ],
     apartmentAttachment: apartmentAttatchment,
     enable: {
       type: Boolean,

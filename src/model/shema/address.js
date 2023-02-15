@@ -45,4 +45,5 @@ const addressSchema = new mongoose.Schema(
 );
 
 addressSchema.plugin(Timezone);
+
 module.exports = addressSchema;

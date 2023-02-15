@@ -3,36 +3,42 @@ const City = require("../../../model/city.model");
 const Ditrict = require("../../../model/ditrict.model");
 const Street = require("../../../model/street.model");
 const Ward = require("../../../model/ward.model");
-const Address = require("../../../model/shema/address");
+const MyError = require("../../../exception/MyError");
+const NotFoundError = require('../../../exception/NotFoundError');
+const commonUtils = require('../../../utils/common.helper');
+const ArgumentError = require("../../../exception/ArgumentError");
+const { NotBeforeError } = require("jsonwebtoken");
 // const dateHelper = require("../../../utils/datetime.helper");
 
-const apartmentValidate = {
+const validateAddress = {
   validDitrict: async (nameDitrict) => {
-    if (!nameDitrict) { throw new Error("valid ditrict ==> missing parameter"); }
+    if (!nameDitrict) { throw new MyError("valid ditrict ==> missing parameter"); }
 
     const ditrict = await Ditrict.findOne({ name: nameDitrict });
-    if (!ditrict) { throw new Error("Ditrict not found"); }
+
+    if (!ditrict) { throw new MyError("Ditrict not found"); }
     return ditrict;
   },
 
   validWard: async (wardInfo) => {
-    const { name, idCity, idDitrict } = wardInfo;
-    if (!name || idCity || idDitrict) { throw new Error("valid ward ==> missing parameter!"); }
+    const { typename, idCity, idDitrict } = wardInfo;
+
+    if (!typename || !idCity || !idDitrict) { throw new MyError("valid ward ==> missing parameter!"); }
 
     const ward = await Ward.findOne(
       {
-        name,
+        typename,
         parent_code: idDitrict,
         parent_city_code: idCity,
       },
     );
-    if (!ward) { throw new Error("ward not fond!!"); }
+    if (!ward) { throw new NotFoundError("ward not fond!!"); }
     return ward;
   },
 
   validStreet: async (streetInfo) => {
     const { name, idCity, idDitrict } = streetInfo;
-    if (!name || idCity || idDitrict) { throw new Error("valid street ==> missing parameter!"); }
+    if (!name || !idCity || !idDitrict) { throw new MyError("valid street ==> missing parameter!"); }
 
     const street = await Street.findOne(
       {
@@ -42,111 +48,122 @@ const apartmentValidate = {
       },
     );
 
-    if (!street) { throw new Error("street not found!"); }
+    if (!street) { throw new NotFoundError("street not found!"); }
     return street;
   },
 
   validTypeHome: (typeHome) => {
-    if (!typeHome) { throw new Error("valid type home ==> missing parameter"); }
+    if (!typeHome) { throw new MyError("valid type home ==> missing parameter"); }
 
     const type = ["DORMITORY", "ROOM_FOR_RENT", "ROOM_FOR_SHARE", "HOUSE", "APARTMENT"];
 
     return type.includes(typeHome);
   },
 
+};
+
+const apartmentValidate = {
   /**
      *
      * @param {*} as addressInfo
      * @returns address
      */
   validAddress: async (addressInfo) => {
-    const {
-      cityName, ditrictName, streetName, wardName, latGgmap, lngGgmap, addressDetail,
-    } = addressInfo;
-    try {
-      if (!(cityName && ditrictName && streetName && wardName && latGgmap && lngGgmap && addressDetail)) { throw new Error("valid address ==> missing parameter"); }
+    const { cityName, ditrictName, streetName, wardName, latGgmap, lngGgmap, addressDetail } = addressInfo;
 
-      const city = await City.findOne({ name: cityName });
-      if (!city) { throw new Error("valid address ==> city not found!"); }
+    if (!(cityName && ditrictName && streetName && wardName && latGgmap && lngGgmap && addressDetail))
+      throw new MyError("valid address ==> missing parameter");
 
-      const ditrict = await this.validDitrict(ditrictName);
-      if (!ditrict) { throw new Error("valid address ==>  invalid ditrict"); }
+    const city = await City.findOne({ name: cityName });
+    if (!city)
+      throw new NotFoundError("valid address ==> city not found!");
 
-      const ward = await this.validWard({
-        name: wardName,
-        idCity: city._id,
-        idDitrict: ditrict._id,
-      });
+    const ditrict = await validateAddress.validDitrict(ditrictName);
+    if (!ditrict)
+      throw new NotFoundError("valid address ==>  invalid ditrict");
 
-      if (!ward) { throw new Error("valid address ==>  ward not found!"); }
+    const ward = await validateAddress.validWard({
+      typename: wardName,
+      idCity: city._id,
+      idDitrict: ditrict._id,
+    });
 
-      const street = await this.validStreet({
-        name: streetName,
-        idCity: city._id,
-        idDitrict: ditrict._id,
-      });
-      if (!street) { throw new Error("valid address ==> street not found!"); }
+    if (!ward)
+      throw new NotFoundError("valid address ==>  ward not found!");
 
-      return new Address(
-        {
-          code_city: city._id,
-          code_dictrict: ditrict._id,
-          code_ward: ward._id,
-          code_street: street._id,
-          Lat_ggmap: latGgmap,
-          Lng_ggmap: lngGgmap,
-          address_detail: addressDetail,
-        },
-      );
-    } catch (error) {
-      console.log("🚀 ~ file: apartment.validation.js:73 ~ validAddress: ~ error", error.message);
-      return null;
-    }
+    const street = await validateAddress.validStreet({
+      name: streetName,
+      idCity: city._id,
+      idDitrict: ditrict._id,
+    });
+
+    if (!street)
+      throw new NotFoundError("valid address ==> street not found!");
+
+    return {
+      code_city: city._id,
+      code_dictrict: ditrict._id,
+      code_ward: ward._id,
+      code_street: street._id,
+      Lat_ggmap: latGgmap,
+      Lng_ggmap: lngGgmap,
+      address_detail: addressDetail,
+    };
   },
 
-  /**
-     *
-     * @param {name, description, basePrice, acreage,typeHome, nbBedRoom, nbBathRoom, nbToilet, nbKitchen, nbFloor, nbRoomAvailable, totalRoom, apartmentAttachment} apartmentInfo
-     * @returns { name,description,basePrice,acreage,typeHome,nbBedRoom,nbBathRoom,nbToilet,nbKitchen,nbFloor,nbRoomAvailable,totalRoom,apartmentAttachment}
-     */
   validApartmentBasicInfo: async (apartmentInfo) => {
-    const {
+    let {
       name, description, basePrice, acreage,
       typeHome, nbBedRoom, nbBathRoom, nbToilet, nbKitchen, nbFloor, nbRoomAvailable, totalRoom, apartmentAttachment,
     } = apartmentInfo;
 
-    try {
-      if (!(name && description && basePrice && acreage && typeHome && nbBedRoom && nbBathRoom
-        && nbToilet && nbKitchen && nbFloor && nbRoomAvailable && totalRoom)) { throw new Error("valid apartment basic info ==> missing parameter!"); }
+    if (!(name && description && typeHome))
+      throw new MyError("valid apartment basic info ==> missing parameter!");
 
-      if (!this.typeHome(typeHome)) { throw new Error("valid apartment basic info ==> type home invalid!"); }
+    // validate number
+    basePrice = commonUtils.convertToNumber(basePrice);
+    acreage = commonUtils.convertToNumber(acreage);
+    nbBedRoom = commonUtils.convertToNumber(nbBedRoom);
+    nbBathRoom = commonUtils.convertToNumber(nbBathRoom);
+    nbToilet = commonUtils.convertToNumber(nbToilet);
+    nbKitchen = commonUtils.convertToNumber(nbKitchen);
+    nbFloor = commonUtils.convertToNumber(nbFloor);
+    nbRoomAvailable = commonUtils.convertToNumber(nbRoomAvailable);
+    totalRoom = commonUtils.convertToNumber(totalRoom);
 
-      if (
-        basePrice.isNaN() || acreage.isNaN() || nbBedRoom.isNaN() || nbBathRoom.isNaN() || nbKitchen.isNaN() || nbFloor.isNaN()
-        || nbRoomAvailable.isNaN() || totalRoom.isNaN()) { throw new Error("valid apartment basic info ==> value must be number"); }
+    if (!validateAddress.validTypeHome(typeHome)) { throw new MyError("valid apartment basic info ==> type home invalid!"); }
 
-      if (apartmentAttachment.isEmpty()) { throw new Error("valid apartment basic info ==> image empty"); }
+    const { url } = apartmentAttachment;
+    if (url.length === 0) { throw new MyError("valid apartment basic info ==> image empty"); }
 
-      return new Apartment({
-        name,
-        description,
-        basePrice,
-        acreage,
-        typeHome,
-        nbBedRoom,
-        nbBathRoom,
-        nbToilet,
-        nbKitchen,
-        nbFloor,
-        nbRoomAvailable,
-        totalRoom,
-        apartmentAttachment,
-      });
-    } catch (error) {
-      console.log("🚀 ~ file: apartment.validation.js:122 ~ validApartmentBasicInfo: ~ error", error.message);
-      return null;
-    }
+    return new Apartment({
+      name,
+      description,
+      basePrice,
+      acreage,
+      typeHome,
+      nbBedRoom,
+      nbBathRoom,
+      nbToilet,
+      nbKitchen,
+      nbFloor,
+      nbRoomAvailable,
+      totalRoom,
+      apartmentAttachment,
+    });
   },
+
+  validApartment: async (apartmentId) => {
+    if (!apartmentId)
+      throw new ArgumentError('valid apartment ==>');
+
+    const apartment = await Apartment.findById(apartmentId);
+    if (!apartment)
+      return NotFoundError('Apartment');
+
+    return apartment;
+  }
+
 };
 
-module.exports = apartmentValidate;
+module.exports = { apartmentValidate, validateAddress };

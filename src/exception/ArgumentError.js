@@ -2,7 +2,7 @@ class ArgumentError extends Error {
   constructor(...params) {
     super();
     this.status = 400;
-    this.message = "Params invalid";
+    this.message = `${params} Params invalid`;
   }
 }
 

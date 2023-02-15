@@ -68,6 +68,12 @@ class UserService {
     if (updateUser.modifiedCount < 1) throw new Error("Update data fail!");
     return user;
   }
+
+  async updateProfileByIndentity(userInfo) {
+    const { name, dob, sex, identity, identityImg } = userInfo;
+
+
+  }
 }
 
 module.exports = new UserService();

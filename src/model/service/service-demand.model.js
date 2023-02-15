@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Timezone = require("mongoose-timezone");
-
+const service = require('../service/service.model');
 const { ObjectId } = mongoose.Schema;
 
 const serviceDemandSchema = new mongoose.Schema(
@@ -13,10 +13,7 @@ const serviceDemandSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    service: {
-      type: ObjectId,
-      ref: "Service",
-    },
+    service: service,
     quality: {
       type: Number,
       default: 0,
