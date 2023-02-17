@@ -17,7 +17,7 @@ class ApartmentService {
       {
         name, description, basePrice, acreage,
         typeHome, nbBedRoom, nbBathRoom, nbToilet, nbKitchen, nbFloor, nbRoomAvailable, totalRoom,
-        amentilities, cityName, ditrictName, streetName, wardName, latGgmap, lngGgmap, addressDetail, apartmentAttachment, services
+        amentilities, cityName, ditrictName, streetName, wardName, latGgmap, lngGgmap, addressDetail, apartmentAttachment, services, deposit, period
       } = apartmentInfo;
 
     const address = await apartmentValidate.validAddress({
@@ -41,6 +41,7 @@ class ApartmentService {
       nbRoomAvailable,
       totalRoom,
       apartmentAttachment,
+      deposit, period
     });
 
     if (!apartment)
@@ -93,8 +94,5 @@ class ApartmentService {
     }
   }
 
-  async createNewRoom(_id, roomInfo) {
-
-  }
 }
 module.exports = new ApartmentService();

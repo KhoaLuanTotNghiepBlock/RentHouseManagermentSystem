@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const MyError = require("../exception/MyError");
+const ArgumentError = require("../exception/ArgumentError");
 
 const commonHelper = {
   isEmpty: (obj) => {
@@ -45,6 +46,15 @@ const commonHelper = {
       throw new Error("Number of floor cannot be negative");
     }
     return value;
+  },
+
+  validateGender: (value) => {
+    if (!value)
+      throw new ArgumentError('valid gender ==> ');
+
+    const gender = ['Male', 'Female', 'All'];
+
+    return gender.includes(value);
   }
 };
 

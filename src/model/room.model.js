@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Schema.ObjectId;
-const { Schema } = mongoose;
 const Timezone = require("mongoose-timezone");
 const ulity = require("./shema/utility");
 const attachment = require("./shema/attachment");
+const address = require("./shema/address");
 
 const roomSchema = new mongoose.Schema(
   {
@@ -14,9 +14,8 @@ const roomSchema = new mongoose.Schema(
       type: Number,
       require: true,
     },
-    apartment: {
-      type: Schema.Types.ObjectId,
-      ref: "Apartment",
+    owner: {
+      type: Object,
     },
     nbCurrentPeople: {
       type: Number,
@@ -31,6 +30,11 @@ const roomSchema = new mongoose.Schema(
       enum: ['Male', 'Female', 'All'],
       default: 'All'
     },
+    typeRoom: {
+      type: String,
+      enum: ["DORMITORY", "ROOM_FOR_RENT", "ROOM_FOR_SHARE"],
+      default: "ROOM_FOR_RENT",
+    },
     deposit: {
       type: Number,
       default: 0,
@@ -44,7 +48,7 @@ const roomSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    amentities: ulity,
+    amentilities: ulity,
     period: {
       type: Number,
       default: 0,
@@ -53,12 +57,9 @@ const roomSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    imgAvatar: {
-      type: String,
-      default: "",
-    },
+    address,
     roomAttachment: attachment,
-    service: [
+    services: [
       {
         type: ObjectId,
         ref: "Service"

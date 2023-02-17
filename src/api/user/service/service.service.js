@@ -7,7 +7,6 @@ const Apartment = require('../../../model/apartment.model');
 const serviceValidate = require('../validate/service.validate');
 const roomValidate = require('../validate/room.validaste');
 const { apartmentValidate } = require('../validate/apartment.validation');
-const Service = require('../../../model/service/service.model');
 
 class ServiceApartmentService {
 
@@ -43,16 +42,16 @@ class ServiceApartmentService {
 
         await roomValidate.validRoom(roomId);
 
-        services = await serviceValidate.validateListService(services);
-
         for (const val of services) {
+            const service = await serviceValidate.validateService(val);
+
             let [saveService, updateRoom] = await Promise.all([
-                await val.save(),
-                awaitRoom.updateOne(
+                await service.save(),
+                await Room.updateOne(
                     { roomId },
                     {
                         $push: {
-                            service: val._id
+                            services: service._id
                         }
                     }
                 )

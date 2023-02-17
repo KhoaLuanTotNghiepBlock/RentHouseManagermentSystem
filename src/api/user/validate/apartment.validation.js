@@ -7,7 +7,6 @@ const MyError = require("../../../exception/MyError");
 const NotFoundError = require('../../../exception/NotFoundError');
 const commonUtils = require('../../../utils/common.helper');
 const ArgumentError = require("../../../exception/ArgumentError");
-const { NotBeforeError } = require("jsonwebtoken");
 // const dateHelper = require("../../../utils/datetime.helper");
 
 const validateAddress = {
@@ -55,11 +54,10 @@ const validateAddress = {
   validTypeHome: (typeHome) => {
     if (!typeHome) { throw new MyError("valid type home ==> missing parameter"); }
 
-    const type = ["DORMITORY", "ROOM_FOR_RENT", "ROOM_FOR_SHARE", "HOUSE", "APARTMENT"];
+    const type = ["HOUSE", "APARTMENT"];
 
     return type.includes(typeHome);
   },
-
 };
 
 const apartmentValidate = {
@@ -114,8 +112,9 @@ const apartmentValidate = {
   validApartmentBasicInfo: async (apartmentInfo) => {
     let {
       name, description, basePrice, acreage,
-      typeHome, nbBedRoom, nbBathRoom, nbToilet, nbKitchen, nbFloor, nbRoomAvailable, totalRoom, apartmentAttachment,
+      typeHome, nbBedRoom, nbBathRoom, nbToilet, nbKitchen, nbFloor, nbRoomAvailable, totalRoom, apartmentAttachment, deposit, period
     } = apartmentInfo;
+    console.log("🚀 ~ file: apartment.validation.js:118 ~ validApartmentBasicInfo: ~ deposit, period", deposit, period)
 
     if (!(name && description && typeHome))
       throw new MyError("valid apartment basic info ==> missing parameter!");
@@ -130,6 +129,8 @@ const apartmentValidate = {
     nbFloor = commonUtils.convertToNumber(nbFloor);
     nbRoomAvailable = commonUtils.convertToNumber(nbRoomAvailable);
     totalRoom = commonUtils.convertToNumber(totalRoom);
+    deposit = commonUtils.convertToNumber(deposit);
+    period = commonUtils.convertToNumber(period);
 
     if (!validateAddress.validTypeHome(typeHome)) { throw new MyError("valid apartment basic info ==> type home invalid!"); }
 
@@ -150,6 +151,8 @@ const apartmentValidate = {
       nbRoomAvailable,
       totalRoom,
       apartmentAttachment,
+      deposit,
+      period
     });
   },
 

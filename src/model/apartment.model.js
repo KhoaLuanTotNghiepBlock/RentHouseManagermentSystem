@@ -4,6 +4,7 @@ const uility = require("./shema/utility");
 const address = require("./shema/address");
 const apartmentAttatchment = require("./shema/attachment");
 const ObjectId = mongoose.Schema.ObjectId;
+
 const apartmentSchema = new mongoose.Schema(
   {
     name: {
@@ -26,8 +27,8 @@ const apartmentSchema = new mongoose.Schema(
     typeHome:
     {
       type: String,
-      enum: ["DORMITORY", "ROOM_FOR_RENT", "ROOM_FOR_SHARE", "HOUSE", "APARTMENT"],
-      default: "ROOM_FOR_RENT",
+      enum: ["HOUSE", "APARTMENT"],
+      default: "HOUSE",
     },
     nbBedRoom: {
       type: Number,
@@ -54,6 +55,14 @@ const apartmentSchema = new mongoose.Schema(
       default: 0,
     },
     totalRoom: {
+      type: Number,
+      default: 0,
+    },
+    deposit: {
+      type: Number,
+      default: 0,
+    },
+    period: {
       type: Number,
       default: 0,
     },

@@ -48,8 +48,6 @@ const ServiceValidate = {
 
         basePrice = commonUtils.convertToNumber(basePrice);
 
-        if (await Service.findOne({ name }))
-            throw new MyError('service is already exist!');
 
         return new Service({
             name,
