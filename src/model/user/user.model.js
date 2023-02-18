@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const mongooseDelete = require("mongoose-delete");
 const Timezone = require("mongoose-timezone");
 

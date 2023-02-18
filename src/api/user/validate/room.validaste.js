@@ -5,7 +5,6 @@ const Apartment = require('../../../model/apartment.model');
 const Room = require('../../../model/room.model');
 const User = require('../../../model/user/user.model');
 const commonHelper = require('../../../utils/common.helper');
-const { apartmentValidate } = require('../validate/apartment.validation');
 
 const roomValidate = {
     validRoom: async (roomId) => {
