@@ -9,8 +9,6 @@ const USERNAME_INVALID = "Username invalid";
 const USERNAME_EXISTS_INVALID = "Accoount already exist";
 const PASSWORD_INVALID = "Password invalid more than 8 letter";
 const CONTACT_INVALID = "Contact info invalid";
-// const CONTACT_EXIST_INVALID = "Contact already exist";
-// const INDENTITY_INVALID = "Identity invalid";
 const DATE_INVALID = "Date of birth invalid";
 const GENDER_INVALID = "Gender invalid";
 const NAME_REGEX = /\w{1,50}/;
@@ -82,8 +80,8 @@ const userValidate = {
   validateResetPassword(username, otpPhone, password) {
     if (
       !this.validateUsername(username)
-            || !this.validateOTP(otpPhone)
-            || !this.validatePassword(password)
+      || !this.validateOTP(otpPhone)
+      || !this.validatePassword(password)
     ) { throw new Error("Info reset password invalid"); }
   },
 

@@ -8,7 +8,7 @@ class ContractController {
         try {
             const { userId } = req.auth;
 
-            const { data } = await contractService.createContract(userId, rea.body);
+            const { data } = await contractService.createContract(userId, req.body);
 
             if (!data)
                 throw new MyError('create contract fail!');
@@ -19,9 +19,20 @@ class ContractController {
                 data
             });
         } catch (error) {
-
+            next(error);
         }
     }
+
+    // [GET] bh/contract/:renterId 
+    async getContractByRenter(req, res, next) {
+        try {
+            const { data } = await contractService.getContractByRenter(req.params.renterId);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+
 };
 
 module.exports = new ContractController();

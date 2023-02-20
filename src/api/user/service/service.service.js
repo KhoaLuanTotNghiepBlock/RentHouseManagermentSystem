@@ -3,11 +3,9 @@ const MyError = require('../../../exception/MyError');
 const NotFoundError = require('../../../exception/NotFoundError');
 const Unit = require('../../../model/service/unit.model');
 const Room = require('../../../model/room.model');
-const Apartment = require('../../../model/apartment.model');
 const serviceValidate = require('../validate/service.validate');
 const roomValidate = require('../validate/room.validaste');
-const { apartmentValidate } = require('../validate/apartment.validation');
-
+const addressValidate = require('../validate/address.validate');
 class ServiceApartmentService {
 
     async createUnit(unitInfo) {
@@ -62,30 +60,7 @@ class ServiceApartmentService {
         }
     }
 
-    async createApartmentService(apartmentId, services) {
-        if (!apartmentId)
-            throw new ArgumentError('apartment service ==>');
 
-        await apartmentValidate.validApartment(apartmentId);
-        for (const val of services) {
-            const service = await serviceValidate.validateService(val);
-
-            let [saveService, updateApartment] = await Promise.all([
-                await service.save(),
-                await Apartment.updateOne(
-                    { apartmentId },
-                    {
-                        $push: {
-                            service: service._id
-                        }
-                    }
-                )
-            ]);
-
-            if (saveService.modifiedCount === 0) throw new MyError('save service fail!');
-            if (updateApartment.modifiedCount === 0) throw new MyError('update apartment fail');
-        }
-    }
 }
 
 module.exports = new ServiceApartmentService();

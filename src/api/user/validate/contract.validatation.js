@@ -4,7 +4,6 @@ const dateUtil = require('../../../utils/datetime.helper');
 const commonUtil = require('../../../utils/common.helper');
 const MyError = require('../../../exception/MyError');
 const User = require('../../../model/user/user.model');
-const Apartment = require('../../../model/apartment.model');
 const Room = require('../../../model/room.model');
 const Contract = require('../../../model/transaction/contract.model');
 
@@ -14,7 +13,7 @@ const contractValidate = {
         if (!contractInfo)
             throw new ArgumentError('valid contract ==>');
 
-        let { period, lessor, rentHouse, dateRent, paytime, payMode, payment } = contractInfo;
+        let { period, room, dateRent, paytime, payMode, payment } = contractInfo;
 
         dateRent = dateUtil.toDate(dateRent);
         paytime = dateUtil.toDate(paytime);
@@ -22,19 +21,21 @@ const contractValidate = {
         if (!commonValidate.validatePayMode(payMode))
             throw new MyError('validate contract ==> paymode invalid');
 
-        if (!await User.getById(lessor))
-            throw new MyError('validate contract ==> user lessor invalid');
 
         period = commonUtil.convertToNumber(period);
         payment = commonUtil.convertToNumber(payment);
 
-        if (!await Apartment.findById(rentHouse._id) && !await Room.findById(rentHouse._id))
-            throw new MyError('contract validate => rent house invalid!');
+        const rentalRoom = await Room.getById(room);
+        const { owner } = rentalRoom;
+        console.log("🚀 ~ file: contract.validatation.js:32 ~ validateContractInfo: ~ owner", owner)
+
+        if (!rentalRoom)
+            throw new MyError('room info invalid!');
 
         return new Contract({
             period,
-            lessor,
-            rentHouse,
+            lessor: owner._id,
+            room,
             dateRent,
             payment,
             paytime,

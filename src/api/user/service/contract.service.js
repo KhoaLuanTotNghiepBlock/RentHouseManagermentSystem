@@ -23,6 +23,18 @@ class ContractService {
             data: contract
         }
     }
+
+    async getContractByRenter(renterId) {
+        if (!renterId)
+            throw new MyError('contract service ==> renter info invalid!');
+
+
+        const contract = await Contract.getByRenterId(renterId);
+
+        return {
+            contract
+        }
+    }
 };
 
 module.exports = new ContractService();

@@ -23,10 +23,10 @@ class AddressService {
         name: val.name,
         pre: val.pre,
       }));
+
       if (!listDitrict) { throw new Error("Get ditrict fail!"); }
       return listDitrict;
     } catch (error) {
-      console.log("🚀 ~ file: address.service.js:26 ~ AddressService ~ getDitrictList ~ error", error);
       throw new Error(error.message);
     }
   }
@@ -40,11 +40,12 @@ class AddressService {
       let listWard = [];
 
       cityData.district.map((val) => {
-        if (val.name === ditrictName) { listWard = val.ward; }
+        if (val.name === ditrictName) {
+          listWard = val.ward;
+        }
       });
       return listWard;
     } catch (error) {
-      console.log("🚀 ~ file: address.service.js:47 ~ AddressService ~ getWardByDitrict ~ error", error.message);
       throw new Error(error.message);
     }
   }
@@ -63,14 +64,25 @@ class AddressService {
 
       return listSreet;
     } catch (error) {
-      console.log("🚀 ~ file: address.service.js:47 ~ AddressService ~ getWardByDitrict ~ error", error.message);
       throw new Error(error.message);
     }
   }
 
   async getDitrictsFromDatabase() {
     const districts = await District.find();
-    return districts;
+    const listDictric = districts.map(val => { return val.name });
+    return listDictric;
+  }
+
+  async getWardFromDatabase(ditrictName) {
+    const wards = await this.getWardByDitrict(ditrictName)
+    const wardList = wards.map(val => val.name);
+    return wardList;
+  }
+
+  async getStreetFromDatabase(ditrictName) {
+    const streets = await this.getStreetByDitrict(ditrictName);
+    return streets;
   }
 }
 

@@ -27,6 +27,7 @@ class UserController {
     try {
       const user = await userService.getProfile(id);
 
+
       if (!user) {
         return res.status(400).json(
           {

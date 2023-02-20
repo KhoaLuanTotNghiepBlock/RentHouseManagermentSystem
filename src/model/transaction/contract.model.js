@@ -20,7 +20,11 @@ const contractSchema = new mongoose.Schema(
       require: true,
       ref: 'User'
     },
-    rentHouse: { require: true },
+    room: {
+      type: ObjectId,
+      require: true,
+      ref: 'Room'
+    },
     dateRent: Date,
     payTime: {
       type: Date,
@@ -57,6 +61,10 @@ contractSchema.static.getById = async (_id) => {
       path: 'lessor',
       select: 'username email phone identity name avatar'
     },
+    {
+      path: 'room',
+      select: '-updatedAt'
+    }
   ];
   const contract = await Contract.findById(_id)
     .select('-updatedAt')
@@ -65,7 +73,7 @@ contractSchema.static.getById = async (_id) => {
   if (!contract)
     throw new NotFoundError('Contract ==>');
 
-  return { period, renter, lessor, rentHouse, payTime, payMode, payment } = contract;
+  return { period, renter, lessor, room, payTime, payMode, payment } = contract;
 };
 
 contractSchema.static.getByRenterId = async (_id) => {
@@ -78,6 +86,10 @@ contractSchema.static.getByRenterId = async (_id) => {
       path: 'lessor',
       select: 'username email phone identity name avatar'
     },
+    {
+      path: 'room',
+      select: '-updatedAt'
+    }
   ];
   const contract = await Contract.findOne({ renter: _id })
     .select('-updatedAt')
@@ -86,7 +98,7 @@ contractSchema.static.getByRenterId = async (_id) => {
   if (!contract)
     throw new NotFoundError('Contract ==>');
 
-  return { period, renter, lessor, rentHouse, payTime, payMode, payment } = contract;
+  return { period, renter, lessor, room, payTime, payMode, payment } = contract;
 };
 
 contractSchema.static.getByLessorId = async (_id) => {
@@ -107,7 +119,7 @@ contractSchema.static.getByLessorId = async (_id) => {
   if (!contract)
     throw new NotFoundError('Contract ==>');
 
-  return { period, renter, lessor, rentHouse, payTime, payMode, payment } = contract;
+  return { period, renter, lessor, room, payTime, payMode, payment } = contract;
 };
 
 module.exports = Contract;

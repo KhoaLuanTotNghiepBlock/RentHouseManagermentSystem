@@ -25,12 +25,13 @@ const options = {
       },
     ],
   },
-  apis: ['./router'],
+  apis: ['./swagger.js'],
 };
 
 const specs = swaggerJsdoc(options);
 
 const server = require("http").Server(app);
+
 const routers = require("./router");
 
 db.connect(process.env.DATABASE_CONNECTION);

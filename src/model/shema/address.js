@@ -27,15 +27,14 @@ const addressSchema = new mongoose.Schema(
     },
     Lat_ggmap: {
       type: Number,
-      required: true,
+      default: 0
     },
     Lng_ggmap: {
       type: Number,
-      required: true,
+      default: 0
     },
     address_detail: {
-      type: String,
-      required: true,
+      type: String, default: 0
     },
   },
   {

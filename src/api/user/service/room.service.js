@@ -3,17 +3,19 @@ const MyError = require('../../../exception/MyError');
 const Room = require('../../../model/room.model');
 const roomValidate = require('../validate/room.validaste');
 const serviceApartment = require('../service/service.service');
-const { apartmentValidate } = require("../validate/apartment.validation");
-
+const validateAddress = require('../validate/address.validate');
+const User = require('../../../model/user/user.model');
+const NotFoundError = require('../../../exception/NotFoundError');
 
 class RoomService {
     async createRoom(_id, roomInfo) {
 
         let room = await roomValidate.validCreateRoom(_id, roomInfo);
-        const { amentilities, services, cityName, ditrictName, streetName, wardName, latGgmap, lngGgmap, addressDetail } = roomInfo;
+        const { amentilities, services, cityName, ditrictName, streetName,
+            wardName, addressDetail } = roomInfo;
 
-        const address = await apartmentValidate.validAddress({
-            cityName, ditrictName, streetName, wardName, latGgmap, lngGgmap, addressDetail,
+        const address = await validateAddress.validAddress({
+            cityName, ditrictName, streetName, wardName, addressDetail,
         });
         if (!room)
             throw new MyError('room service ==> room underfine!');
@@ -23,27 +25,14 @@ class RoomService {
         if (!amentilities || !services)
             throw new ArgumentError('room service ==> missing parameter');
 
-        //set unity
-        room.amentilities = {};
-        room.amentilities.isWifi = amentilities.isWifi;
-        room.amentilities.isMezzanine = amentilities.isMezzanine;
-        room.amentilities.isCamera = amentilities.isCamera;
-        room.amentilities.isParking = amentilities.isParking;
-        room.amentilities.isFrigde = amentilities.isFrigde;
-        room.amentilities.isWashingMachine = amentilities.isWashingMachine;
-        room.amentilities.isTelevision = amentilities.isTelevision;
-        room.amentilities.isAirCoditional = amentilities.isAirCoditional;
-        room.amentilities.isElevator = amentilities.isElevator;
-        room.amentilities.isPool = amentilities.isPool;
-        room.amentilities.isWardrobe = amentilities.isWardrobe;
-        room.amentilities.isPet = amentilities.isPet;
-        room.amentilities.isCooking = amentilities.isCooking;
-        room.amentilities.isBed = amentilities.isBed;
-        room.amentilities.isPrivateWC = amentilities.isPrivateWC;
-        room.amentilities.isSecurity = amentilities.isSecurity;
-        room.amentilities.isNoCurfew = amentilities.isNoCurfew;
-        room.amentilities.isBalcony = amentilities.isBalcony;
+        // set owner
+        const userOwner = await User.getById(_id);
+        if (!userOwner)
+            throw new NotFoundError('room servce=> not found user');
 
+        room.owner = userOwner;
+        //set unity
+        room.amentilities = amentilities;
 
         // save
         await room.save();

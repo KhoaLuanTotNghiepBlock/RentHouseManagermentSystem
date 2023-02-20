@@ -1,7 +1,6 @@
 const ArgumentError = require('../../../exception/ArgumentError');
 const MyError = require('../../../exception/MyError');
 const NotFoundError = require('../../../exception/NotFoundError');
-const Apartment = require('../../../model/apartment.model');
 const Room = require('../../../model/room.model');
 const User = require('../../../model/user/user.model');
 const commonHelper = require('../../../utils/common.helper');
@@ -21,7 +20,7 @@ const roomValidate = {
     validTypeRoom: (typeRoom) => {
         if (!typeRoom) { throw new MyError("valid type room ==> missing parameter"); }
 
-        const type = ["DORMITORY", "ROOM_FOR_RENT", "ROOM_FOR_SHARE"];
+        const type = ["DORMITORY", "ROOM_FOR_RENT", "ROOM_FOR_SHARE", "HOUSE", "APARTMENT"];
 
         return type.includes(typeRoom);
     },
@@ -31,7 +30,7 @@ const roomValidate = {
             throw new ArgumentError('validate create room =>');
 
         let { name, acreage, nbCurrentPeople, totalNbPeople, gender, deposit, description,
-            floor, period, basePrice, roomAttachment, typeRoom } = roomInfo;
+            basePrice, roomAttachment, typeRoom } = roomInfo;
 
         if (!(name && gender && description && roomAttachment))
             throw new ArgumentError('validate room ==> ');
@@ -45,12 +44,10 @@ const roomValidate = {
 
         //validate number
         acreage = commonHelper.convertToNumber(acreage);
-        nbCurrentPeople = commonHelper.convertToNumber(acreage);
-        totalNbPeople = commonHelper.convertToNumber(acreage);
-        deposit = commonHelper.convertToNumber(acreage);
-        floor = commonHelper.convertToNumber(acreage);
-        period = commonHelper.convertToNumber(acreage);
-        basePrice = commonHelper.convertToNumber(acreage);
+        nbCurrentPeople = commonHelper.convertToNumber(nbCurrentPeople);
+        totalNbPeople = commonHelper.convertToNumber(totalNbPeople);
+        deposit = commonHelper.convertToNumber(deposit);
+        basePrice = commonHelper.convertToNumber(basePrice);
 
         if (nbCurrentPeople > totalNbPeople)
             throw new MyError('validate room => current people must be little than toltal number people!');
@@ -66,7 +63,7 @@ const roomValidate = {
             name, acreage,
             nbCurrentPeople, totalNbPeople,
             gender, deposit, description,
-            floor, period, basePrice,
+            basePrice,
             roomAttachment, typeRoom,
             enable: true
         });

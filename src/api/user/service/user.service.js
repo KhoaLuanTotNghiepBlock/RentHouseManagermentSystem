@@ -4,6 +4,7 @@ const User = require("../../../model/user/user.model");
 const userValidate = require("../validate/user.validation");
 const awsS3ServiceHelper = require("../../../utils/aws-s3-service.helper");
 const MyError = require("../../../exception/MyError");
+const addressService = require("./address.service");
 
 class UserService {
   checkImage(file) {
@@ -14,6 +15,7 @@ class UserService {
 
   // [GET] /bh/user/me/profile
   async getProfile(_id) {
+    const a = await addressService.getWardByDitrict("Gò Vấp");
     const user = await User.findById(_id, { auth: 0 })
       .select("-updateAt")
       .populate([
