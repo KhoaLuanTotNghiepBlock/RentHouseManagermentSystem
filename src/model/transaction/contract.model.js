@@ -49,9 +49,7 @@ const contractSchema = new mongoose.Schema(
 );
 
 contractSchema.plugin(Timezone);
-const Contract = mongoose.model("Contract", contractSchema);
-
-contractSchema.static.getById = async (_id) => {
+contractSchema.statics.getById = async (_id) => {
   let contractPineline = [
     {
       path: 'renter',
@@ -76,7 +74,7 @@ contractSchema.static.getById = async (_id) => {
   return { period, renter, lessor, room, payTime, payMode, payment } = contract;
 };
 
-contractSchema.static.getByRenterId = async (_id) => {
+contractSchema.statics.getByRenterId = async (_id) => {
   let contractPineline = [
     {
       path: 'renter',
@@ -101,7 +99,7 @@ contractSchema.static.getByRenterId = async (_id) => {
   return { period, renter, lessor, room, payTime, payMode, payment } = contract;
 };
 
-contractSchema.static.getByLessorId = async (_id) => {
+contractSchema.statics.getByLessorId = async (_id) => {
   let contractPineline = [
     {
       path: 'renter',
@@ -122,4 +120,6 @@ contractSchema.static.getByLessorId = async (_id) => {
   return { period, renter, lessor, room, payTime, payMode, payment } = contract;
 };
 
+
+const Contract = mongoose.model("Contract", contractSchema);
 module.exports = Contract;

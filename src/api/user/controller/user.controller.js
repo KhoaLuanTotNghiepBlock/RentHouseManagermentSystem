@@ -21,7 +21,8 @@ class UserController {
     this.io = io;
   }
 
-  // [GET] /bughouse/user/me/profile
+  // [GET] /user/me/profile
+
   async getProfile(req, res, next) {
     const id = req.auth.userId;
     try {

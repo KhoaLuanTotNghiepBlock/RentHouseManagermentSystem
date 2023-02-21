@@ -141,6 +141,13 @@ UserSchema.statics.getById = async (id) => {
   };
 };
 
+UserSchema.statics.getNewest = async () => {
+  const users = await User.find({ gender: 'Other' }).sort({ _id: -1 });
+  console.log("🚀 ~ file: user.model.js:146 ~ UserSchema.statics.getNewest= ~ users:", users)
+  const user = users[0];
+  return user;
+}
+
 const User = mongoose.model("User", UserSchema);
 
 module.exports = User;

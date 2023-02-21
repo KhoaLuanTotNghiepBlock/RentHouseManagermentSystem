@@ -2,7 +2,7 @@ const contractValidate = require('../validate/contract.validatation');
 const Contract = require('../../../model/transaction/contract.model');
 const User = require('../../../model/user/user.model');
 const MyError = require('../../../exception/MyError');
-
+const demandService = require('./demand.service');
 class ContractService {
 
     async createContract(renterId, contractInfo) {
@@ -19,6 +19,9 @@ class ContractService {
         contract.renter = renter._id;
 
         await contract.save();
+
+        const listDemand = await demandService.createServiceDemandForRoom(contract._id);
+        console.log("🚀 ~ file: contract.service.js:24 ~ ContractService ~ createContract ~ listDemand:", listDemand);
         return {
             data: contract
         }

@@ -1,13 +1,12 @@
-const authRouter = require("./auth.router");
-const serviceRouter = require('../router/service.router');
-const roomRouter = require('../router/room.router');
-const addressRouter = require('../router/address.router');
-const contractRouter = require('./contract.router');
+const authRouter = require("./auth");
+const serviceRouter = require('./service');
+const roomRouter = require('./room');
+const addressRouter = require('./address');
+const contractRouter = require('./contract');
 const authenJWTMiddleWare = require("../middlewares/authenJWT.middleware").api;
 
 const router = (app, io) => {
-  const userRouter = require("./user.router")(io);
-
+  const userRouter = require("./user")(io);
   app.use("/bh/auth", authRouter);
   app.use("/bh/users", authenJWTMiddleWare, userRouter);
   app.use("/bh/room", authenJWTMiddleWare, roomRouter);

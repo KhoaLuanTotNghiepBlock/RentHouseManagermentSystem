@@ -5,8 +5,15 @@ const { ObjectId } = mongoose.Schema;
 
 const invoiceSchema = new mongoose.Schema(
   {
+    contract: {
+      type: ObjectId,
+      ref: 'Contract'
+    },
     creationDate: Date,
-    vat: Number,
+    vat: {
+      type: Number,
+      default: 0.1
+    },
     amount: {
       type: Number,
       default: 0,

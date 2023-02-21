@@ -15,7 +15,6 @@ class UserService {
 
   // [GET] /bh/user/me/profile
   async getProfile(_id) {
-    const a = await addressService.getWardByDitrict("Gò Vấp");
     const user = await User.findById(_id, { auth: 0 })
       .select("-updateAt")
       .populate([

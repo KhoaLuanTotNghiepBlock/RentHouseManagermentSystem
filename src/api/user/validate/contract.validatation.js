@@ -13,14 +13,18 @@ const contractValidate = {
         if (!contractInfo)
             throw new ArgumentError('valid contract ==>');
 
-        let { period, room, dateRent, paytime, payMode, payment } = contractInfo;
+        let { period, room, dateRent, payTime, payMode, payment } = contractInfo;
 
         dateRent = dateUtil.toDate(dateRent);
-        paytime = dateUtil.toDate(paytime);
+        if (!dateRent)
+            throw new MyError('validate contract => date for rent invalid');
+
+        payTime = dateUtil.toDate(payTime);
+        if (!payTime)
+            throw new MyError('validate contract => date for pay invalid');
 
         if (!commonValidate.validatePayMode(payMode))
             throw new MyError('validate contract ==> paymode invalid');
-
 
         period = commonUtil.convertToNumber(period);
         payment = commonUtil.convertToNumber(payment);
@@ -38,7 +42,7 @@ const contractValidate = {
             room,
             dateRent,
             payment,
-            paytime,
+            payTime,
             payMode,
             enable: true
         });

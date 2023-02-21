@@ -20,6 +20,10 @@ class ServiceApartmentController {
         }
     }
 
+    // [POST] /service/create-service-demand/:roomId
+    async createServiceDemand() {
+
+    }
     // [GET] /service/unit
     async getAllUnit(req, res, next) {
         try {

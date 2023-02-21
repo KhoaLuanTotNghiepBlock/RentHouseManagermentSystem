@@ -4,7 +4,6 @@ const Timezone = require("mongoose-timezone");
 const attachment = require("./shema/attachment");
 const address = require("./shema/address");
 const NotFoundError = require("../exception/NotFoundError");
-
 const roomSchema = new mongoose.Schema(
   {
     name: {
@@ -14,9 +13,7 @@ const roomSchema = new mongoose.Schema(
       type: Number,
       require: true,
     },
-    owner: {
-      type: Object,
-    },
+    owner: {},
     nbCurrentPeople: {
       type: Number,
       default: 0,

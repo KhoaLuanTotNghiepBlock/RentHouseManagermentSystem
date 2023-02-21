@@ -16,7 +16,10 @@ module.exports = {
   // convert string to date
   toDate: (dateString) => {
     if (!dateString) return null;
-    const date = new Date(dateString);
+    // var dateString = "23/10/2015"; // Oct 23
+
+    const dateParts = dateString.split("/");
+    const date = new Date(+dateParts[2], dateParts[1] - 1, +dateParts[0]);
     if (date.toDateString() === "Invalid Date") return null;
     return date;
   },

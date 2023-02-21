@@ -7,11 +7,6 @@ const { ObjectId } = mongoose.Schema;
 const invoiceItemSchema = new mongoose.Schema(
   {
     service: serviceDemand,
-    amount: Number,
-    invoice: {
-      type: ObjectId,
-      ref: "Invoice",
-    },
   },
   {
     versionKey: false,
