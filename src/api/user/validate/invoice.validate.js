@@ -1,14 +1,20 @@
 const datetimeHelper = require("../../../utils/datetime.helper");
+const commonHelper = require("../../../utils/common.helper");
 
 const InvoiceValidate = {
-    // check date rent already expired yet: return true if date has exprired
+    /**
+     * 
+     * @param {date} dateRent date that renter rent house, define on contract
+     * @param {date} dateCheck day at moment
+     * @param {Number} period period of contract
+     * @returns true if the contract has expire
+     */
     checkDateRentExpired: (dateRent, dateCheck, period) => {
-        const a = new Date("2022-10-25");
-        const expriredDate = datetimeHelper.toDate(dateRent);
-        expriredDate.setDate(expriredDate.getMonth() + period);
+        const expiredDate = new Date(dateRent);
+        expiredDate.setMonth(expiredDate.getMonth() + period);
 
-        const rentalDate = datetimeHelper.toDate(dateCheck);
-        if (rentalDate > expriredDate)
+        const rentalDate = new Date(dateCheck);
+        if (rentalDate > expiredDate)
             return true;
         return false;
     },
@@ -17,3 +23,5 @@ const InvoiceValidate = {
 
     }
 };
+
+module.exports = InvoiceValidate;

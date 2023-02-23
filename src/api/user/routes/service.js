@@ -2,6 +2,7 @@ const router = require('express').Router();
 const serviceApartmentController = require('../controller/service.controller');
 
 router.post('/unit/create-unit', serviceApartmentController.createUnit);
+router.put('/service-demand', serviceApartmentController.updateServiceDemand);
 /**
  * @swagger
  * /bh/service/unit:

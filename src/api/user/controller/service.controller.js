@@ -1,5 +1,6 @@
 const serviceApartmentService = require('../service/service.service');
 const ArgumentError = require('../../../exception/ArgumentError');
+const demandService = require('../service/demand.service');
 
 class ServiceApartmentController {
     // [POST] /service/unit/create-unit
@@ -19,10 +20,21 @@ class ServiceApartmentController {
             next(error);
         }
     }
+    //[PUT] /service/service-demand
+    async updateServiceDemand(req, res, next) {
+        try {
 
-    // [POST] /service/create-service-demand/:roomId
-    async createServiceDemand() {
+            const { roomId, demandInfo } = req.body;
 
+            const data = await demandService.updateServiceDemandInvoice(roomId, demandInfo);
+            return res.status(200).json({
+                message: 'update sucess',
+                data,
+                errorCode: 200
+            });
+        } catch (error) {
+            next(error);
+        }
     }
     // [GET] /service/unit
     async getAllUnit(req, res, next) {

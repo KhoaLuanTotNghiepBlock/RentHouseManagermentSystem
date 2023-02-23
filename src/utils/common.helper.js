@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const MyError = require("../exception/MyError");
 const ArgumentError = require("../exception/ArgumentError");
-
+const ObjectId = require('mongoose').Types.ObjectId;
 const commonHelper = {
   isEmpty: (obj) => {
     if (!obj) return true;
@@ -55,6 +55,27 @@ const commonHelper = {
     const gender = ['Male', 'Female', 'All'];
 
     return gender.includes(value);
+  },
+
+  deepCopy: (obj) => {
+    if (typeof (obj) === 'object') {
+      if (Array.isArray(obj))
+        return obj.map(this.deepCopy);
+      else {
+        const copy = {};
+        for (const value in obj)
+          copy[value] = this.deepCopy(obj[value]);
+
+        return copy;
+      }
+    }
+    return obj;
+  },
+  toObjectId: (string) => {
+    if (!string)
+      throw new ArgumentError('to objectIb ==> ');
+
+    return new ObjectId(string);
   }
 };
 

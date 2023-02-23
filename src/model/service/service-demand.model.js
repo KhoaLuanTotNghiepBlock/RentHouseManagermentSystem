@@ -79,7 +79,18 @@ serviceDemandSchema.statics.getPresentService = async (serviceId, presentMonth) 
 
   return serviceDemand;
 }
+serviceDemandSchema.statics.getById = async (_id) => {
+  const serviceDemand = await ServiceDemand.findById(_id)
+    .populate({
+      path: 'service',
+      select: 'name description basePrice unit'
+    });
 
+  if (!serviceDemand)
+    throw new MyError('service demand invalid');
+
+  return serviceDemand;
+}
 
 const ServiceDemand = mongoose.model("ServiceDemand", serviceDemandSchema);
 module.exports = ServiceDemand;

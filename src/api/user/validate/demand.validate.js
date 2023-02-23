@@ -46,6 +46,17 @@ const ServiceDemandValidate = {
         });
     },
 
+    validateUpdateDemandInfo: (demandInfo) => {
+        if (!demandInfo)
+            throw new ArgumentError('validate demand==> demand info ');
+
+        let { newIndicator, quality } = demandInfo;
+        console.log("🚀 ~ file: demand.validate.js:54 ~ demandInfo:", demandInfo)
+        newIndicator = commonHelper.convertToNumber(newIndicator);
+        quality = commonHelper.convertToNumber(quality);
+        return { newIndicator, quality };
+    },
+
     checkDemandType: (unit) => {
         const KWh = 'kWh';
         const QUALITY_TYPE = 0;
@@ -59,11 +70,11 @@ const ServiceDemandValidate = {
     },
 
     validateCreateDemandForRoom: ({ room, period, dateRent }) => {
+
         const expiredDate = dateRent;
-        console.log("🚀 ~ file: demand.validate.js:72 ~ dateRent:", dateRent)
 
         expiredDate.setMonth(expiredDate.getMonth() + period);
-        console.log("🚀 ~ file: demand.validate.js:65 ~ expiredDate:", expiredDate)
+
         if (!expiredDate)
             throw new MyError('validate demand ==> expired date invalid');
         const { services } = room;

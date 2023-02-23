@@ -28,10 +28,10 @@ const invoiceSchema = new mongoose.Schema(
       enum: ["VNPay", "Momo", "Bank", "Cash"],
       default: "",
     },
-    invoiceItem: [
+    serviceDemands: [
       {
         type: ObjectId,
-        ref: "InvoiceItem",
+        ref: "ServiceDemand",
       },
     ],
     startDate: Date,

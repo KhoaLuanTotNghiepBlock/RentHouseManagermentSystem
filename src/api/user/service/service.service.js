@@ -61,6 +61,7 @@ class ServiceApartmentService {
     }
 
 
+
 }
 
 module.exports = new ServiceApartmentService();
