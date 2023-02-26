@@ -74,6 +74,31 @@ contractSchema.statics.getById = async (_id) => {
   return { period, renter, lessor, room, payTime, payMode, payment } = contract;
 };
 
+contractSchema.statics.getAll = async () => {
+  let contractPineline = [
+    {
+      path: 'renter',
+      select: 'username email phone identity name avatar'
+    },
+    {
+      path: 'lessor',
+      select: 'username email phone identity name avatar'
+    },
+    {
+      path: 'room',
+      select: '-updatedAt'
+    }
+  ];
+  const contracts = await Contract.find()
+    .select('-updatedAt')
+    .populate(contractPineline).lean();
+
+  if (!contracts)
+    throw new NotFoundError('Contract ==>');
+
+  return contracts;
+};
+
 contractSchema.statics.getByRenterId = async (_id) => {
   let contractPineline = [
     {

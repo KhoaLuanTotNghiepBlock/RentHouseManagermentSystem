@@ -39,4 +39,30 @@ const sendVerify = async ({ to, username, token }) => {
   });
 };
 
-module.exports = { sendVerify };
+const sendNotify = async ({ to, inMonth, inYear, name }) => {
+  const mailOptions = {
+    from: process.env.OUR_EMAIL,
+    to,
+    subject: "BUGHOUSE Service Demand Is Available",
+    html: await hbs.render("./src/template/welcome_mail.hbs", {
+      inMonth,
+      inYear,
+      name,
+      clientDomain: "http://localhost:3000/bh",
+    }),
+    attachments: [
+      {
+        filename: "ladybug.png",
+        path: "./src/resource/icon/ladybug.png",
+        cid: "logo_image",
+      },
+    ],
+  }
+
+  transporter.sendMail(mailOptions, (err, info) => {
+    if (err) console.log(err);
+    else console.log("Email send:", info.response);
+  });
+}
+
+module.exports = { sendVerify, sendNotify };

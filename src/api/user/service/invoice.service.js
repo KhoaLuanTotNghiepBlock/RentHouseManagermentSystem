@@ -57,9 +57,6 @@ class InvoiceService {
             throw new MyError('Period of contract has expired!');
 
         return paymentDay = datetimeHelper.toObject(paymentDay);
-
-
-
     }
 };
 module.exports = new InvoiceService();

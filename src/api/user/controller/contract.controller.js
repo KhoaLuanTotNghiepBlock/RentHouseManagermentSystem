@@ -1,4 +1,5 @@
 const MyError = require('../../../exception/MyError');
+const RentalContract = require('../blockchain/deploy/BHRentalContract');
 const contractService = require('../service/contract.service');
 
 class ContractController {
@@ -23,6 +24,23 @@ class ContractController {
         }
     }
 
+    //[POST] bh/contract/create-smart-contract
+    async createSmartContract(req, res, next) {
+        try {
+            const { contractId, signedByOwner, signedByRenter } = req.body;
+            const data = await RentalContract.createSmartContractFromRentalContract(contractId, signedByOwner, signedByRenter);
+
+            return res.status(200).json({
+                message: 'create smart contract success',
+                errorCode: 200,
+                data
+            });
+        } catch (error) {
+            next(error);
+        }
+
+    }
+
     // [GET] bh/contract/:renterId 
     async getContractByRenter(req, res, next) {
         try {
@@ -31,7 +49,6 @@ class ContractController {
             next(error);
         }
     }
-
 
 };
 

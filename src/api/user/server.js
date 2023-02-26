@@ -6,10 +6,10 @@ const useragent = require("express-useragent");
 const socket = require("../../config/sockect");
 const db = require("../../config/database");
 const swagger = require('./swagger');
-
+const cron = require('../../config/cron');
 const { PORT } = process.env;
 const { HOST } = process.env;
-
+// const cron = require('cron');
 const app = express();
 
 swagger(app);
@@ -29,7 +29,7 @@ app.use(express.json({ limit: "50mb" }));
 const io = socketio(server);
 socket(io);
 routers(app, io);
-
+cron.sendMailToNotifyAboutServiceDemand('0 8 30 * *');
 server.listen(PORT, HOST, () => {
   console.log(`User server is running in http://${HOST}:${PORT}`);
 });
