@@ -6,7 +6,7 @@
   "scripts": {
     "test": "npx jest src/api/user/test/cron.test.js",
     "start-user": "nodemon src/api/user/server.js",
-    "start": "node src/api/user/edotor.js",
+    "start": "node src/api/user/test.js",
     "start-admin": "nodemon src/api/admin/server.js",
     "lint": "eslint .",
     "compile-contract": "node src/api/user/blockchain/config/compirecontract.js"
@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "@sendgrid/mail": "^7.7.0",
+    "@truffle/hdwallet-provider": "^2.1.7",
     "aws-sdk": "^2.1282.0",
     "axios": "^1.2.2",
     "bcryptjs": "^2.4.3",

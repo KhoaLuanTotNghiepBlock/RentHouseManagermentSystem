@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 const mongooseDelete = require("mongoose-delete");
 const Timezone = require("mongoose-timezone");
-
+const wallet = require('./wallet.model');
 const { ObjectId } = mongoose.Types;
 const authSchema = require("../shema/auth");
 const MyError = require("../../exception/MyError");
+const ArgumentError = require('../../exception/ArgumentError');
 
 const UserSchema = new mongoose.Schema(
   {
@@ -23,6 +24,7 @@ const UserSchema = new mongoose.Schema(
     },
     identity: {
       type: String,
+      default: ""
     },
     auth: authSchema,
     name: {
@@ -42,6 +44,7 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    wallet,
     identityImg: [
       {
         url: String,
@@ -61,12 +64,6 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    apartments: [
-      {
-        type: ObjectId,
-        ref: "Apartment",
-      },
-    ],
     otp: String,
     otpTime: Date,
     socketId: {
@@ -146,6 +143,75 @@ UserSchema.statics.getNewest = async () => {
   console.log("🚀 ~ file: user.model.js:146 ~ UserSchema.statics.getNewest= ~ users:", users)
   const user = users[0];
   return user;
+}
+
+UserSchema.statics.getUserByIndentity = async (identity) => {
+  if (!identity)
+    throw new ArgumentError('user identity ==> ');
+
+  const user = await User.findOne({ identity });
+
+  if (!user) { throw new Error("user not found!"); }
+
+  const {
+    _id,
+    name,
+    email,
+    username,
+    phone,
+    gender,
+    dob,
+    avatar,
+    enable
+  } = user;
+
+  return {
+    _id,
+    name,
+    email,
+    username,
+    phone,
+    identity,
+    gender,
+    dob,
+    avatar,
+    enable
+  };
+}
+
+UserSchema.statics.getUserByWallet = async (walletAddress) => {
+  if (!walletAddress)
+    throw new ArgumentError('user wallet address ==>');
+
+  const user = await User.findOne({ 'wallet.walletAddress': walletAddress });
+
+  if (!user) { throw new Error("user not found!"); }
+  const {
+    _id,
+    name,
+    email,
+    username,
+    phone,
+    identity,
+    gender,
+    dob,
+    avatar,
+    enable
+  } = user;
+
+  return {
+    _id,
+    name,
+    email,
+    username,
+    phone,
+    identity,
+    gender,
+    dob,
+    avatar,
+    enable
+  };
+
 }
 
 const User = mongoose.model("User", UserSchema);

@@ -45,6 +45,26 @@ class ContractController {
     async getContractByRenter(req, res, next) {
         try {
             const { data } = await contractService.getContractByRenter(req.params.renterId);
+
+            return res.status(200).json({
+                message: '',
+                errorCode: 200,
+                data
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+    // [GET] bh/contract/:contractAddress
+    async getSmartContract(req, res, next) {
+        try {
+            const data = await RentalContract.getSmartContract(req.params.contractAddress);
+
+            return res.status(200).json({
+                message: '',
+                errorCode: 200,
+                data
+            });
         } catch (error) {
             next(error);
         }

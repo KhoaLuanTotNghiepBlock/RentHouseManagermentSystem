@@ -3,9 +3,10 @@ const Timezone = require("mongoose-timezone");
 
 const walletSchema = new mongoose.Schema(
   {
-    user: {
-      type: Object,
+    walletPrivateKey: {
+      type: String
     },
+    walletAddress: String,
     balance: {
       type: Number,
       default: 0,
@@ -16,12 +17,11 @@ const walletSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true,
-    versionKey: false,
+    _id: false,
+    autoCreate: false,
   },
 );
 
 walletSchema.plugin(Timezone);
-const Wallet = mongoose.model("Wallet", walletSchema);
 
-module.exports = Wallet;
+module.exports = walletSchema;

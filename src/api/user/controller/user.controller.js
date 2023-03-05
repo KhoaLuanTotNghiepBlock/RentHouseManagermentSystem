@@ -3,6 +3,12 @@ const { uploadFile } = require("../../../utils/aws-s3-service.helper");
 const userService = require("../service/user.service");
 const addressService = require('../service/address.service');
 const Street = require("../../../model/street.model");
+const User = require("../../../model/user/user.model");
+
+const { vnp_TmnCode } = process.env;
+const { vnp_HashSecret } = process.env;
+const { vnp_Url } = process.env;
+const { vnp_ReturnUrl } = process.env;
 
 const storage = multer.memoryStorage({
   destination: (req, file, cb) => {
@@ -20,6 +26,47 @@ class UserController {
   constructor(io) {
     this.io = io;
   }
+
+  //[POST] user/wallet-connect
+  async connectVNpaytoWallet(req, res) {
+    try {
+      const { walletAddress, amount } = req.body;
+
+      // Validate the request body
+      if (!walletAddress || !amount) {
+        return res.status(400).json({ message: 'Request body is incomplete.', errorCode: 400, data: {} });
+      }
+
+      const user = await User.getUserByWallet(walletAddress);
+
+      const transactionId = Date.now().toString();
+
+      const response = await axios.post(vnp_Url, {
+        vnp_Version: '2.0.0',
+        vnp_Command: 'pay',
+        vnp_TmnCode: vnp_TmnCode,
+        vnp_Amount: amount * 100,
+        vnp_CurrCode: 'VND',
+        vnp_TxnRef: transactionId,
+        vnp_OrderInfo: 'Payment for wallet',
+        vnp_ReturnUrl: vnp_ReturnUrl,
+        vnp_IpAddr: req.ip,
+        vnp_CreateDate: new Date().toISOString().slice(0, 19).replace('T', ' '),
+        vnp_CustomerId: user._id,
+      });
+
+      return res.redirect(response.data);
+
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async confirmPayment(req, res, next) {
+
+  }
+
+
 
   // [GET] /user/me/profile
 
@@ -95,6 +142,8 @@ class UserController {
 
     }
   }
+
+
 }
 
 module.exports = UserController;

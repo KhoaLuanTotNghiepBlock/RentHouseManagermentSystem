@@ -30,7 +30,7 @@ class RoomService {
         if (!userOwner)
             throw new NotFoundError('room servce=> not found user');
 
-        room.owner = userOwner;
+        room.owner = userOwner._id;
         //set unity
         room.amentilities = amentilities;
 

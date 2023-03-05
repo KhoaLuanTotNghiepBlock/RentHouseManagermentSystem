@@ -1,4 +1,4 @@
-const { web3, signer } = require('../config/web3-init');
+const web3 = require('../config/web3-init');
 const solc = require('solc');
 
 // Loading the contract ABI and Bytecode
@@ -20,30 +20,47 @@ const RentalContract = {
         if (!hash)
             throw new MyError('Contract info invalid!');
 
-        const contractHash = new HashContract({
+        let contractHash = new HashContract({
             contractId,
             hash
         });
-        // save to data base
-        await contractHash.save();
 
         // create new instance of smart contract
         const contract = new web3.eth.Contract(abi);
         const deploy = contract.deploy({ data: '0x' + bytecode, arguments: [contractHash.hash, signedByOwner, signedByRenter] });
 
         // Creating a signing account from a private key
-        web3.eth.accounts.wallet.add(signer);
+        // web3.eth.accounts.wallet.add(signer);
         // Send contract deployment transaction
-        // const accounts = await web3.eth.getAccounts();
-        // const result = await deploy.send({ from: accounts[0], gas: 1500000 });
-        const result = await deploy.send({ from: signer.address, gas: 1500000 });
+        const gas = await deploy.estimateGas();
+        // const result = await deploy.send({ from: signer.address, gas });
 
+        // contractHash.contractAddress = result.options.address;
+        // save to data base
+        await contractHash.save();
         return {
             contractAddress: result.options.address
         };
+    },
+
+    getSmartContract: async (contractAddress) => {
+        console.log("🚀 ~ file: BHRentalContract.js:48 ~ getSmartContract: ~ contractAddress:", contractAddress)
+        if (!contractAddress)
+            throw new MyError('contract address invalid')
+        // Creating a signing account from a private key
+        // web3.eth.accounts.wallet.add(signer);
+
+        // create new instance of smart contract
+        const contract = new web3.eth.Contract(abi, contractAddress);
+        // Issuing a transaction that calls
+        const contractInfo = await contract.methods.getContractTransactionId().call();
+        // const gas = await contractInfo.estimateGas();
+        // const receipt = await contractInfo.send({ from: signer.address, gas });
+        // // const receipt = await contractInfo.send({ from: signer.address, gas: contractInfo.estimateGas() });
+        // console.log("🚀 ~ file: BHRentalContract.js:57 ~ getSmartContract: ~ receipt:", receipt);
+
+        return contractInfo;
     }
-
-
 
 }
 module.exports = RentalContract;

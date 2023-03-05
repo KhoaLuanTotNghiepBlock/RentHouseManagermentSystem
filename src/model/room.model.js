@@ -13,7 +13,11 @@ const roomSchema = new mongoose.Schema(
       type: Number,
       require: true,
     },
-    owner: {},
+    owner: {
+      type: ObjectId,
+      require: true,
+      ref: 'User'
+    },
     nbCurrentPeople: {
       type: Number,
       default: 0,

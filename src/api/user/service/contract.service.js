@@ -8,9 +8,9 @@ const crypto = require('../../../utils/crypto.hepler');
 const HashContract = require('../../../model/transaction/hash-contract.model');
 class ContractService {
 
-    async createContract(renterId, contractInfo) {
-        // get renter 
-        const renter = await User.getById(renterId);
+    async createContract(ownerId, contractInfo) {
+        // get owner 
+        const owner = await User.getById(ownerId);
 
         // validate contract info 
         let contract = await contractValidate.validateContractInfo(contractInfo);
@@ -19,12 +19,11 @@ class ContractService {
             throw new MyError('contract service => contract invalid!');
 
         // set renter 
-        contract.renter = renter._id;
+        contract.lessor = owner._id;
 
         await contract.save();
 
-        const listDemand = await demandService.createServiceDemandForRoom(contract._id);
-        console.log("🚀 ~ file: contract.service.js:24 ~ ContractService ~ createContract ~ listDemand:", listDemand);
+        await demandService.createServiceDemandForRoom(contract._id);
         return {
             data: contract
         }

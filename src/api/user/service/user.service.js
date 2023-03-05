@@ -1,9 +1,16 @@
+require('dotenv').config();
 // const multer = require("multer");
 const User = require("../../../model/user/user.model");
 // const awss3helper = require('../../../utils/awss3.helper');
 const userValidate = require("../validate/user.validation");
 const awsS3ServiceHelper = require("../../../utils/aws-s3-service.helper");
 const MyError = require("../../../exception/MyError");
+const ArgumentError = require("../../../exception/ArgumentError");
+
+const { vnp_TmnCode } = process.env;
+const { vnp_HashSecret } = process.env;
+const { vnp_Url } = process.env;
+const { vnp_ReturnUrl } = process.env;
 
 class UserService {
   checkImage(file) {
@@ -73,6 +80,21 @@ class UserService {
     const { name, dob, sex, identity, identityImg } = userInfo;
 
 
+  }
+
+  async connectWalletVnPay(walletInfo) {
+    // const { walletAddress, amount } = walletInfo;
+
+    // if (!walletAddress || amount)
+    //   throw new ArgumentError('user service connect wallet ==>');
+
+    // // Create a payment request with VNPay
+    // // const vnpayApiKey = '<your-vnpay-api-key>';
+    // // const vnpayEndpoint = 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
+    // // const returnUrl = 'http://localhost:3000/payment-confirmation';
+
+
+    // return response.data;
   }
 }
 

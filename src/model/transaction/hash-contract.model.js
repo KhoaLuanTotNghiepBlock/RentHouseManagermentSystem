@@ -11,7 +11,8 @@ const hashContractSchema = new mongoose.Schema(
         },
         hash: {
             type: String
-        }
+        },
+        contractAddress: String
     },
     {
         timestamps: true,

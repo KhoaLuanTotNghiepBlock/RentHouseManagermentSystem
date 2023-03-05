@@ -123,6 +123,6 @@ bestInGenre('Comedy')
 
 // if (crypto.match(hash, jsonString))
 //     console.log(' string is match')
-const fs = require('fs').promises;
-const sourceCode = fs.readFile('src/api/user/blockchain/contract/BHRentalContract.sol', 'utf8');
-console.log("🚀 ~ file: edotor.js:128 ~ sourceCode:", sourceCode)
+// const fs = require('fs').promises;
+// const sourceCode = fs.readFile('src/api/user/blockchain/contract/BHRentalContract.sol', 'utf8');
+// console.log("🚀 ~ file: edotor.js:128 ~ sourceCode:", sourceCode)

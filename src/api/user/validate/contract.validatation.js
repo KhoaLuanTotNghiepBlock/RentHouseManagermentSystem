@@ -13,32 +13,29 @@ const contractValidate = {
         if (!contractInfo)
             throw new ArgumentError('valid contract ==>');
 
-        let { period, room, dateRent, payTime, payMode, payment } = contractInfo;
+        let { period, room, dateRent, payTime, payMode, payment, renterInfo } = contractInfo;
 
         dateRent = dateUtil.toDate(dateRent);
         if (!dateRent)
             throw new MyError('validate contract => date for rent invalid');
 
         payTime = dateUtil.toDate(payTime);
+
         if (!payTime)
             throw new MyError('validate contract => date for pay invalid');
 
         if (!commonValidate.validatePayMode(payMode))
             throw new MyError('validate contract ==> paymode invalid');
 
+        // get renter
+        const renter = await User.getUserByIndentity(renterInfo);
+
         period = commonUtil.convertToNumber(period);
         payment = commonUtil.convertToNumber(payment);
 
-        const rentalRoom = await Room.getById(room);
-        const { owner } = rentalRoom;
-        console.log("🚀 ~ file: contract.validatation.js:32 ~ validateContractInfo: ~ owner", owner)
-
-        if (!rentalRoom)
-            throw new MyError('room info invalid!');
-
         return new Contract({
             period,
-            lessor: owner._id,
+            renter: renter._id,
             room,
             dateRent,
             payment,

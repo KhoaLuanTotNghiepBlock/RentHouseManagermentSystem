@@ -5,7 +5,7 @@ const User = require("../../../model/user/user.model");
 const Token = require("../../../model/user/token.model");
 const mailHelper = require("../../../utils/nodemailer.helper");
 const crypto = require("../../../utils/crypto.hepler");
-
+const web3 = require('../blockchain/config/web3-init');
 const commonHelper = require("../../../utils/common.helper");
 const userValidation = require("../validate/user.validation");
 
@@ -16,6 +16,7 @@ const { REQUEST_VERIFY_TOKEN_LIFE } = process.env;
 const TOKEN_LIFE = process.env.ACCESS_TOKEN_LIFE;
 const { REFRESH_TOKEN_LIFE } = process.env;
 const { OTP_EXPIRE_MINUTE } = process.env;
+const SIGNER_PRIVATE_KEY = process.env.SIGNER_PRIVATE_KEY;
 
 const sendMessage = require("../../../config/sendsms");
 const { isEmpty } = require("../../../utils/common.helper");
@@ -44,7 +45,7 @@ class AuthService {
       }
       const typeContact = userValidation.validatePhone(contactInfo);
 
-      const newUser = new User({
+      let newUser = new User({
         name,
         username,
         identity,
@@ -59,6 +60,13 @@ class AuthService {
       if (typeContact) newUser.phone = contactInfo;
       else newUser.email = contactInfo;
 
+      // create wallet
+      const { address, privateKey } = await this.createWallet();
+      newUser.wallet =
+      {
+        walletAddress: address,
+        walletPrivateKey: privateKey
+      }
       await newUser.save();
 
       this.sendOTP(newUser._id, contactInfo);
@@ -85,7 +93,7 @@ class AuthService {
       const user = await User.findOne({
         $or: [{ username }, { email: username }, { phone: username }],
       })
-        .select("username name email auth avatar")
+        .select("username name email auth avatar wallet wishList")
         .lean();
 
       if (!user) throw new Error("login ==> user not found!");
@@ -309,5 +317,17 @@ class AuthService {
     );
   }
 
+  async createWallet() {
+    // Creating a signing account from a private key
+    const signer = web3.eth.accounts.create();
+    const address = signer.address;
+    const privateKey = signer.privateKey;
+    await web3.eth.accounts.wallet.add(signer);
+
+    return {
+      address,
+      privateKey
+    }
+  }
 }
 module.exports = new AuthService();
