@@ -9,10 +9,7 @@ const options = {
             description: 'Bughouse API description',
         },
     },
-    apis: ['./routes/room.js', './routes/user.js',
-        './routes/service.js', './routes/auth.js',
-        './routes/contract.js', './routes/index.js',
-        './routes/address.js'],
+    apis: ['./src/api/user/routes/*.js'],
 };
 
 const swaggerSpec = swaggerJSDoc(options);
