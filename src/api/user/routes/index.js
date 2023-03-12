@@ -16,5 +16,44 @@ const router = (app, io) => {
   app.use("/bh/invoice", authenJWTMiddleWare, invoiceRouter);
   app.use("/bh/service", authenJWTMiddleWare, serviceRouter);
 };
-
+/**
+ * @swagger
+ * components:
+ *  schemas: 
+ *    user: 
+ *       description: user in bughouse
+ *       type: object
+ *       properties:
+ *          username:
+ *            type: string
+ *          email: 
+ *            type: string
+ *          phone: 
+ *            type: string
+ *          identity:
+ *            type:string
+ *          auth:
+ *            type: object
+ *            properties:
+ *              password: 
+ *                type: string
+ *              isAdmin:
+ *                type: string
+ *              isVerified:
+ *                type: string
+ *              remainingTime:
+ *                type: boolean
+ *          name:
+ *            type: string
+ *          gender:
+ *            type: string
+ *          dob:
+ *            type: date
+ *          avatar:
+ *            
+ *            
+ *    enum:
+ *      - black
+ *      - white
+ */
 module.exports = router;

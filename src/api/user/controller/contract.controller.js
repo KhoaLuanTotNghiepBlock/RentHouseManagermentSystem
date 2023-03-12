@@ -7,6 +7,7 @@ class ContractController {
     //[POST] bh/contract/create-contract
     async createContract(req, res, next) {
         try {
+            // owner id
             const { userId } = req.auth;
 
             const { data } = await contractService.createContract(userId, req.body);
