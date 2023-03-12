@@ -7,10 +7,6 @@ const awsS3ServiceHelper = require("../../../utils/aws-s3-service.helper");
 const MyError = require("../../../exception/MyError");
 const ArgumentError = require("../../../exception/ArgumentError");
 
-const { vnp_TmnCode } = process.env;
-const { vnp_HashSecret } = process.env;
-const { vnp_Url } = process.env;
-const { vnp_ReturnUrl } = process.env;
 
 class UserService {
   checkImage(file) {

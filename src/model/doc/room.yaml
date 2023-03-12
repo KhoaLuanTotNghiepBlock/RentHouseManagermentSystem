@@ -1,0 +1,106 @@
+
+components:
+  schemas:
+    Room:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: The unique identifier of the room.
+          example: 60c668e15d1b21423c76e7d8
+        name:
+          type: string
+          description: The name of the room.
+          example: Cozy Bedroom
+        acreage:
+          type: number
+          description: The size of the room in square meters.
+          example: 20
+        owner:
+          type: string
+          description: The ID of the user who owns the room.
+          example: 60c668e15d1b21423c76e7d9
+        nbCurrentPeople:
+          type: number
+          description: The number of people currently staying in the room.
+          example: 1
+        totalNbPeople:
+          type: number
+          description: The maximum number of people who can stay in the room.
+          example: 2
+        gender:
+          type: string
+          enum: [Male, Female, All]
+          description: The gender restriction of the room.
+          example: All
+        typeRoom:
+          type: string
+          enum: [DORMITORY, ROOM_FOR_RENT, ROOM_FOR_SHARE, HOUSE, APARTMENT]
+          description: The type of the room.
+          example: ROOM_FOR_RENT
+        deposit:
+          type: number
+          description: The amount of deposit required to book the room.
+          example: 500000
+        description:
+          type: string
+          description: The description of the room.
+          example: This room has a nice view of the city.
+        amentilities:
+          type: array
+          items:
+            type: string
+          description: The list of amenities available in the room.
+          example: [WiFi, Air conditioning, TV]
+        basePrice:
+          type: number
+          description: The base price of the room.
+          example: 500000
+        address:
+          $ref: '#/components/schemas/Address'
+          description: The address of the room.
+        roomAttachment:
+          $ref: '#/components/schemas/Attachment'
+          description: The attachment of the room.
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
+          description: The services available in the room.
+        enable:
+          type: boolean
+          description: The status of the room.
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+          description: The date and time when the room was created.
+          example: '2021-06-13T07:22:57.589Z'
+        updatedAt:
+          type: string
+          format: date-time
+          description: The date and time when the room was last updated.
+          example: '2021-06-13T07:22:57.589Z'
+
+    Address:
+      type: object
+      properties:
+        cityName:
+          type: string
+          description: The name of the city where the room is located.
+          example: Ho Chi Minh City
+        districtName:
+          type: string
+          description: The name of the district where the room is located.
+          example: District 1
+        streetName:
+          type: string
+          description: The name of the street where the room is located.
+          example: Nguyen Hue
+        wardName:
+          type: string
+          description: The name of the ward where the room is located.
+          example: Ben Nghe
+        addressDetail:
+          type: string
+         

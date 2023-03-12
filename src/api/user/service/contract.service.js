@@ -78,6 +78,9 @@ class ContractService {
 
         return contract;
     }
+
+    // async createSmartContract()
+
 };
 
 module.exports = new ContractService();
