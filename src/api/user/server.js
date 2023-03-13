@@ -10,10 +10,18 @@ const cron = require('../../config/cron');
 const { PORT } = process.env;
 const { HOST } = process.env;
 // const cron = require('cron');
+const engine = require("express-handlebars");
 const app = express();
 
 swagger(app);
 // Set api-doc path
+const hbs = engine.create({
+  extname: ".hbs",
+});
+
+// set up view engine
+app.engine('hbs', hbs.engine);
+app.set('view engine', 'hbs');
 
 const server = require("http").Server(app);
 const routers = require("./routes");

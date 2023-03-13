@@ -8,7 +8,7 @@ const axios = require('axios');
 
 const { vnp_TmnCode } = process.env;
 const { vnp_HashSecret } = process.env;
-const { vnp_Url } = process.env;
+let { vnp_Url } = process.env;
 const { vnp_ReturnUrl } = process.env;
 
 const storage = multer.memoryStorage({
@@ -23,6 +23,22 @@ const storage = multer.memoryStorage({
 const upload = multer({ storage, limits: { fileSize: 20000000 } }).single(
   "file",
 );
+
+const sortObject = (obj) =>{
+  var sorted = {};
+  var str = [];
+  var key;
+  for (key in obj) {
+      if (obj.hasOwnProperty(key)) {
+          str.push(encodeURIComponent(key));
+      }
+  }
+  str.sort();
+  for (key = 0; key < str.length; key++) {
+      sorted[str[key]] = encodeURIComponent(obj[str[key]]).replace(/%20/g, "+");
+  }
+  return sorted;
+}
 
 class UserController {
   constructor(io) {
@@ -44,11 +60,11 @@ class UserController {
       req.socket.remoteAddress ||
       req.connection.socket.remoteAddress;
 
-      const createDate = dateFormat(date, 'yyyymmddHHmmss');
-      const orderId = dateFormat(date, 'HHmmss');
+      const createDate = Date.now().toString();
+      const orderId = Date.now().toString();
       const bankCode = req.body.bankCode;
       const user = await User.getUserByWallet(walletAddress);
-
+      const secretKey = vnp_HashSecret;
       const transactionId = Date.now().toString();
 
       // const response = await axios.post(vnp_Url, {
@@ -68,7 +84,7 @@ class UserController {
       // return res.redirect(response.data);
       
       const currCode = 'VND';
-      const vnp_Params = {};
+      let vnp_Params = {};
       vnp_Params['vnp_Version'] = '2.1.0';
       vnp_Params['vnp_Command'] = 'pay';
       vnp_Params['vnp_TmnCode'] = vnp_TmnCode;
@@ -94,9 +110,9 @@ class UserController {
       var hmac = crypto.createHmac("sha512", secretKey);
       var signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex"); 
       vnp_Params['vnp_SecureHash'] = signed;
-      vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
+      vnp_Url += '?' + querystring.stringify(vnp_Params, { encode: false });
   
-      res.redirect(vnpUrl)
+      res.send(vnp_Url)
 
     } catch (error) {
       next(error);

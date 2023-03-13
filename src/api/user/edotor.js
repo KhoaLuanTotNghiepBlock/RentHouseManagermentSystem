@@ -16,49 +16,49 @@ const axios = require("axios");
 
 // getCity("Afghanistan");
 
-const getDataByPage = async (page) => {
-    let data;
+// const getDataByPage = async (page) => {
+//     let data;
 
-    await axios.get(`https://jsonmock.hackerrank.com/api/tvseries?page=${page}`)
-        .then((response) => data = response.data)
-        .catch((error) => console.log(error));
-    return data;
-}
-const getGenreByData = async (genre) => {
-    let page = 1;
-    const listGenre = [];
-    while (true) {
-        const { data, total_pages } = await getDataByPage(page);
+//     await axios.get(`https://jsonmock.hackerrank.com/api/tvseries?page=${page}`)
+//         .then((response) => data = response.data)
+//         .catch((error) => console.log(error));
+//     return data;
+// }
+// const getGenreByData = async (genre) => {
+//     let page = 1;
+//     const listGenre = [];
+//     while (true) {
+//         const { data, total_pages } = await getDataByPage(page);
 
-        if (total_pages < page) {
-            break;
-        }
+//         if (total_pages < page) {
+//             break;
+//         }
 
-        for (let i = 0; i < data.length; i++) {
-            const genres = data[i].genre.split(',');
-            if (genres.includes(genre))
-                listGenre.push(data[i]);
-        }
-        page++;
-    }
+//         for (let i = 0; i < data.length; i++) {
+//             const genres = data[i].genre.split(',');
+//             if (genres.includes(genre))
+//                 listGenre.push(data[i]);
+//         }
+//         page++;
+//     }
 
-    return listGenre;
-}
-async function bestInGenre(genre) {
-    const genres = await getGenreByData(genre);
-    if (!genres || genres.length === 0)
-        return '';
+//     return listGenre;
+// }
+// async function bestInGenre(genre) {
+//     const genres = await getGenreByData(genre);
+//     if (!genres || genres.length === 0)
+//         return '';
 
-    const highestRate = genres.reduce((highest, current) => {
-        return highest.imdb_rating > current.imdb_rating ? highest : current;
-    });
+//     const highestRate = genres.reduce((highest, current) => {
+//         return highest.imdb_rating > current.imdb_rating ? highest : current;
+//     });
 
-    console.log("🚀 ~ file: edotor.js:57 ~ bestInGenre ~ highestRate.name:", highestRate.name)
-    return highestRate.name;
-}
+//     console.log("🚀 ~ file: edotor.js:57 ~ bestInGenre ~ highestRate.name:", highestRate.name)
+//     return highestRate.name;
+// }
 
 
-bestInGenre('Comedy')
+// bestInGenre('Comedy')
 
 
 // const getDataByPage = async (page) => {
@@ -125,4 +125,84 @@ bestInGenre('Comedy')
 //     console.log(' string is match')
 // const fs = require('fs').promises;
 // const sourceCode = fs.readFile('src/api/user/blockchain/contract/BHRentalContract.sol', 'utf8');
+
 // console.log("🚀 ~ file: edotor.js:128 ~ sourceCode:", sourceCode)
+require('dotenv').config();
+const express = require('express');
+const engine = require("express-handlebars");
+const app = express();
+const hbs = engine.create({
+  extname: ".hbs",
+});
+
+// set up view engine
+app.engine('hbs', hbs.engine);
+app.set('view engine', 'hbs');
+
+// 1. Set up PayPal API credentials
+const paypal = require('@paypal/checkout-server-sdk');
+const { PAYPAL_CLIENT_ID, PAYPAY_CLIENT_SERECTKEY } = process.env;
+const environment = new paypal.core.SandboxEnvironment(PAYPAL_CLIENT_ID, PAYPAY_CLIENT_SERECTKEY);
+const client = new paypal.core.PayPalHttpClient(environment);
+
+// 2. Create a PayPal payment button
+const createPayment = async (req, res) => {
+  const { amount } = req.body;
+  const request = new paypal.orders.OrdersCreateRequest();
+  request.prefer("return=representation");
+  request.requestBody({
+    intent: "CAPTURE",
+    purchase_units: [{
+      amount: {
+        currency_code: "USD",
+        value: amount
+      }
+    }],
+    application_context: {
+      return_url: "http://localhost:3000/success",
+      cancel_url: "http://localhost:3000/cancel"
+    }
+  });
+
+  try {
+    const response = await client.execute(request);
+    return res.render(response.result.links.find(link => link.rel === 'approve').href);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send('Something went wrong');
+  }
+};
+
+// 3. Verify the payment information and retrieve the payment amount
+const capturePayment = async (req, res) => {
+  const { orderID, payerID } = req.query;
+  const request = new paypal.orders.OrdersCaptureRequest(orderID);
+  request.requestBody({payer_id: payerID});
+
+  try {
+    const response = await client.execute(request);
+    const amount = response.result.purchase_units[0].amount.value;
+    // 4. Use Web3.js to add the payment amount to the user's Metamask wallet
+    // Example code:
+    // const Web3 = require('web3');
+    // const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+    // const address = '0x123456789abcdef';
+    // const value = web3.utils.toWei(amount, 'ether');
+    // const transactionHash = await web3.eth.sendTransaction({to: address, value: value});
+    return res.send('Payment successful');
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send('Something went wrong');
+  }
+};
+
+// 5. Return a response to the PayPal API to confirm the payment
+const success = (req, res) => {
+  return res.send('Payment successful');
+};
+module.exports = {
+    createPayment,
+    capturePayment
+};
+// const cancel = (req, res)
+

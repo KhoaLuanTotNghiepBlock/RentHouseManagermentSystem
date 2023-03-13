@@ -114,7 +114,7 @@ router.post("/login", authController.login);
  *               username: canhcutcon
  *               password: 123456
  *               name: Võ Thị Trà Giang
- *               contactInfo: 0123456
+ *               contactInfo: 84972347165
  *               email: giangvo@gmail.com
  *     responses:
  *       200:
