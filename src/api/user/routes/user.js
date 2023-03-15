@@ -7,7 +7,7 @@ const userRouter = (io) => {
   // userController.connectVNpaytoWallet
   /**
  * @swagger
- * /user/wallet-connect:
+ * /users/wallet-connect:
  *   post:
  *     summary: Connects VNpay to a user wallet and creates a new transaction for payment.
  *     tags: [User]

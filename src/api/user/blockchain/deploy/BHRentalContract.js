@@ -1,5 +1,4 @@
 const web3 = require('../config/web3-init');
-const solc = require('solc');
 
 // Loading the contract ABI and Bytecode
 // (the results of a previous compilation step)
