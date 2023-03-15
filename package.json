@@ -6,7 +6,7 @@
   "scripts": {
     "test": "npx jest src/api/user/test/cron.test.js",
     "start-user": "nodemon src/api/user/server.js",
-    "start": "node src/api/user/test.js",
+    "start": "nodemon src/api/user/test.test.js",
     "start-admin": "nodemon src/api/admin/server.js",
     "lint": "eslint .",
     "compile-contract": "node src/api/user/blockchain/config/compirecontract.js"
@@ -24,6 +24,7 @@
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "crypto-js": "^4.1.1",
+    "dateformat": "^5.0.3",
     "dotenv": "^16.0.3",
     "download": "^8.0.0",
     "express": "^4.18.2",
@@ -43,6 +44,8 @@
     "nodemailer": "^6.8.0",
     "nodemon": "^2.0.20",
     "npm": "^9.2.0",
+    "qs": "^6.11.1",
+    "sha256": "^0.2.0",
     "socket.io": "^4.5.4",
     "solc": "^0.8.19",
     "swagger-jsdoc": "^6.0.1",

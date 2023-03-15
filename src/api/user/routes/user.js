@@ -5,8 +5,7 @@ const test = require('../edotor');
 const userRouter = (io) => {
   const userController = new UserController(io);
   // userController.connectVNpaytoWallet
-  router.post("/wallet-connect", test.createPayment);
-  router.get("/me/profile", userController.getProfile);
+  router.post("/wallet-connect", userController.connectVNpaytoWallet);
   router.put("/me/profile", userController.updateProfile); // not yet
   router.patch("/me/avatar", userController.changeAvatar); // not yet
   return router;

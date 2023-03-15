@@ -8,7 +8,7 @@ const axios = require('axios');
 
 const { vnp_TmnCode } = process.env;
 const { vnp_HashSecret } = process.env;
-let { vnp_Url } = process.env;
+const { vnp_Url } = process.env;
 const { vnp_ReturnUrl } = process.env;
 
 const storage = multer.memoryStorage({
@@ -48,72 +48,67 @@ class UserController {
   //[POST] user/wallet-connect
   async connectVNpaytoWallet(req, res,next) {
     try {
-      const { walletAddress, amount } = req.body;
-
+      // const { walletAddress, amount } = req.body;
+      const { walletAddress, amount } = { walletAddress:"0x7b54ea3b6f9Ed4D80925D7d6C7E820C4e245818d",amount: 100000};
       // Validate the request body
       if (!walletAddress || !amount) {
         return res.status(400).json({ message: 'Request body is incomplete.', errorCode: 400, data: {} });
       }
-
       const ipAddr = req.headers['x-forwarded-for'] ||
       req.connection.remoteAddress ||
       req.socket.remoteAddress ||
       req.connection.socket.remoteAddress;
 
-      const createDate = Date.now().toString();
-      const orderId = Date.now().toString();
-      const bankCode = req.body.bankCode;
       const user = await User.getUserByWallet(walletAddress);
-      const secretKey = vnp_HashSecret;
-      const transactionId = Date.now().toString();
+      const tmnCode = vnp_TmnCode;
+      let secretKey = vnp_HashSecret;
+      let vnpUrl = vnp_Url;
+      const returnUrl = vnp_ReturnUrl;
 
-      // const response = await axios.post(vnp_Url, {
-      //   vnp_Version: '2.0.0',
-      //   vnp_Command: 'pay',
-      //   vnp_TmnCode: vnp_TmnCode,
-      //   vnp_Amount: amount * 100,
-      //   vnp_CurrCode: 'VND',
-      //   vnp_TxnRef: transactionId,
-      //   vnp_OrderInfo: 'Payment for wallet',
-      //   vnp_ReturnUrl: vnp_ReturnUrl,
-      //   vnp_IpAddr: req.ip,
-      //   vnp_CreateDate: new Date().toISOString().slice(0, 19).replace('T', ' '),
-      //   vnp_CustomerId: user._id,
-      // });
+      const date = new Date();
+      const createDate = date.getFullYear().toString() +
+      (date.getMonth() + 1).toString().padStart(2, '0') +
+      date.getDate().toString().padStart(2, '0') +
+      date.getHours().toString().padStart(2, '0') +
+      date.getMinutes().toString().padStart(2, '0') +
+      date.getSeconds().toString().padStart(2, '0');
+      const orderId = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      const bankCode = 'NCB';
 
-      // return res.redirect(response.data);
-      
+      const orderInfo = "pay for wallet";
+      const orderType = 'topup';
+      const locale = 'vn';
       const currCode = 'VND';
-      let vnp_Params = {};
-      vnp_Params['vnp_Version'] = '2.1.0';
-      vnp_Params['vnp_Command'] = 'pay';
-      vnp_Params['vnp_TmnCode'] = vnp_TmnCode;
-      // vnp_Params['vnp_Merchant'] = ''
-      vnp_Params['vnp_Locale'] = 'vn';
-      vnp_Params['vnp_CurrCode'] = currCode;
-      vnp_Params['vnp_TxnRef'] = orderId;
-      vnp_Params['vnp_OrderInfo'] = 'Payment for wallet';
-      // vnp_Params['vnp_OrderType'] = orderType;
-      vnp_Params['vnp_Amount'] = amount * 100;
-      vnp_Params['vnp_ReturnUrl'] = vnp_ReturnUrl;
-      vnp_Params['vnp_IpAddr'] = ipAddr;
-      vnp_Params['vnp_CreateDate'] = createDate;
-      if(bankCode !== null && bankCode !== ''){
-          vnp_Params['vnp_BankCode'] = bankCode;
-      }
-  
-      vnp_Params = sortObject(vnp_Params);
-  
-      var querystring = require('qs');
-      var signData = querystring.stringify(vnp_Params, { encode: false });
-      var crypto = require("crypto");     
-      var hmac = crypto.createHmac("sha512", secretKey);
-      var signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex"); 
-      vnp_Params['vnp_SecureHash'] = signed;
-      vnp_Url += '?' + querystring.stringify(vnp_Params, { encode: false });
-  
-      res.send(vnp_Url)
 
+      let vnp_Params = {};
+    vnp_Params['vnp_Version'] = '2.1.0';
+    vnp_Params['vnp_Command'] = 'pay';
+    vnp_Params['vnp_TmnCode'] = tmnCode;
+    // vnp_Params['vnp_Merchant'] = ''
+    vnp_Params['vnp_Locale'] = locale;
+    vnp_Params['vnp_CurrCode'] = currCode;
+    vnp_Params['vnp_TxnRef'] = orderId + user.name;
+    vnp_Params['vnp_OrderInfo'] = orderInfo;
+    vnp_Params['vnp_OrderType'] = orderType;
+    vnp_Params['vnp_Amount'] = amount * 100;
+    vnp_Params['vnp_ReturnUrl'] = returnUrl;
+    vnp_Params['vnp_IpAddr'] = ipAddr;
+    vnp_Params['vnp_CreateDate'] = createDate;
+    if (bankCode !== null && bankCode !== '') {
+        vnp_Params['vnp_BankCode'] = bankCode;
+    }
+
+    vnp_Params = sortObject(vnp_Params);
+    const querystring = require('qs');
+    let signData = querystring.stringify(vnp_Params, { encode: false });
+    const crypto = require("crypto");
+    const hmac = crypto.createHmac("sha512", secretKey);
+    const signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex");
+    vnp_Params['vnp_SecureHash'] = signed;
+    vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
+    console.log("🚀 ~ file: user.controller.js:105 ~ UserController ~ connectVNpaytoWallet ~ vnpUrl:", vnpUrl)
+
+    return res.json({ paymentUrl: vnpUrl });
     } catch (error) {
       next(error);
     }
@@ -121,21 +116,30 @@ class UserController {
 
   async confirmPayment(req, res, next) {
     try {
-      const { vnp_ResponseCode, vnp_TransactionNo, vnp_Amount } = req.body;
+      let vnp_Params = req.query;
 
-      // Verify the payment status
-      const response = await axios.post('https://sandbox.vnpayment.vn/merchant_webapi/merchant.html', {
-        vnp_Version: '2.0.0',
-        vnp_TmnCode: '<your-vnpay-merchant-code>',
-        vnp_Amount: vnp_Amount * 100, // VNPay accepts the amount in the smallest currency unit (in this case, Vietnamese dong)
-        vnp_Command: 'querydr',
-        vnp_CreateDate: new Date().toISOString().replace(/[-T:.Z]/g, ''),
-        vnp_IpAddr: req.ip,
-        vnp_Merchant: '<your-vnpay-merchant-name>',
-        vnp_TransactionNo: vnp_TransactionNo
-      });
+      const secureHash = vnp_Params['vnp_SecureHash'];
+      delete vnp_Params['vnp_SecureHash'];
+      delete vnp_Params['vnp_SecureHashType'];
+
+      vnp_Params = sortObject(vnp_Params);
+      const tmnCode = vnp_TmnCode;
+      let secretKey = vnp_HashSecret;
+
+      const querystring = require('qs');
+      const signData = querystring.stringify(vnp_Params, { encode: false });
+      const crypto = require("crypto");
+      const hmac = crypto.createHmac("sha512", secretKey);
+      const signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex");
+  
+      if (secureHash === signed) {
+        res.json({ code: vnp_Params['vnp_ResponseCode'] })
+    } else {
+      res.json({ code: '97' })
+    }
+
     } catch (error) {
-
+      next(error)
     }
   }
 

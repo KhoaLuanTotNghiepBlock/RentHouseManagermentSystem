@@ -5,14 +5,20 @@ contract RentalContract {
     string public contractTransactionId;
     bool public signedByOwner;
     bool public signedByRenter;
-    string public invoice;
-    address public owner;
-    address public renter;
+    uint public rentAmount;
+    uint public depositAmount;
+    address payable public owner;
+    address payable public renter;
     
-    constructor(string memory _contractTransactionId,address _owner,address _renter){
+    event RentStarted(address owner, uint rentAmount, uint depositAmount);
+    event RentEnded(address renter, uint depositReturned);
+
+    constructor(string memory _contractTransactionId,address payable _owner,address payable _renter, uint _rentAmount, uint _depositAmount){
         contractTransactionId = _contractTransactionId;
         owner = _owner;
         renter = _renter;
+        rentAmount = _rentAmount;
+        depositAmount = _depositAmount;
     }
 
     function signByOwner() public {
@@ -22,15 +28,16 @@ contract RentalContract {
 
     function signByRenter() public payable{
         signedByRenter = true;
+        emit RentStarted(renter, rentAmount, depositAmount);
     }
 
-    function payForInvoice(string memory _invoice) public payable{
-        require(msg.sender == renter, "Only renter can pay for the invoice");
-        invoice = _invoice;
+     function endRent() public {
+        owner.transfer(rentAmount + depositAmount);
+        emit RentEnded(msg.sender, depositAmount);
     }
     
-    function getInvoice()public view returns (string memory){
-        return invoice;
+    function getBalance() public view returns (uint) {
+        return address(this).balance;
     }
     
     function getContractTransactionId() public view returns (string memory) {

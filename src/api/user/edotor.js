@@ -145,32 +145,76 @@ const { PAYPAL_CLIENT_ID, PAYPAY_CLIENT_SERECTKEY } = process.env;
 const environment = new paypal.core.SandboxEnvironment(PAYPAL_CLIENT_ID, PAYPAY_CLIENT_SERECTKEY);
 const client = new paypal.core.PayPalHttpClient(environment);
 
+
+const { vnp_TmnCode } = process.env;
+const { vnp_HashSecret } = process.env;
+let { vnp_Url } = process.env;
+const { vnp_ReturnUrl } = process.env;
 // 2. Create a PayPal payment button
 const createPayment = async (req, res) => {
-  const { amount } = req.body;
-  const request = new paypal.orders.OrdersCreateRequest();
-  request.prefer("return=representation");
-  request.requestBody({
-    intent: "CAPTURE",
-    purchase_units: [{
-      amount: {
-        currency_code: "USD",
-        value: amount
-      }
-    }],
-    application_context: {
-      return_url: "http://localhost:3000/success",
-      cancel_url: "http://localhost:3000/cancel"
-    }
-  });
-
   try {
-    const response = await client.execute(request);
-    return res.render(response.result.links.find(link => link.rel === 'approve').href);
+    const amount = req.body.amount;
+    const returnUrl = req.body.returnUrl;
+    const ipAddr = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const orderId = vnpay.generateOrderId();
+    const orderInfo = 'Payment for order ' + orderId;
+    const secureHash = vnp_HashSecret
+
+    const data = qs.stringify({
+      vnp_Version: '2.0.0',
+      vnp_Command: 'pay',
+      vnp_TmnCode: 'YOUR_TMNCODE',
+      vnp_Amount: amount,
+      vnp_CurrCode: 'VND',
+      vnp_BankCode: 'NCB',
+      vnp_TxnRef: orderId,
+      vnp_OrderInfo: orderInfo,
+      vnp_OrderType: 'other',
+      vnp_Locale: 'vn',
+      vnp_ReturnUrl: returnUrl,
+      vnp_IpAddr: ipAddr,
+      vnp_CreateDate: new Date().toISOString().slice(0, 19).replace('T', ' '),
+      vnp_SecureHashType: 'SHA256',
+      vnp_SecureHash: secureHash,
+    });
+
+    const response = await axios.post('http://sandbox.vnpayment.vn/paymentv2/vpcpay.html', data);
+
+    res.status(200).json({
+      message: 'Payment request successfully created',
+      redirectUrl: response.data,
+    });
   } catch (error) {
     console.error(error);
-    return res.status(500).send('Something went wrong');
+    res.status(500).json({
+      message: 'An error occurred while creating payment request',
+      error,
+    });
   }
+  // const { amount } = req.body;
+  // const request = new paypal.orders.OrdersCreateRequest();
+  // request.prefer("return=representation");
+  // request.requestBody({
+  //   intent: "CAPTURE",
+  //   purchase_units: [{
+  //     amount: {
+  //       currency_code: "USD",
+  //       value: amount
+  //     }
+  //   }],
+  //   application_context: {
+  //     return_url: "http://localhost:3000/success",
+  //     cancel_url: "http://localhost:3000/cancel"
+  //   }
+  // });
+
+  // try {
+  //   const response = await client.execute(request);
+  //   return res.render(response.result.links.find(link => link.rel === 'approve').href);
+  // } catch (error) {
+  //   console.error(error);
+  //   return res.status(500).send('Something went wrong');
+  // }
 };
 
 // 3. Verify the payment information and retrieve the payment amount
