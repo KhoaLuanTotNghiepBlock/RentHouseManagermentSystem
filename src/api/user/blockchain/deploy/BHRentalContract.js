@@ -1,19 +1,19 @@
-const web3 = require('../config/web3-init');
+const web3 = require("../config/web3-init");
 
-// Loading the contract ABI and Bytecode
-// (the results of a previous compilation step)
 const fs = require("fs");
-const contractService = require('../../service/contract.service');
+const contractService = require("../../service/contract.service");
 const MyError = require('../../../../exception/MyError');
 const HashContract = require('../../../../model/transaction/hash-contract.model');
 
 const { abi, bytecode } = JSON.parse(fs.readFileSync("src/api/user/blockchain/contract/RentalContract.json"));
 
 const RentalContract = {
-    createSmartContractFromRentalContract: async (contractId, signedByOwner, signedByRenter) => {
+    createSmartContractFromRentalContract: async (contractInfo, ownerAddress, renterAddress) => {
         if (!(signedByOwner && signedByRenter))
             throw new MyError('Sign is missing!');
         // get info of contract
+        const { contractId, rentAumont, depositAmount } = contractInfo;
+
         // then hash all info of contract
         const hash = await contractService.hashContract(contractId);
         if (!hash)
@@ -26,7 +26,7 @@ const RentalContract = {
 
         // create new instance of smart contract
         const contract = new web3.eth.Contract(abi);
-        const deploy = contract.deploy({ data: '0x' + bytecode, arguments: [contractHash.hash, signedByOwner, signedByRenter] });
+        const deploy = contract.deploy({ data: '0x' + bytecode, arguments: [contractHash.hash, ownerAddress, renterAddress, rentAumont, depositAmount] });
 
         // Creating a signing account from a private key
         // web3.eth.accounts.wallet.add(signer);

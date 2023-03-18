@@ -96,12 +96,9 @@ const userValidate = {
 
   async checkRegistryInfo(userInfo) {
     const {
-      name, username, password, contactInfo,
+      username, password, contactInfo,
     } = userInfo;
     const error = {};
-
-    // check vaalidate name
-    if (!name || !NAME_REGEX.test(name)) error.name = NAME_INVALID;
 
     // check validate username
     if (!this.validateUsername(username)) error.username = USERNAME_INVALID;
@@ -121,7 +118,7 @@ const userValidate = {
     if (!isEmpty(error)) error.toString();
 
     return {
-      name, username, password, contactInfo, error,
+      username, password, contactInfo, error,
     };
   },
 

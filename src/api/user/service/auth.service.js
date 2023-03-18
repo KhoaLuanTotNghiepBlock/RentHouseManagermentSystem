@@ -34,7 +34,7 @@ class AuthService {
 
     try {
       const {
-        name, username, password, contactInfo, identity, error,
+        username, password, contactInfo, identity, error,
       } = await userValidation.checkRegistryInfo(userInfo);
       if (!isEmpty(error)) {
         return {
@@ -46,7 +46,6 @@ class AuthService {
       const typeContact = userValidation.validatePhone(contactInfo);
 
       let newUser = new User({
-        name,
         username,
         identity,
         avatar: "",
@@ -111,6 +110,16 @@ class AuthService {
           message: "Already send otp!",
           data: {},
           errorCode: 200,
+        };
+      }
+
+      // check account is already verify yet
+      if (!user.auth.isAuthorize) {
+        return {
+          status: true,
+          message: "You must update your identity!",
+          data: {},
+          errorCode: 400,
         };
       }
 

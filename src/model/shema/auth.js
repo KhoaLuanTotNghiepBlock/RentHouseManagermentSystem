@@ -17,6 +17,10 @@ const authSchema = new mongoose.Schema(
       default: false,
       required: true,
     },
+    isAuthorize: {
+      type: Boolean,
+      default: false
+    },
     remainingTime: {
       type: Date,
       default: undefined,

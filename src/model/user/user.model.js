@@ -6,6 +6,7 @@ const { ObjectId } = mongoose.Types;
 const authSchema = require("../shema/auth");
 const MyError = require("../../exception/MyError");
 const ArgumentError = require('../../exception/ArgumentError');
+const address = require("../shema/address");
 
 const UserSchema = new mongoose.Schema(
   {
@@ -27,6 +28,7 @@ const UserSchema = new mongoose.Schema(
       default: ""
     },
     auth: authSchema,
+    address,
     name: {
       type: String,
       default: "",
