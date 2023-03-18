@@ -6,7 +6,6 @@ const { ObjectId } = mongoose.Types;
 const authSchema = require("../shema/auth");
 const MyError = require("../../exception/MyError");
 const ArgumentError = require('../../exception/ArgumentError');
-const address = require("../shema/address");
 
 const UserSchema = new mongoose.Schema(
   {
@@ -28,7 +27,13 @@ const UserSchema = new mongoose.Schema(
       default: ""
     },
     auth: authSchema,
-    address,
+    address: {
+      city: { type: String, default: null },
+      district: { type: String, default: null },
+      ward: { type: String, default: null },
+      street: { type: String, default: null },
+
+    },
     name: {
       type: String,
       default: "",
@@ -50,10 +55,6 @@ const UserSchema = new mongoose.Schema(
     identityImg: [
       {
         url: String,
-        type: {
-          type: String,
-          enum: ['cccd_chip_front', 'cccd_chip_back']
-        }
       }
     ],
     notifications: [

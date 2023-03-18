@@ -95,10 +95,10 @@ class AuthService {
         .select("username name email auth avatar wallet wishList")
         .lean();
 
-      if (!user) throw new Error("login ==> user not found!");
+      if (!user) throw new Error("user not found!");
 
       // check password
-      if (!crypto.match(user.auth.password, password)) { throw new Error("login ==> password is wrong"); }
+      if (!crypto.match(user.auth.password, password)) { throw new Error("password is wrong"); }
 
       const { phone } = user;
       // check account is already verify yet
@@ -108,7 +108,9 @@ class AuthService {
         return {
           status: true,
           message: "Already send otp!",
-          data: {},
+          data: {
+            username, email: user.email
+          },
           errorCode: 200,
         };
       }

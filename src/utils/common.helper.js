@@ -48,6 +48,14 @@ const commonHelper = {
     return value;
   },
 
+  convertUpperStringToNFD: (value) => {
+    // normalize() function takes a form argument that specifies the Unicode normalization form to use. In this case
+    // expression /[\u0300-\u036f]/g matches all Unicode characters in the "Mn" category, which includes most diacritical marks used in Latin scripts.
+    const normalizedStr = value.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const formattedStr = normalizedStr.charAt(0).toUpperCase() + normalizedStr.slice(1).toLowerCase();
+    return formattedStr;
+  },
+
   validateGender: (value) => {
     if (!value)
       throw new ArgumentError('valid gender ==> ');
