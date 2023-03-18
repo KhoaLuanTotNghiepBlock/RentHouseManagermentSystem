@@ -34,7 +34,7 @@ class AuthService {
 
     try {
       const {
-        username, password, contactInfo, identity, error,
+        username, password, contactInfo, identity, error, email
       } = await userValidation.checkRegistryInfo(userInfo);
       if (!isEmpty(error)) {
         return {
@@ -54,10 +54,10 @@ class AuthService {
           remainingTime: Date.now(),
         },
         phone: "",
+        email
       });
 
-      if (typeContact) newUser.phone = contactInfo;
-      else newUser.email = contactInfo;
+      newUser.phone = contactInfo;
 
       // create wallet
       const { address, privateKey } = await this.createWallet();
@@ -92,7 +92,7 @@ class AuthService {
       const user = await User.findOne({
         $or: [{ username }, { email: username }, { phone: username }],
       })
-        .select("username name email auth avatar wallet wishList")
+        .select("username name email phone auth avatar wallet wishList")
         .lean();
 
       if (!user) throw new Error("user not found!");
@@ -100,7 +100,7 @@ class AuthService {
       // check password
       if (!crypto.match(user.auth.password, password)) { throw new Error("password is wrong"); }
 
-      const { phone } = user;
+      const { phone, email } = user;
       // check account is already verify yet
       if (!user.auth.isVerified) {
         this.sendOTP(user._id, phone);
@@ -109,7 +109,7 @@ class AuthService {
           status: true,
           message: "Already send otp!",
           data: {
-            username, email: user.email
+            username, phone, email
           },
           errorCode: 200,
         };

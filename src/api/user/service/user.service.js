@@ -6,6 +6,7 @@ const userValidate = require("../validate/user.validation");
 const awsS3ServiceHelper = require("../../../utils/aws-s3-service.helper");
 const MyError = require("../../../exception/MyError");
 const ArgumentError = require("../../../exception/ArgumentError");
+const commonHelper = require('../../../utils/common.helper');
 
 
 class UserService {
@@ -85,23 +86,13 @@ class UserService {
     user.dob = dob;
     user.identity = id;
     user.identityImg = identityImg;
-
+    user.adrress.city = commonHelper.convertUpperStringToNFD(address_entities.province);
+    user.address.district = commonHelper.convertUpperStringToNFD(address_entities.district);
+    user.address.ward = commonHelper.convertUpperStringToNFD(address_entities.ward);
+    user.address.street = commonHelper.convertUpperStringToNFD(address_entities.street);
   }
 
-  async connectWalletVnPay(walletInfo) {
-    // const { walletAddress, amount } = walletInfo;
 
-    // if (!walletAddress || amount)
-    //   throw new ArgumentError('user service connect wallet ==>');
-
-    // // Create a payment request with VNPay
-    // // const vnpayApiKey = '<your-vnpay-api-key>';
-    // // const vnpayEndpoint = 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
-    // // const returnUrl = 'http://localhost:3000/payment-confirmation';
-
-
-    // return response.data;
-  }
 }
 
 module.exports = new UserService();

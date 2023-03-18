@@ -96,7 +96,7 @@ const userValidate = {
 
   async checkRegistryInfo(userInfo) {
     const {
-      username, password, contactInfo,
+      username, password, contactInfo, email
     } = userInfo;
     const error = {};
 
@@ -105,7 +105,7 @@ const userValidate = {
     else if (await User.findOne({ username })) { error.username = USERNAME_EXISTS_INVALID; }
 
     // check contact info email or phone
-    if (!contactInfo || !(this.validateEmail(contactInfo) || this.validatePhone(contactInfo))) error.contact = CONTACT_INVALID;
+    if (!contactInfo || !(this.validateEmail(email) || this.validatePhone(contactInfo))) error.contact = CONTACT_INVALID;
 
     // else if (await User.findOne({
     //     $or: [{ email: contactInfo }, { phone: contactInfo }]
@@ -118,7 +118,7 @@ const userValidate = {
     if (!isEmpty(error)) error.toString();
 
     return {
-      username, password, contactInfo, error,
+      username, password, contactInfo, error, email
     };
   },
 
