@@ -85,6 +85,22 @@ class AuthController {
       });
     }
   }
+
+  //[PUT] bh/auth/verify-info
+  async verifyInfoUser(req, res, next) {
+    const { userId, name, dob, sex, id, home, address_entities, identityImg } = req.body;
+    try {
+      const data = await authService.updateProfileByIndentity(userId, { ...identityImg, name, dob, sex, id, identityImg, home, address_entities });
+
+      res.status(200).json({
+        message: "Update user profile success",
+        errorCode: 200,
+        data
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new AuthController();

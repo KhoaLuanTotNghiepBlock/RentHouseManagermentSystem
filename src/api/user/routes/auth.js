@@ -317,7 +317,93 @@ router.post("/confirm-account", authController.confirmAccount);
  *                   description: Additional data returned from the API
  *                   example: {}
  */
-
 router.get("/verify-email/:token", authController.verifyEmail);
 
+/**
+ * @swagger
+ * /bh/auth/verify-info:
+ *   put:
+ *     summary: Verify user information
+ *     description: Updates the user profile with identity information to verify user information
+ *     tags:
+ *       - Auth
+ *     requestBody:
+ *       description: User information to be verified
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: The ID of the user whose information is being verified
+ *               name:
+ *                 type: string
+ *                 description: The user's name
+ *               dob:
+ *                 type: string
+ *                 description: The user's date of birth
+ *               sex:
+ *                 type: string
+ *                 description: The user's gender
+ *               id:
+ *                 type: string
+ *                 description: The user's identification number
+ *               home:
+ *                 type: string
+ *                 description: The user's home address
+ *               address_entities:
+ *                 type: object
+ *               identityImg:
+ *                 type: array
+ *             example:
+ *               userId: "example_user_id"
+ *               name: "Example User"
+ *               dob: "1990-01-01"
+ *               sex: "male"
+ *               id: "example_id"
+ *               home: "123 Example St."
+ *               address_entities: "{}"
+ *               identityImg: []
+ *     responses:
+ *       200:
+ *         description: The user's profile has been updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the success of the operation
+ *                   example: "Update user profile success"
+ *                 errorCode:
+ *                   type: integer
+ *                   description: The error code of the response
+ *                   example: 200
+ *                 data:
+ *                   type: object
+ *                   description: Additional data returned from the API
+ *                   example: {}
+ *       400:
+ *         description: Invalid request data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: A message indicating the error that occurred
+ *                   example: "Invalid request data"
+ *                 errorCode:
+ *                   type: integer
+ *                   description: The error code of the response
+ *                   example: 400
+ */
+router.put("/verify-info", authController.verifyInfoUser);
+
 module.exports = router;
+
+

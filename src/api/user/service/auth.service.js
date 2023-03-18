@@ -340,5 +340,27 @@ class AuthService {
       privateKey
     }
   }
+
+  async updateProfileByIndentity(userId, userInfo) {
+    if (!userInfo)
+      throw new ArgumentError('update profile => missing');
+
+    const { name, dob, sex, id, identityImg, home, address_entities } = userInfo;
+    let user = await User.findOne({ _id: userId });
+    user.name = name;
+    user.gender = sex === 'N/A' ? 'Other' : sex;
+    user.dob = dob;
+    user.identity = id;
+    user.identityImg = identityImg?.length !== 0 ? identityImg : [];
+    user.address = {};
+    user.address.city = address_entities?.province?.toLowerCase() || '';
+    user.address.district = address_entities?.district?.toLowerCase() || '';
+    user.address.ward = address_entities?.ward?.toLowerCase() || '';
+    user.address.street = address_entities?.street?.toLowerCase() || '';
+    user.auth.isAuthorize = true;
+    await user.save();
+    return { user };
+  }
+
 }
 module.exports = new AuthService();

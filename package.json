@@ -6,7 +6,7 @@
   "scripts": {
     "test": "npx jest src/api/user/test/cron.test.js",
     "start-user": "nodemon src/api/user/server.js",
-    "start": "nodemon src/api/user/test.test.js",
+    "start": "node/src/api/user/test.js",
     "start-admin": "nodemon src/api/admin/server.js",
     "lint": "eslint .",
     "lint-fix": "./node_modules/.bin/eslint  \"**/*.js\" --ignore-pattern node_modules/ --fix --color",

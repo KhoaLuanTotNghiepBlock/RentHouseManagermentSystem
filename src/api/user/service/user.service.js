@@ -73,24 +73,6 @@ class UserService {
     return user;
   }
 
-  async updateProfileByIndentity(userId, userInfo) {
-    if (!userInfo)
-      throw new ArgumentError('update profile => missing');
-
-    const { name, dob, sex, id, identityImg, home, address_entities } = userInfo;
-
-    let user = await User.getById(userId);
-
-    user.name = name;
-    user.gender = sex;
-    user.dob = dob;
-    user.identity = id;
-    user.identityImg = identityImg;
-    user.adrress.city = commonHelper.convertUpperStringToNFD(address_entities.province);
-    user.address.district = commonHelper.convertUpperStringToNFD(address_entities.district);
-    user.address.ward = commonHelper.convertUpperStringToNFD(address_entities.ward);
-    user.address.street = commonHelper.convertUpperStringToNFD(address_entities.street);
-  }
 
 
 }

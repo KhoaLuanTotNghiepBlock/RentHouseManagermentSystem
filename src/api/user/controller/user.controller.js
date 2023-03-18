@@ -181,21 +181,18 @@ class UserController {
 
   // [PUT] /bh/user/me/profile
   async updateProfile(req, res, next) {
-    const id = req.auth.userId;
+    const userId = req.auth.userId;
+    const { name, dob, sex, id, identityImg, home, address_entities } = req.body;
     try {
-      await userService.updateProfile(id, req.body);
+      const data = await userService.updateProfileByIndentity(userId, { name, dob, sex, id, identityImg, home, address_entities });
+
       res.status(200).json({
         message: "Update user profile success",
         errorCode: 200,
-        data: {},
+        data
       });
     } catch (error) {
-      res.status(400).json({
-        message: error.message,
-        errorCode: 400,
-        data: {},
-      });
-      next();
+      next(error);
     }
   }
 

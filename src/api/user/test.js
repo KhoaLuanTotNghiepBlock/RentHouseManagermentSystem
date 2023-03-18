@@ -2,11 +2,11 @@ const { https } = require("follow-redirects");
 // const fs = require("fs");
 
 const BASE_URL = "https://k3yq9e.api.infobip.com";
-const API_KEY = "App b689fe5d2cce3491a9918f468354eca4-9ea84ff5-f786-4213-829a-dd89647be5c5";
+const API_KEY = "App 8ebc3ad16610ebbfd9bcc9a255a81b7f-591f69c2-a030-49a4-8336-3d990b46edc0";
 const MEDIA_TYPE = "application/json";
 
 const SENDER = "InfoSMS";
-const RECIPIENT = "84972347165";
+const RECIPIENT = "84961516941";
 const MESSAGE_TEXT = "This is a otp";
 
 const options = {
