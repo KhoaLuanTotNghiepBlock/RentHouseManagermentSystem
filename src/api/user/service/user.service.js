@@ -7,6 +7,7 @@ const awsS3ServiceHelper = require("../../../utils/aws-s3-service.helper");
 const MyError = require("../../../exception/MyError");
 const ArgumentError = require("../../../exception/ArgumentError");
 const commonHelper = require('../../../utils/common.helper');
+const City = require('../../../model/city.model');
 
 
 class UserService {
@@ -18,6 +19,14 @@ class UserService {
 
   // [GET] /bh/user/me/profile
   async getProfile(_id) {
+    const city = new City(
+      {
+        name: "Hồ Chí Minh",
+        type: "Thành phố",
+        typename: "Thành phố"
+      }
+    );
+    await city.save()
     const user = await User.findById(_id, { auth: 0 })
       .select("-updateAt")
       .populate([

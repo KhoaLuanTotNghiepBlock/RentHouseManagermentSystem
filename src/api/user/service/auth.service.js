@@ -121,7 +121,7 @@ class AuthService {
           status: true,
           message: "You must update your identity!",
           data: {},
-          errorCode: 400,
+          errorCode: 200,
         };
       }
 

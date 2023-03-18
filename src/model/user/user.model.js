@@ -32,7 +32,6 @@ const UserSchema = new mongoose.Schema(
       district: { type: String, default: null },
       ward: { type: String, default: null },
       street: { type: String, default: null },
-
     },
     name: {
       type: String,
