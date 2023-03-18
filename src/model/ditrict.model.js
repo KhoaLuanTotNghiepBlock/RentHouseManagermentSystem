@@ -9,11 +9,9 @@ const districtSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    required: true,
   },
   typename: {
     type: String,
-    required: true,
   },
   parent_code: {
     type: ObjectId,

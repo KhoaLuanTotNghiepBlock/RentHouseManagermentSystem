@@ -92,7 +92,7 @@ class AuthService {
       const user = await User.findOne({
         $or: [{ username }, { email: username }, { phone: username }],
       })
-        .select("username name email phone auth avatar wallet wishList")
+        .select("_id username name email phone auth avatar wallet wishList")
         .lean();
 
       if (!user) throw new Error("user not found!");
@@ -109,7 +109,7 @@ class AuthService {
           status: true,
           message: "Already send otp!",
           data: {
-            username, phone, email
+            userId: user._id, username, phone, email
           },
           errorCode: 200,
         };
@@ -359,7 +359,42 @@ class AuthService {
     user.address.street = address_entities?.street?.toLowerCase() || '';
     user.auth.isAuthorize = true;
     await user.save();
-    return { user };
+
+    const payload = {
+      userId: user._id,
+      isAdmin: user.auth.isAdmin,
+    };
+
+    const accessToken = jwt.sign(payload, SECRET_KEY, {
+      expiresIn: TOKEN_LIFE,
+    });
+
+    const refreshToken = jwt.sign(payload, REFRESH_SECRET_KEY, {
+      expiresIn: REFRESH_TOKEN_LIFE,
+    });
+
+    await Token.create([
+      {
+        refreshToken,
+        payload,
+      },
+    ]);
+
+    if (user.auth.isAdmin) user.isAdmin = true;
+
+    user.auth = undefined;
+
+    return {
+      status: true,
+      message: "update success",
+      errorCode: 200,
+      data: {
+        accessToken,
+        refreshToken,
+        user,
+      },
+    };
+
   }
 
 }

@@ -8,6 +8,8 @@ const MyError = require("../../../exception/MyError");
 const ArgumentError = require("../../../exception/ArgumentError");
 const commonHelper = require('../../../utils/common.helper');
 const City = require('../../../model/city.model');
+const addressService = require('./address.service');
+const District = require('../../../model/ditrict.model');
 
 
 class UserService {
@@ -16,25 +18,27 @@ class UserService {
 
     if (mimetype !== "image/jpeg" && mimetype !== "image/png") { throw new MyError("Image invalid"); }
   }
+  async cityData() {
+    const listDitrict = await addressService.getDitrictList();
+    console.log("🚀 ~ file: user.service.js:23 ~ UserService ~ cityData ~ listDitrict:", listDitrict)
+
+    for (let i = 0; i < listDitrict.lenght; i++) {
+      const ditrict = new District({
+        name: listDitrict[i].name,
+        type: listDitrict[i].pre,
+        typename: `${listDitrict[i].pre} ${listDitrict[i].name}`
+      });
+      await ditrict.save();
+    }
+  }
 
   // [GET] /bh/user/me/profile
   async getProfile(_id) {
-    const city = new City(
-      {
-        name: "Hồ Chí Minh",
-        type: "Thành phố",
-        typename: "Thành phố"
-      }
-    );
-    await city.save()
+
+    await this.cityData();
     const user = await User.findById(_id, { auth: 0 })
       .select("-updateAt")
-      .populate([
-        {
-          path: "apartments",
-          select: "-updatedAt",
-        },
-      ]).lean()
+      .lean()
       .then((data) => data)
       .catch((err) => err);
 
