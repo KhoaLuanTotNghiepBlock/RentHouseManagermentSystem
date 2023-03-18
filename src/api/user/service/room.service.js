@@ -9,7 +9,6 @@ const NotFoundError = require('../../../exception/NotFoundError');
 
 class RoomService {
     async createRoom(_id, roomInfo) {
-
         let room = await roomValidate.validCreateRoom(_id, roomInfo);
         const { amentilities, services, cityName, ditrictName, streetName,
             wardName, addressDetail } = roomInfo;
@@ -17,6 +16,7 @@ class RoomService {
         const address = await validateAddress.validAddress({
             cityName, ditrictName, streetName, wardName, addressDetail,
         });
+
         if (!room)
             throw new MyError('room service ==> room underfine!');
 
@@ -33,10 +33,10 @@ class RoomService {
         room.owner = userOwner._id;
         //set unity
         room.amentilities = amentilities;
-
+        // 641602d34cb2f6bdce2aa2f6
+        console.log("🚀 ~ file: room.service.js:36 ~ RoomService ~ createRoom ~ room:", room._id)
         // save
         await room.save();
-
         // set sevrice 
         room.services = {};
         await serviceApartment.createRoomService(room._id, services);
@@ -67,7 +67,6 @@ class RoomService {
                 .lean(),
             Room.countDocuments(filter),
         ]);
-
         return {
             items,
             total,

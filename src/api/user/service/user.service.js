@@ -10,6 +10,8 @@ const commonHelper = require('../../../utils/common.helper');
 const City = require('../../../model/city.model');
 const addressService = require('./address.service');
 const District = require('../../../model/ditrict.model');
+const Street = require('../../../model/street.model');
+const Ward = require('../../../model/ward.model');
 
 
 class UserService {
@@ -19,23 +21,36 @@ class UserService {
     if (mimetype !== "image/jpeg" && mimetype !== "image/png") { throw new MyError("Image invalid"); }
   }
   async cityData() {
-    const listDitrict = await addressService.getDitrictList();
-    console.log("🚀 ~ file: user.service.js:23 ~ UserService ~ cityData ~ listDitrict:", listDitrict)
+    const listDitrict = await addressService.getDitrictsFromDatabase();
+    const city = await City.findOne({ _id: "6415ee77cc372ede59b64c1a" })
+    // add drestirct
+    // for (let i = 0; i < listDitrict.length; i++) {
+    //   const ditrict = new District({
+    //     name: listDitrict[i].name,
+    //     type: listDitrict[i].pre,
+    //     typename: `${listDitrict[i].pre} ${listDitrict[i].name}`,
+    //     parent_code: city._id
+    //   });
+    //   await ditrict.save();
+    // }
 
-    for (let i = 0; i < listDitrict.lenght; i++) {
-      const ditrict = new District({
-        name: listDitrict[i].name,
-        type: listDitrict[i].pre,
-        typename: `${listDitrict[i].pre} ${listDitrict[i].name}`
-      });
-      await ditrict.save();
+    for (let i = 0; i < listDitrict.length; i++) {
+      const list = await addressService.getWardByDitrict(listDitrict[i].name)
+      for (let j = 0; j < list.length; j++) {
+        const ward = new Ward({
+          name: list[j].name,
+          type: list[j].pre,
+          typename: `${list[j].pre} ${list[j].name}`,
+          parent_code: listDitrict[i]._id,
+          parent_code_city: city._id
+        });
+        await ward.save();
+      }
     }
   }
 
   // [GET] /bh/user/me/profile
   async getProfile(_id) {
-
-    await this.cityData();
     const user = await User.findById(_id, { auth: 0 })
       .select("-updateAt")
       .lean()

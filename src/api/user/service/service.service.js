@@ -37,26 +37,17 @@ class ServiceApartmentService {
     async createRoomService(roomId, services) {
         if (!roomId)
             throw new ArgumentError('room service ==>');
-
-        await roomValidate.validRoom(roomId);
-
         for (const val of services) {
             const service = await serviceValidate.validateService(val);
-
-            let [saveService, updateRoom] = await Promise.all([
-                await service.save(),
-                await Room.updateOne(
-                    { roomId },
-                    {
-                        $push: {
-                            services: service._id
-                        }
+            await service.save();
+            await Room.updateOne(
+                { _id: roomId },
+                {
+                    $push: {
+                        services: service._id
                     }
-                )
-            ]);
-
-            if (saveService.modifiedCount === 0) throw new MyError('save service fail!');
-            if (updateRoom.modifiedCount === 0) throw new MyError('update room fail');
+                }
+            )
         }
     }
 

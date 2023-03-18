@@ -37,13 +37,18 @@ class RoomController {
                 }
             ]
 
-            return roomService.getAllRoom(
+            const { items, total, page, limit, totalPages } = await roomService.getAllRoom(
                 conditions,
                 commonHelper.getPagination(req.query),
                 projection,
                 populate,
                 sort,
             );
+            return res.status(200).json({
+                data: { items, total, page, limit, totalPages },
+                message: "success",
+                errorCode: 200
+            });
 
         } catch (error) {
             next(error);

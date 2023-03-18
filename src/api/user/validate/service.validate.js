@@ -48,7 +48,6 @@ const ServiceValidate = {
 
         basePrice = commonUtils.convertToNumber(basePrice);
 
-
         return new Service({
             name,
             description,

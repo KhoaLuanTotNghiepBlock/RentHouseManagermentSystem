@@ -29,7 +29,6 @@ class ServiceDemandService {
             throw new MyError('Service demand Invalid');
 
         serviceDemand.amount = this.amountServiceDemand(serviceDemand.type, serviceDemand, basePrice);
-        console.log("🚀 ~ file: demand.service.js:23 ~ ServiceDemandService ~ createServiceDemand ~ serviceDemand:", serviceDemand);
         serviceDemand.save();
         return serviceDemand;
     }
@@ -45,7 +44,6 @@ class ServiceDemandService {
         const rentalDate = datetimeHelper.toObject(dateRent);
 
         let { expiredDate, services } = ServiceDemandValidate.validateCreateDemandForRoom({ room, period, dateRent });
-        console.log("🚀 ~ file: demand.service.js:48 ~ ServiceDemandService ~ createServiceDemandForRoom ~ room, period, dateRent :", room, period, dateRent)
 
         const listDemand = [];
         for (let serDemand of services) {

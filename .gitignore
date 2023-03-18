@@ -4,6 +4,7 @@ node_modules
 
 # production
 /build
+/test.test.js
 
 # misc
 .DS_Store
