@@ -33,8 +33,9 @@ class RoomService {
         room.owner = userOwner._id;
         //set unity
         room.amentilities = amentilities;
-        // 641602d34cb2f6bdce2aa2f6
-        console.log("🚀 ~ file: room.service.js:36 ~ RoomService ~ createRoom ~ room:", room._id)
+
+        room.address = {};
+        room.address = address;
         // save
         await room.save();
         // set sevrice 

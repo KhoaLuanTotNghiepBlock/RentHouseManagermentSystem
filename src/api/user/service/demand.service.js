@@ -37,7 +37,7 @@ class ServiceDemandService {
         if (!(contractId))
             throw new ArgumentError('invoice service ==>');
 
-        const contract = await Contract.getById(contractId);
+        const contract = await Contract.findOne({ _id: contractId });
 
         let { room, period, dateRent } = contract;
 

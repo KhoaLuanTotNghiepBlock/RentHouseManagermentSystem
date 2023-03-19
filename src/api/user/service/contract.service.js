@@ -6,6 +6,7 @@ const demandService = require('./demand.service');
 const NotFoundError = require('../../../exception/NotFoundError');
 const crypto = require('../../../utils/crypto.hepler');
 const HashContract = require('../../../model/transaction/hash-contract.model');
+const { toObjectId } = require('../../../utils/common.helper');
 class ContractService {
 
     async createContract(ownerId, contractInfo) {
@@ -50,7 +51,7 @@ class ContractService {
     }
 
     async hashContract(contractId) {
-        const contract = await Contract.getById(contractId);
+        const contract = await Contract.findOne({ _id: contractId });
 
         if (!contract)
             throw new NotFoundError('Contract not found!');
@@ -63,7 +64,7 @@ class ContractService {
     async getContractByHash(hashContract) {
         const { contractId, hash } = await HashContract.getByHash(hash);
 
-        const contract = await Contract.getById(contractId);
+        const contract = await Contract.findOne({ _id: contractId });
 
         if (!contract)
             throw new NotFoundError('Contract not found!');
@@ -76,27 +77,129 @@ class ContractService {
         return contract;
     }
 
-    async getAllRoomContract(
+    async getAllRoomByRented(
         conditions = {},
         pagination,
         projection,
-        populate = [],
         sort = {}) {
 
         const filter = { ...conditions };
         const { limit, page, skip } = pagination;
         delete filter.limit;
         delete filter.page;
+        const { renter } = filter;
+        renter && (filter.renter = toObjectId(renter));
 
-        const [items, total] = await Promise.all([
-            Contract.find(filter, projection)
-                .sort(sort)
-                .skip(skip)
-                .limit(limit)
-                .populate(populate)
-                .lean(),
-            Contract.countDocuments(filter),
+        const roomLookup = {
+            from: "rooms",
+            let: { room: "$room" },
+            pipeline: [
+                { $match: { $expr: { $eq: ["$_id", "$$room"] } } },
+                {
+                    $lookup: {
+                        from: "users",
+                        let: { userId: "$owner" },
+                        pipeline: [
+                            { $match: { $expr: { $eq: ["$_id", "$$userId"] } } },
+                            {
+                                $project: {
+                                    _id: 1,
+                                    name: 1,
+                                    avatar: 1,
+                                    phone: 1,
+                                    email: 1,
+                                    identity: 1,
+                                },
+                            },
+                        ],
+                        as: "owner",
+                    },
+                    $lookup: {
+                        from: "services",
+                        let: { serviceIds: "$services" },
+                        pipeline: [
+                            { $match: { $expr: { $in: ["$_id", "$$serviceIds"] } } },
+                            {
+                                $project: {
+                                    _id: 1,
+                                    name: 1,
+                                    avatar: 1,
+                                    phone: 1,
+                                    email: 1,
+                                    identity: 1,
+                                },
+                            },
+                        ],
+                        as: "services",
+                    }
+                },
+                { $project: { updatedAt: 0 } },
+            ],
+            as: "room",
+        };
+
+        const renterLookup = {
+            from: "users",
+            let: { userId: "$renter" },
+            pipeline: [
+                {
+                    $match: { $expr: { $eq: ["$_id", "$$userId"] } },
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        name: 1,
+                        avatar: 1,
+                        phone: 1,
+                        email: 1,
+                        identity: 1,
+                    },
+                },
+            ],
+            as: "renter",
+        };
+
+        const lessorLookup = {
+            from: "users",
+            let: { userId: "$lessor" },
+            pipeline: [
+                {
+                    $match: { $expr: { $eq: ["$_id", "$$userId"] } },
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        name: 1,
+                        avatar: 1,
+                        phone: 1,
+                        email: 1,
+                        identity: 1,
+                    },
+                },
+            ],
+            as: "lessor",
+        };
+        let [items, total] = await Promise.all([
+            Contract.aggregate([
+                { $match: { renter: filter.renter } },
+                { $lookup: roomLookup },
+                { $unwind: "$room" },
+                { $lookup: renterLookup },
+                { $unwind: "$renter" },
+                { $lookup: lessorLookup },
+                { $unwind: "$lessor" },
+                { $limit: limit },
+                { $skip: skip },
+                { $sort: sort },
+                { $project: projection },
+            ]),
+            Contract.aggregate([
+                { $match: { renter: filter.renter } },
+                { $count: "totalValue" },
+            ]),
         ]);
+
+        total = total.length !== 0 ? total[0].totalValue : 0;
         return {
             items,
             total,
@@ -105,9 +208,138 @@ class ContractService {
             totalPages: Math.ceil(total / limit),
         };
     }
-    async getRoomUserRented() {
-    }
 
+    async getAllRoomLessor(
+        conditions = {},
+        pagination,
+        projection,
+        sort = {}) {
+
+        const filter = { ...conditions };
+        const { limit, page, skip } = pagination;
+        delete filter.limit;
+        delete filter.page;
+        const { lessor } = filter;
+        lessor && (filter.lessor = toObjectId(lessor));
+
+        const roomLookup = {
+            from: "rooms",
+            let: { room: "$room" },
+            pipeline: [
+                { $match: { $expr: { $eq: ["$_id", "$$room"] } } },
+                {
+                    $lookup: {
+                        from: "users",
+                        let: { userId: "$owner" },
+                        pipeline: [
+                            { $match: { $expr: { $eq: ["$_id", "$$userId"] } } },
+                            {
+                                $project: {
+                                    _id: 1,
+                                    name: 1,
+                                    avatar: 1,
+                                    phone: 1,
+                                    email: 1,
+                                    identity: 1,
+                                },
+                            },
+                        ],
+                        as: "owner",
+                    },
+                    $lookup: {
+                        from: "services",
+                        let: { serviceIds: "$services" },
+                        pipeline: [
+                            { $match: { $expr: { $in: ["$_id", "$$serviceIds"] } } },
+                            {
+                                $project: {
+                                    _id: 1,
+                                    name: 1,
+                                    avatar: 1,
+                                    phone: 1,
+                                    email: 1,
+                                    identity: 1,
+                                },
+                            },
+                        ],
+                        as: "services",
+                    }
+                },
+                { $project: { updatedAt: 0 } },
+            ],
+            as: "room",
+        };
+
+        const renterLookup = {
+            from: "users",
+            let: { userId: "$renter" },
+            pipeline: [
+                {
+                    $match: { $expr: { $eq: ["$_id", "$$userId"] } },
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        name: 1,
+                        avatar: 1,
+                        phone: 1,
+                        email: 1,
+                        identity: 1,
+                    },
+                },
+            ],
+            as: "renter",
+        };
+
+        const lessorLookup = {
+            from: "users",
+            let: { userId: "$lessor" },
+            pipeline: [
+                {
+                    $match: { $expr: { $eq: ["$_id", "$$userId"] } },
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        name: 1,
+                        avatar: 1,
+                        phone: 1,
+                        email: 1,
+                        identity: 1,
+                    },
+                },
+            ],
+            as: "lessor",
+        };
+        let [items, total] = await Promise.all([
+            Contract.aggregate([
+                { $match: { lessor: filter.lessor } },
+                { $lookup: roomLookup },
+                { $unwind: "$room" },
+                { $lookup: renterLookup },
+                { $unwind: "$renter" },
+                { $lookup: lessorLookup },
+                { $unwind: "$lessor" },
+                { $limit: limit },
+                { $skip: skip },
+                { $sort: sort },
+                { $project: projection },
+            ]),
+            Contract.aggregate([
+                { $match: { renter: filter.renter } },
+                { $count: "totalValue" },
+            ]),
+        ]);
+
+        total = total.length !== 0 ? total[0].totalValue : 0;
+        return {
+            items,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        };
+    }
 };
 
 module.exports = new ContractService();

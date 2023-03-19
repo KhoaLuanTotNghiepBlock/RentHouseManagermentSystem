@@ -12,7 +12,7 @@ class InvoiceService {
         if (!(contractId && invoiceInfo && userId))
             throw new ArgumentError('invoice service ==>');
 
-        const contract = await Contract.getById(contractId);
+        const contract = await Contract.findOne({ _id: contractId });
 
         const { period, payMode, dateRent, lessor } = contract;
 

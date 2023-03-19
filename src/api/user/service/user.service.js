@@ -20,6 +20,7 @@ class UserService {
 
     if (mimetype !== "image/jpeg" && mimetype !== "image/png") { throw new MyError("Image invalid"); }
   }
+
   async cityData() {
     const listDitrict = await addressService.getDitrictsFromDatabase();
     const city = await City.findOne({ _id: "6415ee77cc372ede59b64c1a" })

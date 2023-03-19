@@ -101,7 +101,7 @@ class RoomController {
         }
     }
 
-    // [GET] bh/room/rented
+    // [GET] bh/room/user/rented
     async getRentedRoom(req, res, next) {
         try {
             const { userId } = req.auth;
@@ -111,31 +111,45 @@ class RoomController {
             };
             const sort = { createdAt: -1 };
             const projection = {
-                renter: 1,
                 room: 1,
-                lessor: 1,
                 dateRent: 1
             };
-            const populate = [
-                {
-                    path: 'renter',
-                    select: '_id username email phone identity name avatar'
-                },
-                {
-                    path: 'lessor',
-                    select: '_id username email phone identity name avatar'
-                },
-                {
-                    path: 'room',
-                    select: '-updatedAt'
-                }
-            ]
 
-            const { items, total, page, limit, totalPages } = await contractService.getAllRoomContract(
+            const { items, total, page, limit, totalPages } = await contractService.getAllRoomByRented(
                 conditions,
                 commonHelper.getPagination(req.query),
                 projection,
-                populate,
+                sort,
+            );
+            return res.status(200).json({
+                data: { items, total, page, limit, totalPages },
+                message: "success",
+                errorCode: 200
+            });
+
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    //[GET] bh/room/user/leased
+    async getLeasedRoom(req, res, next) {
+        try {
+            const { userId } = req.auth;
+            const conditions = {
+                ...req.query,
+                lessor: userId
+            };
+            const sort = { createdAt: -1 };
+            const projection = {
+                room: 1,
+                dateRent: 1
+            };
+
+            const { items, total, page, limit, totalPages } = await contractService.getAllRoomLessor(
+                conditions,
+                commonHelper.getPagination(req.query),
+                projection,
                 sort,
             );
             return res.status(200).json({
