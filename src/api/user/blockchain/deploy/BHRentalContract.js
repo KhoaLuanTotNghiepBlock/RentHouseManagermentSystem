@@ -3,13 +3,14 @@ const web3 = require("../config/web3-init");
 const fs = require("fs");
 const MyError = require('../../../../exception/MyError');
 const HashContract = require('../../../../model/transaction/hash-contract.model');
-
+const ethers = require("ethers");
 const { abi, bytecode } = JSON.parse(fs.readFileSync("src/api/user/blockchain/contract/RentalContract.json"));
 const { SIGNER_PRIVATE_KEY } = process.env;
 // Creating a signing account from a private key
 const signer = web3.eth.accounts.privateKeyToAccount(
     SIGNER_PRIVATE_KEY
 );
+
 const RentalContract = {
     createSmartContractFromRentalContract: async (contractInfo, ownerAddress, renterAddress) => {
         // get info of contract
@@ -70,9 +71,9 @@ const RentalContract = {
     signByOwner: async (ownerAddress, contractAddress) => {
         // Create a new instance of the RentalContract smart contract
         const rentalContract = new web3.eth.Contract(abi, contractAddress);
-
+        // const gas = await rentalContract.estimateGas();
         // Call the signByRenter function in the smart contract and pass the renter's address
-        const receipt = await rentalContract.methods.signByOwner().send({ from: ownerAddress });
+        const receipt = await rentalContract.methods.signByOwner().send({ from: ownerAddress, gasPrice, gasLimit });
         // rr: true, message: 'Contract signed by renter', 
         return { receipt };
     },
