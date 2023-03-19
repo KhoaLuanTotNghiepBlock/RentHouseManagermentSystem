@@ -42,7 +42,7 @@ const contractSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    contract: { type: String, default: "" }
+    plusContract: { type: String, default: "" }
   },
   {
     timestamps: true,

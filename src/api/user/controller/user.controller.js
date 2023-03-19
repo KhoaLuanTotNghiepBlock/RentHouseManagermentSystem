@@ -1,5 +1,4 @@
 const multer = require("multer");
-const { uploadFile } = require("../../../utils/aws-s3-service.helper");
 const userService = require("../service/user.service");
 const addressService = require('../service/address.service');
 const Street = require("../../../model/street.model");
@@ -11,18 +10,6 @@ const { vnp_HashSecret } = process.env;
 const { vnp_Url } = process.env;
 const { vnp_ReturnUrl } = process.env;
 
-const storage = multer.memoryStorage({
-  destination: (req, file, cb) => {
-    cb(null, "");
-  },
-  filename: (req, file, cb) => {
-    cb(null, `${Date.now()}-${file.originalname}`);
-  },
-});
-
-const upload = multer({ storage, limits: { fileSize: 20000000 } }).single(
-  "file",
-);
 
 const sortObject = (obj) => {
   var sorted = {};
@@ -48,8 +35,8 @@ class UserController {
   //[POST] user/wallet-connect
   async connectVNpaytoWallet(req, res, next) {
     try {
-      // const { walletAddress, amount } = req.body;
-      const { walletAddress, amount } = { walletAddress: "0x7b54ea3b6f9Ed4D80925D7d6C7E820C4e245818d", amount: 100000 };
+      const { walletAddress, amount } = req.body;
+      // const { walletAddress, amount } = { walletAddress: "0x7b54ea3b6f9Ed4D80925D7d6C7E820C4e245818d", amount: 100000 };
       // Validate the request body
       if (!walletAddress || !amount) {
         return res.status(400).json({ message: 'Request body is incomplete.', errorCode: 400, data: {} });
@@ -178,6 +165,31 @@ class UserController {
     }
   }
 
+  // [GET] /user/me/wallet
+  async getWallet(req, res, next) {
+    const id = req.auth.userId;
+    try {
+      const user = await userService.getProfile(id);
+
+      const { wallet } = user;
+      return res.status(200).json(
+        {
+          message: "success",
+          data: wallet,
+          errorCode: 200,
+        },
+      );
+    } catch (error) {
+      return res.status(400).json(
+        {
+          message: error.message,
+          data: {},
+          errorCode: 400,
+        },
+      );
+    }
+  }
+
   // [PUT] /bh/user/me/profile
   async updateProfile(req, res, next) {
     const userId = req.auth.userId;
@@ -212,6 +224,7 @@ class UserController {
 
     }
   }
+
 
 }
 

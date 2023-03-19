@@ -58,6 +58,7 @@ const userRouter = (io) => {
  *                   example: {}
  */
   router.post("/wallet-connect", userController.connectVNpaytoWallet);
+  router.get("/me/wallet", userController.getWallet);
   router.get("/me/profile", userController.getProfile); // not yet
   router.patch("/me/avatar", userController.changeAvatar); // not yet
   return router;

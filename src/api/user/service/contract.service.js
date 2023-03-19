@@ -7,6 +7,9 @@ const NotFoundError = require('../../../exception/NotFoundError');
 const crypto = require('../../../utils/crypto.hepler');
 const HashContract = require('../../../model/transaction/hash-contract.model');
 const { toObjectId } = require('../../../utils/common.helper');
+const ArgumentError = require('../../../exception/ArgumentError');
+const RentalContract = require('../blockchain/deploy/BHRentalContract');
+
 class ContractService {
 
     async createContract(ownerId, contractInfo) {
@@ -39,6 +42,22 @@ class ContractService {
         }
     }
 
+    async creatSmartContract(contractId, ownerAddress, renterAddress) {
+        if (!(contractId && ownerAddress && renterAddress))
+            throw new ArgumentError('smart contract');
+
+        const contract = await Contract.getOne(contractId);
+
+        const { room, payment } = contract;
+        // then hash all info of contract
+        const hash = await this.hashContract(contractId);
+        if (!hash)
+            throw new MyError('Contract info invalid!');
+        return await RentalContract.createSmartContractFromRentalContract(
+            { contractId, rentAumont: payment, depositAmount: room?.deposit, hash },
+            ownerAddress, renterAddress
+        )
+    }
 
     //takes a parameter days that specifies the number of days in the future to look for contracts where payTime is due
     async getContractsDueIn(days) {

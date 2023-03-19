@@ -15,6 +15,5 @@ const web3 = new Web3(
     )
 );
 
-
 module.exports = web3;
 
