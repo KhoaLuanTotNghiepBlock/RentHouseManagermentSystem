@@ -47,5 +47,5 @@ router.post('/create-room', RoomController.createRoomForRent);
 
 router.get('/', RoomController.getAllRoom);
 
-// router.get('/', Room);
+router.get('/:userId', RoomController.getOwnerRoom);
 module.exports = router;

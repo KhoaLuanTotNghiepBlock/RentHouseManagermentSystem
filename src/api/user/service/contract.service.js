@@ -32,10 +32,7 @@ class ContractService {
     async getContractByRenter(renterId) {
         if (!renterId)
             throw new MyError('contract service ==> renter info invalid!');
-
-
         const contract = await Contract.getByRenterId(renterId);
-
         return {
             contract
         }
@@ -79,7 +76,37 @@ class ContractService {
         return contract;
     }
 
-    // async createSmartContract()
+    async getAllRoomContract(
+        conditions = {},
+        pagination,
+        projection,
+        populate = [],
+        sort = {}) {
+
+        const filter = { ...conditions };
+        const { limit, page, skip } = pagination;
+        delete filter.limit;
+        delete filter.page;
+
+        const [items, total] = await Promise.all([
+            Contract.find(filter, projection)
+                .sort(sort)
+                .skip(skip)
+                .limit(limit)
+                .populate(populate)
+                .lean(),
+            Contract.countDocuments(filter),
+        ]);
+        return {
+            items,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        };
+    }
+    async getRoomUserRented() {
+    }
 
 };
 
