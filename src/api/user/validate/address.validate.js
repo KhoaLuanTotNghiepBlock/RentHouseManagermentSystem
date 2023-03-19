@@ -17,13 +17,13 @@ const validateAddress = {
     },
 
     validWard: async (wardInfo) => {
-        const { typename, idCity, idDitrict } = wardInfo;
+        const { name, idCity, idDitrict } = wardInfo;
 
-        if (!typename || !idCity || !idDitrict) { throw new MyError("valid ward ==> missing parameter!"); }
+        if (!name || !idCity || !idDitrict) { throw new MyError("valid ward ==> missing parameter!"); }
 
         const ward = await Ward.findOne(
             {
-                typename,
+                name,
                 parent_code: idDitrict,
                 parent_city_code: idCity,
             },
@@ -63,7 +63,7 @@ const validateAddress = {
             throw new NotFoundError("valid address ==>  invalid ditrict");
 
         const ward = await validateAddress.validWard({
-            typename: wardName,
+            name: wardName,
             idCity: city._id,
             idDitrict: ditrict._id,
         });
