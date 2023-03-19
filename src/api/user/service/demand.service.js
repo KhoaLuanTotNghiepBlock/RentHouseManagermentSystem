@@ -9,6 +9,7 @@ const datetimeHelper = require("../../../utils/datetime.helper");
 const objectHelper = require("../../../utils/object.helper");
 const ServiceDemandValidate = require("../validate/demand.validate");
 const roomValidate = require("../validate/room.validaste");
+const contractService = require("./contract.service");
 
 class ServiceDemandService {
 
@@ -37,7 +38,7 @@ class ServiceDemandService {
         if (!(contractId))
             throw new ArgumentError('invoice service ==>');
 
-        const contract = await Contract.findOne({ _id: contractId });
+        const contract = await Contract.getOne(contractId);
 
         let { room, period, dateRent } = contract;
 

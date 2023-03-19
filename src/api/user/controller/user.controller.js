@@ -144,7 +144,6 @@ class UserController {
   }
 
   // [GET] /user/me/profile
-
   async getProfile(req, res, next) {
     const id = req.auth.userId;
     try {
@@ -213,7 +212,6 @@ class UserController {
 
     }
   }
-
 
 }
 

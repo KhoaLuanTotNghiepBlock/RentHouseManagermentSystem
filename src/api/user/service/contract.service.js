@@ -39,6 +39,7 @@ class ContractService {
         }
     }
 
+
     //takes a parameter days that specifies the number of days in the future to look for contracts where payTime is due
     async getContractsDueIn(days) {
         const today = new Date();
@@ -51,7 +52,7 @@ class ContractService {
     }
 
     async hashContract(contractId) {
-        const contract = await Contract.findOne({ _id: contractId });
+        const contract = await Contract.getOne(contractId);
 
         if (!contract)
             throw new NotFoundError('Contract not found!');
@@ -64,8 +65,7 @@ class ContractService {
     async getContractByHash(hashContract) {
         const { contractId, hash } = await HashContract.getByHash(hash);
 
-        const contract = await Contract.findOne({ _id: contractId });
-
+        const contract = await Contract.getOne(contractId);
         if (!contract)
             throw new NotFoundError('Contract not found!');
 

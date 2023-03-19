@@ -5,14 +5,16 @@ const datetimeHelper = require("../../../utils/datetime.helper");
 const serviceDemand = require('../service/demand.service');
 const InvoiceValidate = require("../validate/invoice.validate");
 const Invoice = require('../../../model/transaction/invoice.model');
-const commonHelper = require('../../../utils/common.helper')
+const commonHelper = require('../../../utils/common.helper');
+const contractService = require("./contract.service");
+
 class InvoiceService {
 
     async createInvoice(userId, contractId, invoiceInfo) {
         if (!(contractId && invoiceInfo && userId))
             throw new ArgumentError('invoice service ==>');
 
-        const contract = await Contract.findOne({ _id: contractId });
+        const contract = await Contract.getOne(contractId);
 
         const { period, payMode, dateRent, lessor } = contract;
 

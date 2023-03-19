@@ -55,6 +55,7 @@ class AWSS3Helper {
     const uploadParams = {
       Bucket: bucketName,
       Body: buffer,
+      acl: 'public-read',
       Key: `${filePath}`,
     };
 

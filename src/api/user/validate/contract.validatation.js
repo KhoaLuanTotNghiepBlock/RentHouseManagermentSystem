@@ -13,7 +13,7 @@ const contractValidate = {
         if (!contractInfo)
             throw new ArgumentError('valid contract ==>');
 
-        let { period, room, dateRent, payTime, payMode, payment, renter } = contractInfo;
+        let { period, room, dateRent, payTime, payMode, payment, renter, contract } = contractInfo;
 
         dateRent = dateUtil.toDate(dateRent);
         if (!dateRent)
@@ -40,7 +40,8 @@ const contractValidate = {
             payment,
             payTime,
             payMode,
-            enable: true
+            enable: true,
+            contract: contract !== undefined ? contract : ""
         });
     },
 };

@@ -72,6 +72,7 @@ const unauthorizeRouter = (io) => {
  *               description: Empty data object.
  */
   router.get("/payment-confirmation", userController.confirmPayment);
+
   return router;
 };
 
