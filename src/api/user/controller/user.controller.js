@@ -74,8 +74,8 @@ class UserController {
       // vnp_Params['vnp_Merchant'] = ''
       vnp_Params['vnp_Locale'] = locale;
       vnp_Params['vnp_CurrCode'] = currCode;
-      vnp_Params['vnp_TxnRef'] = orderId + user.name;
-      vnp_Params['vnp_OrderInfo'] = orderInfo;
+      vnp_Params['vnp_TxnRef'] = user._id + new Date();
+      vnp_Params['vnp_OrderInfo'] = user._id;
       vnp_Params['vnp_OrderType'] = orderType;
       vnp_Params['vnp_Amount'] = amount * 100;
       vnp_Params['vnp_ReturnUrl'] = returnUrl;
@@ -108,6 +108,12 @@ class UserController {
       const secureHash = vnp_Params['vnp_SecureHash'];
       delete vnp_Params['vnp_SecureHash'];
       delete vnp_Params['vnp_SecureHashType'];
+      const amount = vnp_Params["vnp_Amount"];
+      const userId = vnp_Params["vnp_OrderInfo"];
+
+      const user = await User.findOne({ _id: userId });
+      user.wallet.balance += amount;
+      await user.save();
 
       vnp_Params = sortObject(vnp_Params);
       const tmnCode = vnp_TmnCode;

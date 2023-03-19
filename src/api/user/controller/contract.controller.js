@@ -44,10 +44,9 @@ class ContractController {
     //[POST] bh/contract/:contractAddress/sign-by-renter
     async signByRenter(req, res, next) {
         try {
-            const { contractAddress } = req.params.contractAddress;
+            const contractAddress = req.params.contractAddress;
             const { userId } = req.auth;
-            const user = await User.getById(userId);
-            const data = await contractService.creatSmartContract(contractId, ownerAddress, renterAddress);
+            const data = await contractService.signByRenter(userId, contractAddress);
 
             return res.status(200).json({
                 message: 'create smart contract success',
@@ -57,9 +56,23 @@ class ContractController {
         } catch (error) {
             next(error);
         }
-
     }
-    //[POST] bh/contract/sign-lessor
+    //[POST] bh/contract/:contractAddress/sign-lessor
+    async signByOwner(req, res, next) {
+        try {
+            const contractAddress = req.params.contractAddress;
+            const { userId } = req.auth;
+            const data = await contractService.signByOwner(userId, contractAddress);
+
+            return res.status(200).json({
+                message: 'create smart contract success',
+                errorCode: 200,
+                data
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 
     // [GET] bh/contract/:renterId 
     async getContractByRenter(req, res, next) {

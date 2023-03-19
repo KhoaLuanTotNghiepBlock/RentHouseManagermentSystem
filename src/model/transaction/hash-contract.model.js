@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const Timezone = require("mongoose-timezone");
 const NotFoundError = require("../../exception/NotFoundError");
+const Contract = require("./contract.model");
+const MyError = require("../../exception/MyError");
 const ObjectId = mongoose.Types.ObjectId;
 
 const hashContractSchema = new mongoose.Schema(
@@ -36,6 +38,17 @@ hashContractSchema.statics.getByHash = async (hash) => {
     if (!hashContract)
         throw new NotFoundError('Hash contract not found');
     return hashContract;
+};
+
+hashContractSchema.statics.getByAddress = async (address) => {
+    const hashContract = await hashContract.findOne({ contractAddress: address });
+    if (!hashContract)
+        throw new NotFoundError('Hash contract not found');
+
+    const contract = await Contract.getOne(hashContract.contractId);
+    if (!contract)
+        throw new MyError('contract not found');
+    return contract;
 };
 
 const HashContract = mongoose.model("HashContract", hashContractSchema);

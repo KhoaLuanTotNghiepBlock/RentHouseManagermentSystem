@@ -123,6 +123,7 @@ UserSchema.statics.getById = async (id) => {
     gender,
     dob,
     avatar,
+    wallet,
     enable
   } = user;
 
@@ -135,6 +136,7 @@ UserSchema.statics.getById = async (id) => {
     identity,
     gender,
     dob,
+    wallet,
     avatar,
     enable
   };
