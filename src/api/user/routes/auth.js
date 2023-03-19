@@ -84,7 +84,6 @@ const authController = require("../controller/auth.controller");
  *                               example: true
  */
 router.post("/login", authController.login);
-
 /**
  * @swagger
  * /bh/auth/registry:

@@ -44,5 +44,8 @@ const RoomController = require('../controller/room.controller');
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post('/create-room', RoomController.createRoomForRent);
+
 router.get('/', RoomController.getAllRoom);
+
+// router.get('/', Room);
 module.exports = router;

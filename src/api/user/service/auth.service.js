@@ -120,7 +120,9 @@ class AuthService {
         return {
           status: true,
           message: "You must update your identity!",
-          data: {},
+          data: {
+            userId: user._id, username, phone, email
+          },
           errorCode: 200,
         };
       }
