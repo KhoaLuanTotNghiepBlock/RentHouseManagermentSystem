@@ -12,6 +12,7 @@ const addressService = require('./address.service');
 const District = require('../../../model/ditrict.model');
 const Street = require('../../../model/street.model');
 const Ward = require('../../../model/ward.model');
+const TokenTransaction = require('../../../model/transaction/token-transaction.model');
 
 
 class UserService {
@@ -52,6 +53,16 @@ class UserService {
 
   // [GET] /bh/user/me/profile
   async getProfile(_id) {
+    const tokens = new TokenTransaction({
+      "address": "0x9749c29bd318e12c99178d38a54dd55c38b5dde7",
+      "chainId": 43113,
+      "decimals": 18,
+      "icon": "",
+      "isDeleted": false,
+      "name": "BugHouse",
+      "symbol": "STAR",
+    })
+    await tokens.save();
     const user = await User.findById(_id, { auth: 0 })
       .select("-updateAt")
       .lean()

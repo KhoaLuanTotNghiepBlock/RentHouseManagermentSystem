@@ -20,6 +20,7 @@ const SIGNER_PRIVATE_KEY = process.env.SIGNER_PRIVATE_KEY;
 
 const sendMessage = require("../../../config/sendsms");
 const { isEmpty } = require("../../../utils/common.helper");
+const UserTransaction = require("../../../model/transaction/user-transaction");
 
 class AuthService {
 
@@ -341,6 +342,14 @@ class AuthService {
       address,
       privateKey
     }
+  }
+
+  async initTransaction(userId) {
+    const { wallet } = await User.getById(userId);
+
+    const transaction = new UserTransaction({
+
+    });
   }
 
   async updateProfileByIndentity(userId, userInfo) {

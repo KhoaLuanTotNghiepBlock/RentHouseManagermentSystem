@@ -9,6 +9,7 @@ const HashContract = require('../../../model/transaction/hash-contract.model');
 const { toObjectId } = require('../../../utils/common.helper');
 const ArgumentError = require('../../../exception/ArgumentError');
 const RentalContract = require('../blockchain/deploy/BHRentalContract');
+const datetimeHelper = require('../../../utils/datetime.helper');
 
 class ContractService {
 
@@ -53,6 +54,7 @@ class ContractService {
         const hash = await this.hashContract(contractId);
         if (!hash)
             throw new MyError('Contract info invalid!');
+
         return await RentalContract.createSmartContractFromRentalContract(
             { contractId, rentAumont: payment, depositAmount: room?.deposit, hash },
             ownerAddress, renterAddress
@@ -65,9 +67,9 @@ class ContractService {
 
         const user = await User.getById(userId);
         const { wallet } = user;
-
         const contract = await HashContract.getByAddress(contractAddress);
-
+        if (contract.payment > wallet.balance)
+            throw new MyError('Insufficient balance');
         return await RentalContract.signByRenter(wallet?.walletAddress, contractAddress, contract.payment);
     }
 
@@ -76,7 +78,6 @@ class ContractService {
             throw new ArgumentError('sign by owner missing');
 
         const user = await User.getById(userId);
-        console.log("🚀 ~ file: contract.service.js:79 ~ ContractService ~ signByOwner ~ user:", user)
         const { wallet } = user;
 
         return await RentalContract.signByOwner(wallet.walletAddress, contractAddress);
@@ -91,6 +92,16 @@ class ContractService {
         const contracts = await Contract.find({});
 
         return contracts;
+    }
+
+    async checkContractStatus(date, contractId) {
+        const contract = await Contract.getOne(contractId);
+        const { dateRent, period } = contract;
+
+        const periodDate = datetimeHelper.periodDate(dateRent, period);
+        if (!periodDate)
+            throw new MyError('period date invalid!');
+        return periodDate > date;
     }
 
     async hashContract(contractId) {

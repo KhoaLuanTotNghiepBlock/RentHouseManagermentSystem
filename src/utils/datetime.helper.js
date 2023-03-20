@@ -1,3 +1,6 @@
+const ArgumentError = require("../exception/ArgumentError");
+const MyError = require("../exception/MyError");
+
 const DAY_MILISECONDS = 86400000;
 const HOURSE_MILISECONDS = 3600000;
 const MINUTE_MILISECONDS = 60000;
@@ -54,5 +57,13 @@ module.exports = {
 
     return `${numberMiliseconds} giây`;
   },
+
+  periodDate: (date, period) => {
+    if (!date || !period)
+      throw new MyError('period date missing parameter');
+    const periodDate = new Date().setDate(date.getDay());
+
+    return periodDate.setMonth(date.getMonth() + 1 + period);
+  }
 
 };

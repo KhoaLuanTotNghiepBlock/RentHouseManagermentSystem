@@ -61,9 +61,9 @@ const RentalContract = {
     signByRenter: async (renterAddress, contractAddress, rentAmount) => {
         // Create a new instance of the RentalContract smart contract
         const rentalContract = new web3.eth.Contract(abi, contractAddress);
-
         // Call the signByRenter function in the smart contract and pass the renter's address
-        const receipt = await rentalContract.methods.signByRenter().send({ from: renterAddress, value: rentAmount });
+        const tx = rentalContract.methods.signByRenter();
+        const receipt = await tx.send({ from: renterAddress, value: rentAmount });
         // rr: true, message: 'Contract signed by renter', 
         return { receipt };
     },
@@ -71,9 +71,9 @@ const RentalContract = {
     signByOwner: async (ownerAddress, contractAddress) => {
         // Create a new instance of the RentalContract smart contract
         const rentalContract = new web3.eth.Contract(abi, contractAddress);
-        // const gas = await rentalContract.estimateGas();
+        const tx = rentalContract.methods.signByOwner();
         // Call the signByRenter function in the smart contract and pass the renter's address
-        const receipt = await rentalContract.methods.signByOwner().send({ from: ownerAddress, gasPrice, gasLimit });
+        const receipt = await tx.send({ from: ownerAddress, gas: await tx.estimateGas(), });
         // rr: true, message: 'Contract signed by renter', 
         return { receipt };
     },
