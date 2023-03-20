@@ -3,7 +3,8 @@ const USER_TRANSACTION_ACTION = {
     REVERT_TRANSACTION: "revert_transaction",
     SIGN_CONTRACT: "sign_contract",
     WITHDRAW: "withdraw",
-    PAYMENT: "payment"
+    PAYMENT: "payment",
+    PENALTY: 'penalty'
 };
 
 const ACTION_FUNCTION = {
@@ -12,6 +13,7 @@ const ACTION_FUNCTION = {
     [USER_TRANSACTION_ACTION.REVERT_TRANSACTION]: "plus",
     [USER_TRANSACTION_ACTION.WITHDRAW]: "minus",
     [USER_TRANSACTION_ACTION.SIGN_CONTRACT]: "minus",
+    [USER_TRANSACTION_ACTION.PENALTY]: "minus",
 };
 
 module.exports = {

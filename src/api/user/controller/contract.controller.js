@@ -49,7 +49,7 @@ class ContractController {
             const data = await contractService.signByRenter(userId, contractAddress);
 
             return res.status(200).json({
-                message: 'create smart contract success',
+                message: 'sign smart contract success',
                 errorCode: 200,
                 data
             });
@@ -65,7 +65,7 @@ class ContractController {
             const data = await contractService.signByOwner(userId, contractAddress);
 
             return res.status(200).json({
-                message: 'create smart contract success',
+                message: 'sign smart contract success',
                 errorCode: 200,
                 data
             });
@@ -73,6 +73,7 @@ class ContractController {
             next(error);
         }
     }
+
 
     // [GET] bh/contract/:renterId 
     async getContractByRenter(req, res, next) {

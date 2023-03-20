@@ -42,6 +42,7 @@ const contractSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
     plusContract: { type: String, default: "" }
   },
   {

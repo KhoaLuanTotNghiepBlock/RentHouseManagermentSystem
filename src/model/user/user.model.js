@@ -200,6 +200,7 @@ UserSchema.statics.getUserByWallet = async (walletAddress) => {
     gender,
     dob,
     avatar,
+    wallet,
     enable
   } = user;
 
@@ -212,6 +213,7 @@ UserSchema.statics.getUserByWallet = async (walletAddress) => {
     identity,
     gender,
     dob,
+    wallet,
     avatar,
     enable
   };
