@@ -21,12 +21,19 @@ class UserWalletService {
 
         amount = commonHelper.convertToNumber(amount);
         console.log("🚀 ~ file: user-wallet.service.js:23 ~ UserWalletService ~ changeBalance ~ amount:", amount)
-
         let newAmount = commonHelper.convertToNumber(userBalance?.wallet?.balance);
+        if (newAmount === Infinity) {
+            newAmount = 0;
+        }
         newAmount += amount;
-        console.log("🚀 ~ file: user-wallet.service.js:27 ~ UserWalletService ~ changeBalance ~ newAmount:", newAmount)
         userBalance.wallet.balance = newAmount;
         await userBalance.save();
+
+        // let newAmount = commonHelper.convertToNumber(userBalance?.wallet?.balance);
+        // newAmount += amount;
+        // console.log("🚀 ~ file: user-wallet.service.js:27 ~ UserWalletService ~ changeBalance ~ newAmount:", newAmount)
+        // userBalance.wallet.balance = newAmount;
+        // await userBalance.save();
 
         if (withHistory) {
             const transaction = await UserTransaction.create({

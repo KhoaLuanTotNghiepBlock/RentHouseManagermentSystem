@@ -69,7 +69,6 @@ class RoomController {
                 message: "success",
                 errorCode: 200
             });
-
         } catch (error) {
             next(error);
         }
