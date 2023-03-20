@@ -29,12 +29,6 @@ class UserWalletService {
         userBalance.wallet.balance = newAmount;
         await userBalance.save();
 
-        // let newAmount = commonHelper.convertToNumber(userBalance?.wallet?.balance);
-        // newAmount += amount;
-        // console.log("🚀 ~ file: user-wallet.service.js:27 ~ UserWalletService ~ changeBalance ~ newAmount:", newAmount)
-        // userBalance.wallet.balance = newAmount;
-        // await userBalance.save();
-
         if (withHistory) {
             const transaction = await UserTransaction.create({
                 action,
@@ -55,6 +49,7 @@ class UserWalletService {
         conditions = {},
         pagination,
         projection = {},
+        populate = [],
         sort = {}
     ) {
         const { limit, page, skip } = pagination;
@@ -62,18 +57,14 @@ class UserWalletService {
             userId,
             actions,
         } = conditions;
+
         const filter = {
             isDeleted: false,
-            userAddress: userAddress,
-            action: { $in: actions },
         };
-
-        const sort_ = {
-            createdAt: -1,
-        };
+        userId && (filter.userId = userId)
 
         const [items, total] = await Promise.all([
-            UserTransaction.find(filter, projection).sort(sort_).skip(skip).limit(limit),
+            UserTransaction.find(filter, projection).populate(populate).sort(sort).skip(skip).limit(limit),
             UserTransaction.countDocuments(filter),
         ]);
 

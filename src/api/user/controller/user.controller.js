@@ -6,6 +6,7 @@ const User = require("../../../model/user/user.model");
 const axios = require('axios');
 const userWalletService = require("../service/user-wallet.service");
 const { USER_TRANSACTION_ACTION } = require('../../../config/user-transaction')
+const commonHelper = require('../../../utils/common.helper');
 const { vnp_TmnCode } = process.env;
 const { vnp_HashSecret } = process.env;
 const { vnp_Url } = process.env;
@@ -198,6 +199,41 @@ class UserController {
           errorCode: 400,
         },
       );
+    }
+  }
+
+  // [GET] /user/me/transaction-history
+  async getTransactionHistory(req, res, next) {
+    try {
+      const conditions = {
+        ...req.query
+      };
+      const sort = {
+        createdAt: -1,
+      };
+      const projection = {};
+      const populate = [
+        {
+          path: 'userId',
+          select: '_id username email phone identity name avatar'
+        },
+      ]
+
+      const { items, total, page, limit, totalPages } = await userWalletService.getTransactionHistory(
+        conditions,
+        commonHelper.getPagination(req.query),
+        projection,
+        populate,
+        sort,
+      );
+      return res.status(200).json({
+        data: { items, total, page, limit, totalPages },
+        message: "success",
+        errorCode: 200
+      });
+
+    } catch (error) {
+      next(error);
     }
   }
 
