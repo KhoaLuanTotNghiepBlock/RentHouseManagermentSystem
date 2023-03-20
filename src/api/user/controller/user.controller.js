@@ -4,7 +4,8 @@ const addressService = require('../service/address.service');
 const Street = require("../../../model/street.model");
 const User = require("../../../model/user/user.model");
 const axios = require('axios');
-
+const userWalletService = require("../service/user-wallet.service");
+const { USER_TRANSACTION_ACTION } = require('../../../config/user-transaction')
 const { vnp_TmnCode } = process.env;
 const { vnp_HashSecret } = process.env;
 const { vnp_Url } = process.env;
@@ -93,7 +94,6 @@ class UserController {
       const signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex");
       vnp_Params['vnp_SecureHash'] = signed;
       vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
-      console.log("🚀 ~ file: user.controller.js:105 ~ UserController ~ connectVNpaytoWallet ~ vnpUrl:", vnpUrl)
 
       return res.json({ paymentUrl: vnpUrl });
     } catch (error) {
@@ -111,9 +111,7 @@ class UserController {
       const amount = vnp_Params["vnp_Amount"];
       const userId = vnp_Params["vnp_OrderInfo"];
 
-      const user = await User.findOne({ _id: userId });
-      user.wallet.balance += amount;
-      await user.save();
+      const data = await userWalletService.changeBalance(userId, amount, null, USER_TRANSACTION_ACTION.PAYMENT);
 
       vnp_Params = sortObject(vnp_Params);
       const tmnCode = vnp_TmnCode;
@@ -126,11 +124,18 @@ class UserController {
       const signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex");
 
       if (secureHash === signed) {
-        res.json({ code: vnp_Params['vnp_ResponseCode'] })
+        res.status(200).json({
+          message: 'success',
+          errorCode: 200,
+          data
+        })
       } else {
-        res.json({ code: '97' })
+        res.status(200).json({
+          message: 'success',
+          errorCode: 200,
+          data
+        })
       }
-
     } catch (error) {
       next(error)
     }

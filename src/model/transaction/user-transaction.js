@@ -6,7 +6,7 @@ const { ObjectId } = mongoose.Schema.Types;
 const userTransaction = new mongoose.Schema(
   {
     userId: { type: ObjectId, required: true, ref: 'User' },
-    transactionId: { type: String, required: true, unique: true },
+    transactionId: { type: String, required: true, unique: false },
     action: { type: String, required: true },
     data: { type: Object, default: null },
     prevBalance: { type: Number, default: 0, min: 0 },

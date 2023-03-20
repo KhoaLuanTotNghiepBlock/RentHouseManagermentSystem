@@ -1,7 +1,6 @@
 // Require necessary dependencies
 const Web3 = require('web3');
 const { Contract, ethers, Wallet } = require("ethers");
-
 require('dotenv').config();
 
 const NETWORK = process.env.ETHEREUM_NETWORK;
