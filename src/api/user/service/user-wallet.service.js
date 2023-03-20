@@ -14,13 +14,18 @@ class UserWalletService {
 
     async changeBalance(userId, amount, data, action, transactionId = bugId, withHistory = true) {
 
-        const userBalance = await User.findOne({ _id: userId });
+        const userBalance = await User.findOne({ _id: userId }).select('wallet');
+        console.log("🚀 ~ file: user-wallet.service.js:18 ~ UserWalletService ~ changeBalance ~ userBalance:", userBalance)
         if (!userBalance)
             throw new MyError('user not found');
 
         amount = commonHelper.convertToNumber(amount);
+        console.log("🚀 ~ file: user-wallet.service.js:23 ~ UserWalletService ~ changeBalance ~ amount:", amount)
 
-        userBalance.wallet.balance += amount;
+        let newAmount = commonHelper.convertToNumber(userBalance?.wallet?.balance);
+        newAmount += amount;
+        console.log("🚀 ~ file: user-wallet.service.js:27 ~ UserWalletService ~ changeBalance ~ newAmount:", newAmount)
+        userBalance.wallet.balance = newAmount;
         await userBalance.save();
 
         if (withHistory) {

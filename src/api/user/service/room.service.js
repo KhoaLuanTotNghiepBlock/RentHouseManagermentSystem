@@ -76,6 +76,12 @@ class RoomService {
             totalPages: Math.ceil(total / limit),
         };
     }
+
+    async getOneRoom(roomId) {
+        const room = await Room.getById(roomId);
+
+        return room;
+    }
 }
 
 module.exports = new RoomService();
