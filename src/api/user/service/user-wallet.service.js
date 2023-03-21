@@ -9,7 +9,7 @@ class UserWalletService {
     async getBalance(userId) {
         const { wallet } = await User.getById(userId);
 
-        return wallet.balance;
+        return wallet;
     }
 
     async changeBalance(userId, amount, data, action, transactionId = bugId, withHistory = true) {

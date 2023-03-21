@@ -181,9 +181,8 @@ class UserController {
   async getWallet(req, res, next) {
     const id = req.auth.userId;
     try {
-      const user = await userService.getProfile(id);
+      const wallet = await userWalletService.getBalance(id);
 
-      const { wallet } = user;
       return res.status(200).json(
         {
           message: "success",
