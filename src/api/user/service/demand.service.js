@@ -93,17 +93,15 @@ class ServiceDemandService {
     }
 
     async updateServiceDemadEachMonth(atMonth, serviceId, demandInfo) {
-        const serviceLastDemand = await ServiceDemand.getLastService(serviceId, atMonth - 1);
-        if (!serviceLastDemand)
-            throw new NotFoundError('demand service => last demand service');
-
         let servicePreDemand = await ServiceDemand.getPresentService(serviceId, atMonth);
         if (!servicePreDemand)
             throw new NotFoundError('demand service => present demand service');
 
+        const serviceLastDemand = await ServiceDemand.getLastService(serviceId, atMonth - 1);
+
         const { newIndicator, quality } = ServiceDemandValidate.validateUpdateDemandInfo(demandInfo);
 
-        servicePreDemand.oldIndicator = serviceLastDemand.newIndicator;
+        servicePreDemand.oldIndicator = serviceLastDemand !== null ? serviceLastDemand.newIndicator : 0;
         servicePreDemand.newIndicator = newIndicator;
         servicePreDemand.quality = quality;
         await servicePreDemand.save();

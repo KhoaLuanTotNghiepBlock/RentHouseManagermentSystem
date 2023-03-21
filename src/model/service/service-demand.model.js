@@ -64,9 +64,8 @@ serviceDemandSchema.statics.getNewestservice = async (serviceId) => {
 
 serviceDemandSchema.statics.getLastService = async (serviceId, lastMonth) => {
   const serviceDemand = await ServiceDemand.findOne({ servicce: serviceId, atMonth: lastMonth });
-
   if (!serviceDemand)
-    throw new MyError('service demand invalid');
+    return null;
 
   return serviceDemand;
 }
