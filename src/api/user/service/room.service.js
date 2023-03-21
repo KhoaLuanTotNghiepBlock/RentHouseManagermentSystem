@@ -9,6 +9,7 @@ const NotFoundError = require('../../../exception/NotFoundError');
 
 class RoomService {
     async createRoom(_id, roomInfo) {
+
         let room = await roomValidate.validCreateRoom(_id, roomInfo);
         const { amentilities, services, cityName, ditrictName, streetName,
             wardName, addressDetail } = roomInfo;

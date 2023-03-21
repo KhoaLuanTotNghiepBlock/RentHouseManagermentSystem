@@ -30,9 +30,8 @@ class ContractService {
 
         await demandService.createServiceDemandForRoom(contract._id);
 
-        // await creatSmartContract(contract._id, owner.wallet.walletAddress, renter.wallet.walletAddress);
         return {
-            data: contract
+            contract
         }
     }
 

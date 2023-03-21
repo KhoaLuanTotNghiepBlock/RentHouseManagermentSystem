@@ -28,10 +28,14 @@ const roomValidate = {
     validCreateRoom: async (userId, roomInfo) => {
         if (!roomInfo)
             throw new ArgumentError('validate create room =>');
+        console.log("🚀 ~ file: room.validaste.js:71 ~ validCreateRoom: ~ roomInfo:", roomInfo)
 
         let { name, acreage, nbCurrentPeople, totalNbPeople, gender, deposit, description,
             basePrice, roomAttachment, typeRoom } = roomInfo;
-
+        console.log("🚀 ~ file: room.validaste.js:35 ~ validCreateRoom: ~ roomAttachment:", roomAttachment)
+        console.log("🚀 ~ file: room.validaste.js:72 ~ validCreateRoom: ~ description:", description)
+        console.log("🚀 ~ file: room.validaste.js:72 ~ validCreateRoom: ~ gender:", gender)
+        console.log("🚀 ~ file: room.validaste.js:72 ~ validCreateRoom: ~ name:", name)
         if (!(name && gender && description && roomAttachment))
             throw new ArgumentError('validate room ==> ');
 
@@ -68,6 +72,7 @@ const roomValidate = {
             enable: true
         });
     }
+
 
 }
 

@@ -11,10 +11,7 @@ class ContractController {
             // owner id
             const { userId } = req.auth;
 
-            const { data } = await contractService.createContract(userId, req.body);
-
-            if (!data)
-                throw new MyError('create contract fail!');
+            const data = await contractService.createContract(userId, req.body);
 
             return res.status(200).json({
                 message: 'create contract success',
