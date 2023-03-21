@@ -9,12 +9,14 @@ const hashContractSchema = new mongoose.Schema(
     {
         contractId: {
             type: ObjectId,
-            required: true
+            required: true,
+            ref: 'Contract'
         },
         hash: {
             type: String
         },
-        contractAddress: String
+        contractAddress: String,
+        txhash: { type: String }
     },
     {
         timestamps: true,

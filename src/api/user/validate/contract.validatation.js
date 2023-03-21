@@ -13,27 +13,33 @@ const contractValidate = {
         if (!contractInfo)
             throw new ArgumentError('valid contract ==>');
 
-        let { period, room, dateRent, payTime, payMode, payment, contract } = contractInfo;
+        let { period, room, dateRent, payTime, payMode, payment } = contractInfo;
 
         dateRent = dateUtil.toDate(dateRent);
         if (!dateRent)
             throw new MyError('validate contract => date for rent invalid');
 
         payTime = dateUtil.toDate(payTime);
-
         if (!payTime)
             throw new MyError('validate contract => date for pay invalid');
 
         if (!commonValidate.validatePayMode(payMode))
             throw new MyError('validate contract ==> paymode invalid');
 
-        const userOwner = await User.getById(room.owner?._id);
+        const { owner } = await Room.findOne({ _id: room }).populate([
+            {
+                path: "owner",
+                select: "_id"
+            }
+        ]).select("owner");
+        console.log("🚀 ~ file: contract.validatation.js:35 ~ validateContractInfo: ~ owner:", owner)
+
 
         period = commonUtil.convertToNumber(period);
         payment = commonUtil.convertToNumber(payment);
 
         return new Contract({
-            lessor: userOwner._id,
+            lessor: owner._id,
             period,
             room,
             dateRent,
@@ -41,7 +47,6 @@ const contractValidate = {
             payTime,
             payMode,
             enable: true,
-            contract: contract !== undefined ? contract : ""
         });
     },
 };

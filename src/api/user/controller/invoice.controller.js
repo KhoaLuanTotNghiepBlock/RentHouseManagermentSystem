@@ -4,6 +4,9 @@ class InvoiceController {
     // [POST] /invoice/create
     async createInvoice(req, res, next) {
         try {
+            /**
+             * from user lessor create invoice by contract
+             */
             const { userId } = req.auth;
 
             const { contractId, invoiceInfo } = req.body;

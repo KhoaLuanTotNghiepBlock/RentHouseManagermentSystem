@@ -27,6 +27,7 @@ contract RentalContract {
         renter = _renter;
         rentAmount = _rentAmount;
         depositAmount = _depositAmount;
+        signedByOwner= true;
     }
 
     // only renter cna sign

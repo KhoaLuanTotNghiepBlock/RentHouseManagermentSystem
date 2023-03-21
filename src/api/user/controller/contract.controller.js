@@ -27,6 +27,11 @@ class ContractController {
     }
     //[POST] bh/contract/create-smart-contract
     async createSmartContract(req, res, next) {
+        /**
+         * renter aggree contract rule
+         * create contract
+         * ==> create smart contract
+         */
         try {
             const { contractId, ownerAddress, renterAddress } = req.body;
             const data = await contractService.creatSmartContract(contractId, ownerAddress, renterAddress);

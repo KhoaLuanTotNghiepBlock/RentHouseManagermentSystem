@@ -9,7 +9,6 @@ const invoiceSchema = new mongoose.Schema(
       type: ObjectId,
       ref: 'Contract'
     },
-    creationDate: Date,
     vat: {
       type: Number,
       default: 0.1

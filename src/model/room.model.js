@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const ObjectId = mongoose.Schema.ObjectId;
 const Timezone = require("mongoose-timezone");
 const attachment = require("./shema/attachment");
-const address = require("./shema/address");
 const NotFoundError = require("../exception/NotFoundError");
 const roomSchema = new mongoose.Schema(
   {
@@ -50,7 +49,14 @@ const roomSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    address,
+    address: {
+      city: { type: String, default: "Hồ Chí Minh" },
+      district: { type: String, default: "" },
+      ward: { type: String, default: "" },
+      street: { type: String, default: "" },
+      addressDetail: { type: String, default: "" },
+      fullText: { type: String, default: "" }
+    },
     roomAttachment: attachment,
     services: [
       {
