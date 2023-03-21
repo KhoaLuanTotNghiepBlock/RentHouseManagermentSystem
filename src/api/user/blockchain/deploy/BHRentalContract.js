@@ -32,8 +32,10 @@ const RentalContract = {
         // Send contract deployment transaction
         const gas = await deploy.estimateGas();
         console.log("🚀 ~ file: BHRentalContract.js:27 ~ createSmartContractFromRentalContract: ~ gas:", gas)
+
         const result = await deploy.send({ from: signer.address, gas })
             .once("transactionHash", (txhash) => {
+                contractHash.txhash = txhash;
                 console.log(`Mining deployment transaction ...`);
                 console.log(`https://${network}.etherscan.io/tx/${txhash}`);
             });
@@ -42,7 +44,8 @@ const RentalContract = {
         // save to data base
         await contractHash.save();
         return {
-            contractAddress: result.options.address
+            contractAddress: result.options.address,
+            txhash: contractHash.txhash
         };
     },
 
@@ -63,33 +66,56 @@ const RentalContract = {
         return contractInfo;
     },
 
-    signByRenter: async (renterAddress, contractAddress, rentAmount) => {
-        const { wallet } = await User.getUserByWallet(renterAddress);
-        // const signRenter = await web3.eth.accounts.privateKeyToAccount(
-        //     wallet.walletPrivateKey
-        // );
-        // Create a new instance of the RentalContract smart contract
-        const rentalContract = new web3.eth.Contract(abi, contractAddress);
+    // signByRenter: async (renterAddress, contractAddress, rentAmount) => {
+    //     const { wallet } = await User.getUserByWallet(renterAddress);
+    //     // const signRenter = await web3.eth.accounts.privateKeyToAccount(
+    //     //     wallet.walletPrivateKey
+    //     // );
+    //     // Create a new instance of the RentalContract smart contract
+    //     const rentalContract = new web3.eth.Contract(abi, contractAddress);
 
-        // Call the signByRenter function in the smart contract and pass the renter's address
-        const tx = rentalContract.methods.signByRenter();
-        // 7. Sign tx with PK
-        const createTransaction = await web3.eth.accounts.signTransaction(
-            {
-                to: contractAddress,
-                data: tx.encodeABI(),
-                gas: await tx.estimateGas(),
-            },
+    //     // Call the signByRenter function in the smart contract and pass the renter's address
+    //     const tx = rentalContract.methods.signByRenter();
+    //     // 7. Sign tx with PK
+    //     const createTransaction = await web3.eth.accounts.signTransaction(
+    //         {
+    //             to: contractAddress,
+    //             data: tx.encodeABI(),
+    //             gas: await tx.estimateGas(),
+    //         },
+    //         wallet.walletPrivateKey
+    //     );
+
+    //     // 8. Send tx and wait for receipt
+    //     const createReceipt = await web3.eth.sendSignedTransaction(createTransaction.rawTransaction);
+    //     console.log(`Tx successful with hash: ${createReceipt.transactionHash}`);
+
+    //     // const receipt = await tx.call({ from: signRenter.address, value: rentAmount });
+    //     // rr: true, message: 'Contract signed by renter', 
+    //     return { createReceipt };
+    // },
+    signByRenter: async (renterAddress, contractAddress, rentAmount, depositAmount) => {
+        const { wallet } = await User.getUserByWallet(renterAddress);
+        const rentalContract = new web3.eth.Contract(abi, contractAddress);
+        const signRenter = await web3.eth.accounts.privateKeyToAccount(
             wallet.walletPrivateKey
         );
+        // convert payment to ether
+        const value = web3.utils.toWei(rentAmount + depositAmount, 'ether');
 
-        // 8. Send tx and wait for receipt
-        const createReceipt = await web3.eth.sendSignedTransaction(createTransaction.rawTransaction);
-        console.log(`Tx successful with hash: ${createReceipt.transactionHash}`);
+        const signRenterAbi = rentalContract.methods.signByRenter().encodeABI();
 
-        // const receipt = await tx.call({ from: signRenter.address, value: rentAmount });
-        // rr: true, message: 'Contract signed by renter', 
-        return { createReceipt };
+        const tx = {
+            from: signRenter.address,
+            to: contractAddress,
+            gas: await signRenterAbi.estimateGas(),
+            value: value,
+            data: signRenterAbi
+        };
+        const signedTx = await web3.eth.accounts.signTransaction(tx, wallet.walletPrivateKey);
+        const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+        console.log(txReceipt);
+        return txReceipt;
     },
 
     signByOwner: async (ownerAddress, contractAddress) => {
@@ -106,7 +132,7 @@ const RentalContract = {
         return { receipt };
     },
 
-    getTranSactionInfo: async () => {
+    decodeStartEvent: async () => {
         const tx = await web3.eth.getTransaction(txHash);
         console.log(tx);
     }
