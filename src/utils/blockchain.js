@@ -1,4 +1,5 @@
 const ethers = require('ethers');
+const axios = require('axios');
 
 const JSON_PROVIDER = new ethers.providers.JsonRpcProvider();
 const _this = {};
@@ -42,5 +43,18 @@ _this.getLatestBlockNumber = async (
         console.error("getLatestBlockNumber error with maximum retry", e.message);
         throw e;
     }
+};
+
+_this.vndToEth = async (vndAmount) => {
+    const [usdRateResponse, ethRateResponse] = await Promise.all([
+        axios.get('https://api.coinbase.com/v2/exchange-rates?currency=VND'),
+        axios.get('https://api.coinbase.com/v2/exchange-rates?currency=ETH')
+    ]);
+    const usdRate = usdRateResponse.data.data.rates.USD;
+    const ethRate = ethRateResponse.data.data.rates.USD;
+
+    const usdAmount = vndAmount * usdRate;
+    const ethAmount = usdAmount / ethRate;
+    return ethAmount;
 };
 module.exports = _this;
