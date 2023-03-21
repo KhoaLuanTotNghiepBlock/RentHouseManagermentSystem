@@ -1,0 +1,195 @@
+{
+    {
+        "_id": {
+            "$oid": "63c983b381e74bba82b3e5da"
+        },
+        "key": "main",
+        "__v": 0,
+        "createdAt": {
+            "$date": {
+                "$numberLong": "1674150835353"
+            }
+        },
+        "updatedAt": {
+            "$date": {
+                "$numberLong": "1678266367973"
+            }
+        },
+        "isPublic": true,
+        "values": {
+            "defaultUserImage": "https://ipfs.pantograph.app/ipfs/Qmcaen8DLN9zDvZiinrsGKKuFJUTS7G9YYzSpzri8zxDeK",
+            "signMessageText": "Welcome to Star Token, your sign session: ",
+            "signMessageTTL": 30000000000,
+            "maintenance": false,
+            "mainTokenChainId": 43113,
+            "deadlineClaimInSeconds": 300,
+            "baseCrown": 10
+        }
+    },
+    {
+        "_id": {
+            "$oid": "63da809681e74bba82f52bb9"
+        },
+        "key": "contract",
+        "__v": 0,
+        "createdAt": {
+            "$date": {
+                "$numberLong": "1675264149764"
+            }
+        },
+        "isPublic": true,
+        "updatedAt": {
+            "$date": {
+                "$numberLong": "1678247414431"
+            }
+        },
+        "values": {
+            "tokenA": "0x9749c29bd318e12c99178d38a54dd55c38b5dde7",
+            "storeNFT": "0x9aaa9404a86618FB084d4CD277d07fB9fd3C36a9",
+            "marketplace": "0x6e320462aae16d49c11a50c39f5eb9e904a64303",
+            "claimToken": "0x50c2f39d1db00dcd35efd0b92a02f76b241ce329"
+        }
+    },
+    {
+        "_id": {
+            "$oid": "63db425e81e74bba820eb373"
+        },
+        "key": "language",
+        "__v": 0,
+        "createdAt": {
+            "$date": {
+                "$numberLong": "1675313758664"
+            }
+        },
+        "isPublic": true,
+        "updatedAt": {
+            "$date": {
+                "$numberLong": "1678334143509"
+            }
+        },
+        "values": {
+            "en": {
+                "name": "English",
+                "icon": "https://ipfs.pantograph.app/ipfs/Qmb4T3wggFoGuqhuwhP4HejxST7zwqSj9BvbtTgZqasP6d"
+            },
+            "ja": {
+                "name": "Japan",
+                "icon": "https://ipfs.pantograph.app/ipfs/QmecjiCCVSHAVwFQSMk8aW9rv3BRiUcKPd9N3959vEPwtR?filename=Japan.png"
+            },
+            "cn": {
+                "name": "China",
+                "icon": "https://ipfs.pantograph.app/ipfs/Qmd5W3SXTrvj4zDKB5iDPNkYg5U5pcGpmXMajAxRK4qSJ5?filename=China.png"
+            },
+            "vn": {
+                "name": "Việt Nam",
+                "icon": "https://ipfs.pantograph.app/ipfs/QmanjRZ6M8XS3h83w5ANHfT4mHm5AGC3UHnrxqPBfm5Edg?filename=Vietnam.png"
+            },
+            "it": {
+                "name": "Italian",
+                "icon": "https://ipfs.pantograph.app/ipfs/QmZ8CDoQkCbimTnpexVjJkfVpnhntx5usm6ppE2TCUoeXL?filename=Italy.png"
+            },
+            "id": {
+                "name": "Indonesian",
+                "icon": "https://ipfs.pantograph.app/ipfs/QmNptVwxddyxXBd6sqFYr7K4nEKAYUrxdQ69JYomPFe7Bq?filename=Indonesia.png"
+            },
+            "ru": {
+                "name": "Russian",
+                "icon": "https://ipfs.pantograph.app/ipfs/Qmaxieb2oiXxQ1jMwqYfs5pqFdLkd4bLSmF8FyvZ31xHQX?filename=Russia.png"
+            },
+            "nl": {
+                "name": "Dutch",
+                "icon": "https://ipfs.pantograph.app/ipfs/QmRFnJBYoVH2y8C1K9WVZLDFAX1ZcXMqwcWSMzLHkES1nn?filename=Netherlands.png"
+            },
+            "el": {
+                "name": "Greek",
+                "icon": "https://ipfs.pantograph.app/ipfs/QmT6DKAhsSDge6dXZfPMxVjKK2BqXUqQxYTHwFGwPueAFa?filename=Greece.png"
+            },
+            "es": {
+                "name": "Spanish",
+                "icon": "https://ipfs.pantograph.app/ipfs/QmQUYpxJ2szE3YCAR4Tis2NcuFeUZBZ4Rvx9hpkWbW4wUw?filename=Spain.png"
+            },
+            "de": {
+                "name": "Germany",
+                "icon": "https://ipfs.pantograph.app/ipfs/QmU1jGnUBm4thMacTmvTaRFHdiGasngaxJp9dMZ8Som4hw?filename=Germany.png"
+            },
+            "pt": {
+                "name": "Portuguese",
+                "icon": "https://ipfs.pantograph.app/ipfs/QmRkRR6ifF7vEpd5aWNWzffEs21SiNVC9etfZgnEgYLsHQ?filename=Portugal.png"
+            }
+        }
+    },
+    {
+        "_id": {
+            "$oid": "63e4664e81e74bba82acdafc"
+        },
+        "key": "app",
+        "__v": 0,
+        "createdAt": {
+            "$date": {
+                "$numberLong": "1675912782218"
+            }
+        },
+        "isPublic": true,
+        "updatedAt": {
+            "$date": {
+                "$numberLong": "1679379072608"
+            }
+        },
+        "values": {
+            "maintenance": false,
+            "mainTokenChainId": 43113,
+            "nftStoreChainIds": [
+                43113,
+                80001
+            ],
+            "discord": "https://discord.gg/3Z7Y4Z",
+            "twitter": "https://twitter.com/pantographapp",
+            "telegram": "https://t.me/pantographapp",
+            "reddit": "https://www.reddit.com/r/pantographapp",
+            "whitePaper": "https://pantograph.app/whitepaper",
+            "helpCenter": "https://pantograph.app/help-center",
+            "privacyPolicy": "https://pantograph.app/privacy-policy",
+            "termsOfService": "https://pantograph.app/terms-of-service",
+            "appName": "Eatnsmile",
+            "storeNftPrice": 100,
+            "tokenPermit": "StarToken",
+            "nftStorePermit": "StarNFT",
+            "appSlug": "eatnsmile",
+            "appIcon": "https://ipfs.pantograph.app/ipfs/QmXn99vcRhrYdcZDQyunKPuwPABA2neYne6XLcVBLxrjTM",
+            "appBanner": "https://ipfs.pantograph.app/ipfs/QmYZuScTgExQ17CJWUiWRqpTxAi9rMbSspXnz2iXZgu2on",
+            "searchIcon": "https://ipfs.pantograph.app/ipfs/Qmb9bi1zwmHdAvpeFwHH8pGTRP7oQV1sFzPGe96qKrdU7N",
+            "bookmarkIcon": "https://ipfs.pantograph.app/ipfs/QmborS1EbpRPteKGy1RpshJJJBHvJ4HJaHH94WH1eBCiyJ",
+            "chainName": {
+                "43113": "Avalanche",
+                "80001": "Polygon"
+            },
+            "mainVideoThumbnail": "https://ipfs.pantograph.app/ipfs/QmSfQvKYy3fQqhG2eAEbUTWJgXnqQ5hywBmGDk2xwFrZM7",
+            "mainVideo": "https://ipfs.pantograph.app/ipfs/QmaAo6Dvd3z4ef3ZWWcf9YcWp1tC4CAFFMmHc5Jj51k2mm",
+            "bannerIcon": "https://ipfs.pantograph.app/ipfs/QmTus7x6myARYm9shuoVsTP3JPWdvveAzVeU8sXHkBiYu3",
+            "marketplacePermit": "Exchange",
+            "priceEditStoreWei": "3000000000000000000"
+        }
+    },
+    {
+        "_id": {
+            "$oid": "63fda80e2a6dd363f2a7a1b3"
+        },
+        "key": "captchaImages",
+        "__v": 0,
+        "createdAt": {
+            "$date": {
+                "$numberLong": "1677488230197"
+            }
+        },
+        "isPublic": true,
+        "updatedAt": {
+            "$date": {
+                "$numberLong": "1677488230197"
+            }
+        },
+        "values": [
+            "https://ipfs.pantograph.app/ipfs/Qmd1nkjYbNwXHs3GNahrPB1eLxMrGyXaJA8nCHzYXxUNU5",
+            "https://ipfs.pantograph.app/ipfs/Qmcaen8DLN9zDvZiinrsGKKuFJUTS7G9YYzSpzri8zxDeK"
+        ]
+    }
+}

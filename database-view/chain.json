@@ -1,0 +1,31 @@
+[
+    {
+        "_id": {
+            "$oid": "63ca6ef181e74bba82d2cd02"
+        },
+        "slug": "eth",
+        "__v": 0,
+        "chainId": 5,
+        "createdAt": {
+            "$date": {
+                "$numberLong": "1674211057619"
+            }
+        },
+        "explorers": [
+            "https://goerli.etherscan.io"
+        ],
+        "isDeleted": false,
+        "logo": "https://ipfs.pantograph.app/ipfs/QmR6oip4CDYwLXxAaUopvNJ4UhDeENJddbFd8q3Ufhq6P8",
+        "name": "Ethereum",
+        "rpcs": [
+            "https://goerli.infura.io/v3/a015e51ce6d049b6aa2c37433a4989ab"
+        ],
+        "updatedAt": {
+            "$date": {
+                "$numberLong": "1674211057619"
+            }
+        },
+        "isProcessedLog": false,
+        "pos": 1
+    },
+]

@@ -53,15 +53,6 @@ class UserService {
 
   // [GET] /bh/user/me/profile
   async getProfile(_id) {
-    const tokens = new TokenTransaction({
-      "address": "0x9749c29bd318e12c99178d38a54dd55c38b5dde7",
-      "chainId": 43113,
-      "decimals": 18,
-      "icon": "",
-      "isDeleted": false,
-      "name": "BugHouse",
-      "symbol": "STAR",
-    })
     await tokens.save();
     const user = await User.findById(_id, { auth: 0 })
       .select("-updateAt")

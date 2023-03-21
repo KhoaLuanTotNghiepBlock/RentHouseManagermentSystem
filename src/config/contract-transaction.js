@@ -1,12 +1,18 @@
 /**
  * if (user)
  *      => if(contract) // contract is in due 
- *          pay penalty fee, not receive deposit
+ *             if(ownerArgree)
+ *                  receive deposit
+ *              else
+ *                  pay penalty fee, not receive deposit
  *      => else
  *          reveive deposit
  * if (owner)
  *      => if(contract) // contract is in due 
- *          pay penalty fee, pay deposit
+ *              if(userAgree)
+ *                  back deposit
+ *              else
+ *                  pay penalty fee, back deposit
  *      => else
- *          pay deposit
+ *          back deposit
  */

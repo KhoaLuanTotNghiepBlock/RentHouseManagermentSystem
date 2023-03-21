@@ -63,11 +63,14 @@ class ContractService {
 
     async signByRenter(userId, contractAddress) {
         if (!userId || !contractAddress)
-            throw new ArgumentError('sign by owner missing');
+            throw new ArgumentError('sign by renter missing');
 
         const user = await User.getById(userId);
         const { wallet } = user;
-        return await RentalContract.signByRenter(wallet?.walletAddress, contractAddress);
+        const contract = await HashContract.getByAddress(contractAddress);
+        if (contract.payment > wallet.balance)
+            throw new MyError('Insufficient balance');
+        return await RentalContract.signByRenter(wallet?.walletAddress, contractAddress, contract.payment);
     }
 
     async signByOwner(userId, contractAddress) {
@@ -79,6 +82,8 @@ class ContractService {
 
         return await RentalContract.signByOwner(wallet.walletAddress, contractAddress);
     }
+
+
 
     //takes a parameter days that specifies the number of days in the future to look for contracts where payTime is due
     async getContractsDueIn(days) {
