@@ -20,6 +20,7 @@ contract RentalContract {
     event RentStarted(uint256 _roomId, address renter, string _contractHash);
     event PayForRent(uint256 _roomId, string _invoiceHash);
     event RentEnded(uint256 _roomId);
+    event ReOpen(uint256 _roomId);
 
     function setRoomForRent(
         string memory contractHash,
@@ -101,6 +102,6 @@ contract RentalContract {
             false,
             true
         );
-        emit RentEnded(_roomId);
+        emit ReOpen(_roomId);
     }
 }
