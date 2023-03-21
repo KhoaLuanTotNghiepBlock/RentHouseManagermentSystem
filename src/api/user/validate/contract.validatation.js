@@ -13,7 +13,7 @@ const contractValidate = {
         if (!contractInfo)
             throw new ArgumentError('valid contract ==>');
 
-        let { period, room, dateRent, payTime, payMode, payment, renter, contract } = contractInfo;
+        let { period, room, dateRent, payTime, payMode, payment, contract } = contractInfo;
 
         dateRent = dateUtil.toDate(dateRent);
         if (!dateRent)
@@ -27,7 +27,7 @@ const contractValidate = {
         if (!commonValidate.validatePayMode(payMode))
             throw new MyError('validate contract ==> paymode invalid');
 
-        const userRent = await User.getById(renter);
+        const userOwner = await User.getById(renter);
 
         period = commonUtil.convertToNumber(period);
         payment = commonUtil.convertToNumber(payment);

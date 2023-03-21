@@ -13,9 +13,9 @@ const datetimeHelper = require('../../../utils/datetime.helper');
 
 class ContractService {
 
-    async createContract(ownerId, contractInfo) {
+    async createContract(renterId, contractInfo) {
         // get owner 
-        const owner = await User.getById(ownerId);
+        const renter = await User.getById(renterId);
 
         // validate contract info 
         let contract = await contractValidate.validateContractInfo(contractInfo);
@@ -24,7 +24,7 @@ class ContractService {
             throw new MyError('contract service => contract invalid!');
 
         // set renter 
-        contract.lessor = owner._id;
+        contract.renter = renter._id;
 
         await contract.save();
 
