@@ -27,14 +27,14 @@ const contractValidate = {
         if (!commonValidate.validatePayMode(payMode))
             throw new MyError('validate contract ==> paymode invalid');
 
-        const userOwner = await User.getById(renter);
+        const userOwner = await User.getById(room.owner?._id);
 
         period = commonUtil.convertToNumber(period);
         payment = commonUtil.convertToNumber(payment);
 
         return new Contract({
+            lessor: userOwner._id,
             period,
-            renter: userRent._id,
             room,
             dateRent,
             payment,

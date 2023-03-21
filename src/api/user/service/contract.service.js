@@ -25,10 +25,12 @@ class ContractService {
 
         // set renter 
         contract.renter = renter._id;
-
+        const owner = await User.getById(contract.lessor);
         await contract.save();
 
         await demandService.createServiceDemandForRoom(contract._id);
+
+        // await creatSmartContract(contract._id, owner.wallet.walletAddress, renter.wallet.walletAddress);
         return {
             data: contract
         }

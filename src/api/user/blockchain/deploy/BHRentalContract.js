@@ -70,7 +70,6 @@ const RentalContract = {
         // );
         // Create a new instance of the RentalContract smart contract
         const rentalContract = new web3.eth.Contract(abi, contractAddress);
-        console.log("🚀 ~ file: BHRentalContract.js:94 ~ signByRenter: ~  wallet.walletPrivateKey:", wallet.walletPrivateKey)
 
         // Call the signByRenter function in the smart contract and pass the renter's address
         const tx = rentalContract.methods.signByRenter();
@@ -106,6 +105,12 @@ const RentalContract = {
         // rr: true, message: 'Contract signed by renter', 
         return { receipt };
     },
+
+    getTranSactionInfo: async () => {
+        const tx = await web3.eth.getTransaction(txHash);
+        console.log(tx);
+    }
+
 
 }
 module.exports = RentalContract;
