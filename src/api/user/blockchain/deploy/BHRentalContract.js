@@ -5,6 +5,7 @@ const MyError = require('../../../../exception/MyError');
 const HashContract = require('../../../../model/transaction/hash-contract.model');
 const ethers = require("ethers");
 const User = require('../../../../model/user/user.model');
+const ContractStruct = require('../../../../model/contract-struct.model');
 const { abi, bytecode } = JSON.parse(fs.readFileSync("src/api/user/blockchain/contract/RentalContract.json"));
 const { SIGNER_PRIVATE_KEY } = process.env;
 const network = "sepolia";
@@ -47,6 +48,35 @@ const RentalContract = {
             contractAddress: result.options.address,
             txhash: contractHash.txhash
         };
+    },
+
+    initSmartContract: async (userId) => {
+        const user = await User.getById(userId);
+
+        const signer = web3.eth.accounts.privateKeyToAccount(
+            SIGNER_PRIVATE_KEY
+        );
+        // create new instance of smart contract
+        const contract = new web3.eth.Contract(abi);
+        const deploy = contract.deploy({ data: '0x' + bytecode, arguments: [] });
+
+        // Creating a signing account from a private key
+        web3.eth.accounts.wallet.add(signer);
+        // Send contract deployment transaction
+        const gas = await deploy.estimateGas();
+        const contractStruct = await ContractStruct.create({
+            owner: user._id
+        });
+        const result = await deploy.send({ from: signer.address, gas })
+            .once("transactionHash", (txhash) => {
+                contractStruct.transactionHash = txhash;
+                contractStruct.status = true;
+                console.log(`Mining deployment transaction ...`);
+                console.log(`https://${network}.etherscan.io/tx/${txhash}`);
+            });
+
+        await contractStruct.save();
+        return { contractStruct };
     },
 
     getSmartContract: async (contractAddress) => {

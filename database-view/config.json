@@ -191,5 +191,38 @@
             "https://ipfs.pantograph.app/ipfs/Qmd1nkjYbNwXHs3GNahrPB1eLxMrGyXaJA8nCHzYXxUNU5",
             "https://ipfs.pantograph.app/ipfs/Qmcaen8DLN9zDvZiinrsGKKuFJUTS7G9YYzSpzri8zxDeK"
         ]
+    },
+    {
+        "_id": {
+            "$oid": "64080c7c15519227640b57a5"
+        },
+        "transactionId": "claim_0x6d0cf39a5158b38c2f1584a200e24a215c4b73207da257e7771af28da2d26240",
+        "userAddress": "0x64470e5f5dd38e497194bbcaf8daa7ca578926f6",
+        "tokenId": {
+            "$oid": "63ca9f0a81e74bba82d93d29"
+        },
+        "action": "withdraw",
+        "data": {
+            "nonce": "1"
+        },
+        "prevBalance": 17,
+        "prevBalanceWei": "17000000000000000000",
+        "actionAmount": -1,
+        "actionAmountWei": "-1000000000000000000",
+        "balance": 16,
+        "balanceWei": "16000000000000000000",
+        "isReverted": false,
+        "isDeleted": false,
+        "createdAt": {
+            "$date": {
+                "$numberLong": "1678249084360"
+            }
+        },
+        "updatedAt": {
+            "$date": {
+                "$numberLong": "1678249084360"
+            }
+        },
+        "__v": 0
     }
 }

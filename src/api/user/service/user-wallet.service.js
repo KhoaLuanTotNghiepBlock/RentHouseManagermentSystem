@@ -15,12 +15,10 @@ class UserWalletService {
     async changeBalance(userId, amount, data, action, transactionId = bugId, withHistory = true) {
 
         const userBalance = await User.findOne({ _id: userId }).select('wallet');
-        console.log("🚀 ~ file: user-wallet.service.js:18 ~ UserWalletService ~ changeBalance ~ userBalance:", userBalance)
         if (!userBalance)
             throw new MyError('user not found');
 
         amount = commonHelper.convertToNumber(amount);
-        console.log("🚀 ~ file: user-wallet.service.js:23 ~ UserWalletService ~ changeBalance ~ amount:", amount)
         let newAmount = commonHelper.convertToNumber(userBalance?.wallet?.balance);
         if (newAmount === Infinity) {
             newAmount = 0;
@@ -81,6 +79,8 @@ class UserWalletService {
         const data = await this.changeBalance(userId, depositAmount, null, USER_TRANSACTION_ACTION.DEPOSIT);
         return data;
     }
+
+
 };
 
 module.exports = new UserWalletService();

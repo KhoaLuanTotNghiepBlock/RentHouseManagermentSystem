@@ -1,0 +1,130 @@
+{
+    {
+        "_id": {
+            "$oid": "64080c7d15519227640b57a7"
+        },
+        "userAddress": "0x64470e5f5dd38e497194bbcaf8daa7ca578926f6",
+        "claimHash": "0x6d0cf39a5158b38c2f1584a200e24a215c4b73207da257e7771af28da2d26240",
+        "chainId": 43113,
+        "nonce": "1",
+        "tokens": [
+            "0x9749c29bd318e12c99178d38a54dd55c38b5dde7"
+        ],
+        "amounts": [
+            "1000000000000000000"
+        ],
+        "deadline": 1678249382,
+        "data": {
+            "claim": [
+                "1",
+                1678249382,
+                "0x64470e5f5dd38e497194bbcaf8daa7ca578926f6",
+                [
+                    "1000000000000000000"
+                ],
+                [
+                    "0x9749c29bd318e12c99178d38a54dd55c38b5dde7"
+                ]
+            ],
+            "signatures": [
+                [
+                    27,
+                    "0x62b0a0f411351ab84f687b1e28a5f8a1dfc36cdee45f8d5b122308a889bbd5a0",
+                    "0x21a76dd61ce722ddf6aa620ac8367369d4d9b02bfe4407277b5732e1e217254e"
+                ],
+                [
+                    27,
+                    "0x8aa6909bd3200f34c73928c003250199027b6b4c12339c7cca0b3a2c066f6616",
+                    "0x4f2e8241fbac9d1f31021ab91c68b4bef5febadc5ba0739734ab1ecd7e0e81ac"
+                ],
+                [
+                    27,
+                    "0xe2a59821791b51a104ae7bf5a4c1716239c7847aaf1c1245eca4037e5e196553",
+                    "0x0a5c5b8e46925a1033e5c4121afa80be8c724e7c15918eb9835b586cdf79a94a"
+                ]
+            ]
+        },
+        "status": "SUCCESS",
+        "createdAt": {
+            "$date": {
+                "$numberLong": "1678249085175"
+            }
+        },
+        "updatedAt": {
+            "$date": {
+                "$numberLong": "1678250965970"
+            }
+        },
+        "__v": 0,
+        "txHash": "1678250963-R8a5xLnV1by7ADh6if7T"
+    },
+    {
+        "_id": {
+            "$oid": "6412f0615f0aa8106d990b4b"
+        },
+        "userAddress": "0xb90b5d96c832dd38fb439f1ec7647b6258d7b7d7",
+        "eventName": "received_helpful",
+        "eventType": "received_helpful",
+        "evidenceId": "6412f061a747685bde6a94df",
+        "targetId": "640832cb892f821f170350a8",
+        "point": 1,
+        "createdAt": {
+            "$date": {
+                "$numberLong": "1678962785524"
+            }
+        },
+        "updatedAt": {
+            "$date": {
+                "$numberLong": "1678962785524"
+            }
+        },
+        "__v": 0
+    },
+    {
+        "_id": {
+            "$oid": "6405a36e3d66c89fde249c9d"
+        },
+        "sellerAddress": "0xe33f9c7ac822fed3128f4e830515a33b17d7416f",
+        "nftAddress": "0x9aaa9404a86618fb084d4cd277d07fb9fd3c36a9",
+        "nftId": "473",
+        "chainId": 43113,
+        "price": 1.23,
+        "priceWei": "1230000000000000000",
+        "currency": "0x0000000000000000000000000000000000000000",
+        "nonce": "5",
+        "startTime": 1678091015,
+        "endTime": 1680769415,
+        "permit": "0xd81e112a33387983ff96443e6c637b42fdd0728b4ca42144262feffebf2d85102eb93299910208e08987c72d8c9538297e1a2ef8e7470273c2bf8d1f7d9bf28d1b",
+        "v": "28",
+        "r": "0x1de52200e7b7463ca3a60078bd80532d29eb8bb441a7769b97050c81ce89b947",
+        "s": "0x33c4be88daaaea72451d852796e0696f2b95654e09d71b02f9298d4bdc75c6e7",
+        "createdAt": {
+            "$date": {
+                "$numberLong": "1678091118774"
+            }
+        },
+        "updatedAt": {
+            "$date": {
+                "$numberLong": "1678091118774"
+            }
+        },
+        "__v": 0
+    },
+    {
+        "_id": {
+            "$oid": "63fd9b0e81e74bba82378547"
+        },
+        "chainId": 43113,
+        "txHash": "0xd5929267eb26ae4d3ae94c85affb27e166edb66e1c60094b4b595b4af8f6e7b8",
+        "__v": 0,
+        "address": "0x9aaa9404a86618fb084d4cd277d07fb9fd3c36a9",
+        "createdAt": {
+            "$date": {
+                "$numberLong": "1677564686790"
+            }
+        },
+        "from": "0x0000000000000000000000000000000000000000",
+        "id": "361",
+        "to": "0x542d62c0045ee991ba1d4ab9693457dbfb63b375"
+    }
+}

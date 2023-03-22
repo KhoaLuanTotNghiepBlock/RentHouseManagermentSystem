@@ -10,8 +10,8 @@ class ContractController {
         try {
             // owner id
             const { userId } = req.auth;
-
-            const data = await contractService.createContract(userId, req.body);
+            const { period, room, dateRent, payTime, payMode, payment } = req.body;
+            const data = await contractService.createContract(userId, { period, room, dateRent, payTime, payMode, payment });
 
             return res.status(200).json({
                 message: 'create contract success',
