@@ -86,9 +86,7 @@ class ContractService {
 
     async readContract(
 
-    )
-
-
+    ) { }
 
     //takes a parameter days that specifies the number of days in the future to look for contracts where payTime is due
     async getContractsDueIn(days) {
