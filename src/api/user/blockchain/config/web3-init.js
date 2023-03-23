@@ -9,7 +9,7 @@ const INFURA_API_KEY = process.env.INFURA_API_KEY;
 // const { abi, bytecode } = JSON.parse(fs.readFileSync("Demo.json"));
 // Initialize web3 provider
 // const providerUrl = `https://${NETWORK}.infura.io/v3/${INFURA_API_KEY}`;
-const providerUrl = `https://sepolia.infura.io/v3/${INFURA_API_KEY}`;
+const providerUrl = `https://avalanche-fuji.infura.io/v3/${INFURA_API_KEY}`;
 const provider = new Web3.providers.HttpProvider(providerUrl);
 
 // Initialize web3 instance

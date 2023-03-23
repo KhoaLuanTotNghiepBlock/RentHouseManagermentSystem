@@ -6,7 +6,7 @@ const serviceApartment = require('../service/service.service');
 const validateAddress = require('../validate/address.validate');
 const User = require('../../../model/user/user.model');
 const NotFoundError = require('../../../exception/NotFoundError');
-
+const rentalContract = require('../blockchain/deploy/BHRentalContract');
 class RoomService {
     async createRoom(_id, roomInfo) {
 
@@ -43,6 +43,8 @@ class RoomService {
         room.services = {};
         await serviceApartment.createRoomService(room._id, services);
 
+        await rentalContract.setRoomForRent(room._id, userOwner.wallet.walletAddress, room.basePrice, room.deposit);
+        // await rentalContract.setRoomForRent("641c7bb881e925acffaf013e", userOwner.wallet.walletAddress, 10, 10);
         return {
             data: room
         }

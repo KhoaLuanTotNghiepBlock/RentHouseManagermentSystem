@@ -23,13 +23,12 @@ contract RentalContract {
     event ReOpen(uint256 _roomId);
 
     function setRoomForRent(
-        string memory contractHash,
         uint256 rentAmountPerMonth,
         uint256 depositAmount
     ) public {
         rooms[roomId] = Room(
-            contractHash,
             "",
+            "contract",
             rentAmountPerMonth,
             depositAmount,
             payable(msg.sender),
@@ -41,7 +40,7 @@ contract RentalContract {
         roomId++;
     }
 
-    function signByRenter(uint256 _roomId) public payable {
+    function signByRenter(uint256 _roomId,  string memory _contractHash) public payable {
         require(rooms[_roomId].forRent, "!for rent");
         require(
             msg.value >=
@@ -52,6 +51,7 @@ contract RentalContract {
         require(!rooms[_roomId].signed, "Room rented");
         rooms[_roomId].signed = true;
         rooms[_roomId].renter = payable(msg.sender);
+        rooms[_roomId].contractHash = _contractHash;
         rooms[_roomId].owner.transfer(rooms[_roomId].rentAmountPerMonth);
         emit RentStarted(_roomId, msg.sender, rooms[_roomId].contractHash);
     }

@@ -1,15 +1,15 @@
 require('dotenv').config();
 const web3 = require("../config/web3-init");
 const fs = require("fs");
-const MyError = require('../../../../exception/MyError');
 const HashContract = require('../../../../model/transaction/hash-contract.model');
-const ethers = require("ethers");
+const RoomTransaction = require('../../../../model/transaction/room-transaction.model');
 const User = require('../../../../model/user/user.model');
-const { abi, bytecode } = JSON.parse(fs.readFileSync("src/api/user/blockchain/contract/RentalContract.json"));
+const MyError = require('../../../../exception/MyError');
+const { abi, bytecode } = JSON.parse(fs.readFileSync("src/api/user/blockchain/contract/RentalContractV2.json"));
 const { SIGNER_PRIVATE_KEY } = process.env;
 const network = "sepolia";
 // Creating a signing account from a private key
-
+const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
 const RentalContract = {
     createSmartContractFromRentalContract: async (contractInfo, ownerAddress, renterAddress) => {
         // get info of contract
@@ -45,6 +45,14 @@ const RentalContract = {
             contractAddress: result.options.address,
             txhash: contractHash.txhash
         };
+    },
+
+    createSigner: async (userAddress) => {
+        const { wallet } = await User.getUserByWallet(userAddress);
+        const signer = await web3.eth.accounts.privateKeyToAccount(
+            wallet.walletPrivateKey
+        );
+        return signer;
     },
 
     // signByRenter: async (renterAddress, contractAddress, rentAmount) => {
@@ -113,46 +121,70 @@ const RentalContract = {
         return { receipt };
     },
 
-    setRoomForRent: async (contractHash, amountRent, deposit) => {
+    setRoomForRent: async (roomId, ownerAddress, amountRent, deposit) => {
+        const { wallet, _id } = await User.getUserByWallet(ownerAddress);
+        const signOwner = await RentalContract.createSigner(ownerAddress);
+        const rentalContract = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
+        const renterAbi = rentalContract.methods.setRoomForRent(amountRent, deposit).encodeABI();
+        // Estimatic the gas limit
+        const limit = await web3.eth.estimateGas({
+            from: signOwner.address,
+            to: "0xAED01C776d98303eE080D25A21f0a42D94a86D9c",
+            value: web3.utils.toWei("0.001")
+        });
 
+        const tx = {
+            from: signOwner.address,
+            to: CONTRACT_ADDRESS,
+            gas: 3000000,
+            data: renterAbi,
+            value: 0,
+        };
+
+        const signedTx = await web3.eth.accounts.signTransaction(tx, wallet.walletPrivateKey);
+        const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+        const transactionHash = txReceipt.transactionHash;
+        // const transactionHash = '0x804d3b29931c656407777e0178ff8cf9e7c7765bcc6d37b5281ab32ebeb532c2';
+
+        const event = await RentalContract.getGetEventFromTransaction(transactionHash, rentalContract);
+        if (event.length === 0) throw new MyError('event not found');
+        console.log("🚀 ~ file: BHRentalContract.js:151 ~ setRoomForRent: ~ event:", event)
+        const { returnValues } = event[0];
+        const roomTransaction = await RoomTransaction.create({
+            transactionHash,
+            owner: _id,
+            status: "available",
+            roomUid: returnValues._roomId,
+            roomId,
+        });
+        console.log("🚀 ~ file: BHRentalContract.js:161 ~ setRoomForRent: ~ roomTransaction:", roomTransaction)
+        await roomTransaction.save();
     },
 
-    readContract: async (
-        nameFunction,
-        params,
-        delay = 1000,
-        maxTries = 10,
-        retries = 0
-    ) => {
-        // Create a new instance of the RentalContract smart contract
-        const rentalContract = new web3.eth.Contract(abi, contractAddress);
-        return rentalContract.methods[nameFunction](...params)
-            .call()
-            .then((result) => {
-                return result;
-            })
-            .catch(() => {
-                if (retries < maxTries) {
-                    return new Promise((resolve) => {
-                        setTimeout(() => {
-                            return resolve(
-                                _this.readContractData(
-                                    contractAddress,
-                                    nameFunction,
-                                    params,
-                                    delay,
-                                    maxTries,
-                                    retries + 1
-                                )
-                            );
-                        }, delay || 1500);
-                    });
-                }
-                return null;
-            });
+
+
+    getRooms: async (roomId) => {
+        return result = await etherHelper.readContract({
+            nameFunction: "totalSupply",
+            params: [roomId],
+            CONTRACT_ADDRESS,
+            abi: abi,
+            retry: 2,
+        });
+    },
+
+    getGetEventFromTransaction: async (txHash, contract) => {
+        try {
+            const transaction = await web3.eth.getTransaction(txHash);
+            const blockNumber = transaction.blockNumber;
+            console.log('Transaction confirmed in block:', blockNumber);
+
+            const events = await contract.getPastEvents('allEvents', { fromBlock: blockNumber, toBlock: blockNumber });
+            return events;
+        } catch (error) {
+            throw new MyError(error);
+        }
     }
-
-
 
 
 }

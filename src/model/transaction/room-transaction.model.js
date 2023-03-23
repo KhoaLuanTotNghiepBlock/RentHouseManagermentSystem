@@ -3,19 +3,19 @@ const Timezone = require("mongoose-timezone");
 
 const { ObjectId } = mongoose.Schema;
 
-const contractStructSchema = new mongoose.Schema(
+const roomTransactionSchema = new mongoose.Schema(
   {
     transactionHash: { type: String, required: true },
     owner: { type: ObjectId, required: true, ref: 'User' },
     status: { type: String, enum: ["available", "already-rent", "not-available"], default: "available" },
-    roomUid: { type: number, default: -1 },
+    roomUid: { type: Number, default: -1 },
     roomId: { type: ObjectId, ref: 'Room', required: true },
-
+    invoiceHash: { type: String, default: "" },
   },
   { timestamp: true }
 );
 
-contractStructSchema.plugin(Timezone);
+roomTransactionSchema.plugin(Timezone);
 
-const ContractStruct = mongoose.model("ContractStruct", contractStructSchema);
-module.exports = ContractStruct;
+const RoomTransaction = mongoose.model("RoomTransaction", roomTransactionSchema);
+module.exports = RoomTransaction;
