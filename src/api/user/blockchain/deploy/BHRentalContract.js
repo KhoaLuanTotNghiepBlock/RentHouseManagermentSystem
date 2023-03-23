@@ -5,12 +5,10 @@ const MyError = require('../../../../exception/MyError');
 const HashContract = require('../../../../model/transaction/hash-contract.model');
 const ethers = require("ethers");
 const User = require('../../../../model/user/user.model');
-const ContractStruct = require('../../../../model/contract-struct.model');
 const { abi, bytecode } = JSON.parse(fs.readFileSync("src/api/user/blockchain/contract/RentalContract.json"));
 const { SIGNER_PRIVATE_KEY } = process.env;
 const network = "sepolia";
 // Creating a signing account from a private key
-
 
 const RentalContract = {
     createSmartContractFromRentalContract: async (contractInfo, ownerAddress, renterAddress) => {
@@ -32,7 +30,6 @@ const RentalContract = {
         web3.eth.accounts.wallet.add(signer);
         // Send contract deployment transaction
         const gas = await deploy.estimateGas();
-        console.log("🚀 ~ file: BHRentalContract.js:27 ~ createSmartContractFromRentalContract: ~ gas:", gas)
 
         const result = await deploy.send({ from: signer.address, gas })
             .once("transactionHash", (txhash) => {
@@ -48,52 +45,6 @@ const RentalContract = {
             contractAddress: result.options.address,
             txhash: contractHash.txhash
         };
-    },
-
-    initSmartContract: async (userId) => {
-        const user = await User.getById(userId);
-
-        const signer = web3.eth.accounts.privateKeyToAccount(
-            SIGNER_PRIVATE_KEY
-        );
-        // create new instance of smart contract
-        const contract = new web3.eth.Contract(abi);
-        const deploy = contract.deploy({ data: '0x' + bytecode, arguments: [] });
-
-        // Creating a signing account from a private key
-        web3.eth.accounts.wallet.add(signer);
-        // Send contract deployment transaction
-        const gas = await deploy.estimateGas();
-        const contractStruct = await ContractStruct.create({
-            owner: user._id
-        });
-        const result = await deploy.send({ from: signer.address, gas })
-            .once("transactionHash", (txhash) => {
-                contractStruct.transactionHash = txhash;
-                contractStruct.status = true;
-                console.log(`Mining deployment transaction ...`);
-                console.log(`https://${network}.etherscan.io/tx/${txhash}`);
-            });
-
-        await contractStruct.save();
-        return { contractStruct };
-    },
-
-    getSmartContract: async (contractAddress) => {
-        console.log("🚀 ~ file: BHRentalContract.js:48 ~ getSmartContract: ~ contractAddress:", contractAddress)
-        if (!contractAddress)
-            throw new MyError('contract address invalid')
-        // Creating a signing account from a private key
-        // web3.eth.accounts.wallet.add(signer);
-
-        // create new instance of smart contract
-        const contract = new web3.eth.Contract(abi, contractAddress);
-        // Issuing a transaction that calls
-        const contractInfo = await contract.methods.getContractTransactionId().call();
-        // const gas = await contractInfo.estimateGas();
-        // const receipt = await contractInfo.send({ from: signer.address, gas });
-        // console.log("🚀 ~ file: BHRentalContract.js:57 ~ getSmartContract: ~ receipt:", receipt);
-        return contractInfo;
     },
 
     // signByRenter: async (renterAddress, contractAddress, rentAmount) => {
@@ -162,10 +113,46 @@ const RentalContract = {
         return { receipt };
     },
 
-    decodeStartEvent: async () => {
-        const tx = await web3.eth.getTransaction(txHash);
-        console.log(tx);
+    setRoomForRent: async (contractHash, amountRent, deposit) => {
+
+    },
+
+    readContract: async (
+        nameFunction,
+        params,
+        delay = 1000,
+        maxTries = 10,
+        retries = 0
+    ) => {
+        // Create a new instance of the RentalContract smart contract
+        const rentalContract = new web3.eth.Contract(abi, contractAddress);
+        return rentalContract.methods[nameFunction](...params)
+            .call()
+            .then((result) => {
+                return result;
+            })
+            .catch(() => {
+                if (retries < maxTries) {
+                    return new Promise((resolve) => {
+                        setTimeout(() => {
+                            return resolve(
+                                _this.readContractData(
+                                    contractAddress,
+                                    nameFunction,
+                                    params,
+                                    delay,
+                                    maxTries,
+                                    retries + 1
+                                )
+                            );
+                        }, delay || 1500);
+                    });
+                }
+                return null;
+            });
     }
+
+
 
 
 }

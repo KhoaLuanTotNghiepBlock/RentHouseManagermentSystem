@@ -84,6 +84,10 @@ class ContractService {
         return await RentalContract.signByOwner(wallet.walletAddress, contractAddress);
     }
 
+    async readContract(
+
+    )
+
 
 
     //takes a parameter days that specifies the number of days in the future to look for contracts where payTime is due
