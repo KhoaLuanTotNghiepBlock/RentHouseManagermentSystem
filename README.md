@@ -8,66 +8,16 @@ Run with role admin: `npm run start-admin`
 
 ## API
 
-### Auth `/bh/auth`
--   `[POST] /registry`: sign up.
-    -   body: {
-                    "name": "Đoàn Ngọc Quốc Bảo",
-                    "username": "yonedoan",
-                    "password": "123456789",
-                    "contactInfo": "84972347165"
-            }
-    -   result: {
-            "errorCode": 200,
-            "message": "Account is create succesful",
-            "data": {}
-        }
--   `[POST] /login`: sign in.
-    -   body: {
-                "username": "canhcutcon",
-                "password": "123456789"
-            }
-    -   result: {
-                "message": "login success",
-                "data": {
-                    "accessToken": String
-                    "refreshToken": String,
-                    "user": {
-                        "_id": "63c2c1646753d82e5c9826df",
-                        "name": "Võ Thị Trà Giang",
-                        "avatar": "",
-                        "username": "canhcutcon"
-                    }
-                },
-                "errorCode": 200
-            }
 
--   `[POST] /confirm-account`: verify account by otp
-    -   body: {
-            "username": "yonedoan",
-            "otp": "878484"
-        }
-    -   result: {
-            "message": "Account confirm successful",
-            "data": {},
-            "errorCode": 200
-        }
--   `[POST] /reset-otp`: resend otp
-    -   body: {
-            "username": "yonedoan",
-        }
-    -   result: {
-             errorCode: 200,
-             message: "OTP already send!",
-            "errorCode": 200
-        }
-
--   `[POST] /confirm-account`: verify account by otp
-    -   body: {
-            "username": "yonedoan",
-            "otp": "878484"
-        }
-    -   result: {
-            "message": "Account confirm successful",
-            "data": {},
-            "errorCode": 200
-        }
+### Rental house
+<hr>
+# user create account
+# user create room => room will deploy on admin smart-contract with room-transaction 
+# renter rent room by contract ==> create success reuturn { contract, contract hash}
+# renter have to sign that aggree to rent room ==> 
+# sign by renter contain {
+    contractHash,
+    roomInfo
+} ==> sign transaction to room on smart contract renter have to pay rentAmount + rentDeposit
+==> room info in smart contract will be update {contract, renter address, deposit}
+==> user owner receive rentamount

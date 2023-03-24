@@ -15,8 +15,6 @@ const hashContractSchema = new mongoose.Schema(
         hash: {
             type: String
         },
-        contractAddress: String,
-        txhash: { type: String }
     },
     {
         timestamps: true,
@@ -41,17 +39,5 @@ hashContractSchema.statics.getByHash = async (hash) => {
         throw new NotFoundError('Hash contract not found');
     return hashContract;
 };
-
-hashContractSchema.statics.getByAddress = async (address) => {
-    const hashContract = await hashContract.findOne({ contractAddress: address });
-    if (!hashContract)
-        throw new NotFoundError('Hash contract not found');
-
-    const contract = await Contract.getOne(hashContract.contractId);
-    if (!contract)
-        throw new MyError('contract not found');
-    return contract;
-};
-
 const HashContract = mongoose.model("HashContract", hashContractSchema);
 module.exports = HashContract;

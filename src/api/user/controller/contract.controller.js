@@ -22,12 +22,11 @@ class ContractController {
             next(error);
         }
     }
-    //[POST] bh/contract/:contractAddress/sign-by-renter
+    //[POST] bh/contract/sign-by-renter
     async signByRenter(req, res, next) {
         try {
-            const contractAddress = req.params.contractAddress;
             const { userId } = req.auth;
-            const data = await contractService.signByRenter(userId, contractAddress);
+            const data = await contractService.signByRenter(userId, roomId, contractHash);
 
             return res.status(200).json({
                 message: 'sign smart contract success',

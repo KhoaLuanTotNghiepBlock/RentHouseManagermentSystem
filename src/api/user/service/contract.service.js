@@ -10,6 +10,8 @@ const { toObjectId } = require('../../../utils/common.helper');
 const ArgumentError = require('../../../exception/ArgumentError');
 const RentalContract = require('../blockchain/deploy/BHRentalContract');
 const datetimeHelper = require('../../../utils/datetime.helper');
+const RoomTransaction = require('../../../model/transaction/room-transaction.model');
+const roomService = require('./room.service');
 
 class ContractService {
 
@@ -29,9 +31,10 @@ class ContractService {
         await contract.save();
 
         await demandService.createServiceDemandForRoom(contract._id);
-
+        // create contract hash
+        const contractHash = await ContractService.hashContract(contract._id);
         return {
-            contract
+            contract, contractHash
         }
     }
 
@@ -44,49 +47,38 @@ class ContractService {
         }
     }
 
-    async creatSmartContract(contractId, ownerAddress, renterAddress) {
-        if (!(contractId && ownerAddress && renterAddress))
-            throw new ArgumentError('smart contract');
+    async signByRenter(userId, roomId, contractHash) {
 
-        const contract = await Contract.getOne(contractId);
-
-        const { room, payment } = contract;
-        // then hash all info of contract
-        const hash = await this.hashContract(contractId);
-        if (!hash)
-            throw new MyError('Contract info invalid!');
-
-        return await RentalContract.createSmartContractFromRentalContract(
-            { contractId, rentAumont: payment, depositAmount: room?.deposit, hash },
-            ownerAddress, renterAddress
-        )
-    }
-
-    async signByRenter(userId, contractAddress) {
-        if (!userId || !contractAddress)
+        if (!userId || !contractHash || !roomId)
             throw new ArgumentError('sign by renter missing');
 
-        const user = await User.getById(userId);
-        const { wallet } = user;
-        const contract = await HashContract.getByAddress(contractAddress);
-        if (contract.payment > wallet.balance)
+        // get room last transaction info
+        const { lstTransaction } = await roomService.getOneRoom({ _id: roomId }, { lstTransaction: 1 });
+
+        // get room transaction ==> return room smart-contract id
+        const roomTransaction = await RoomTransaction.find({
+            roomId,
+            status: "available",
+            ...(lstTransaction && { transactionHash: lstTransaction })
+        }).populate([
+            {
+                path: roomId,
+                select: "-updatedAt"
+            },
+            {
+                path: owner,
+
+            }
+        ]);
+        if (!roomTransaction) throw new MyError("room not available!");
+
+        // check payment
+        const { wallet } = await User.getById(userId);
+        if (roomTransaction.value > wallet.balance)
             throw new MyError('Insufficient balance');
-        return await RentalContract.signByRenter(wallet?.walletAddress, contractAddress, contract.payment);
+
+        return await RentalContract.signByRenter(wallet?.walletAddress, contractHash, roomTransaction.roomUid);
     }
-
-    async signByOwner(userId, contractAddress) {
-        if (!userId || !contractAddress)
-            throw new ArgumentError('sign by owner missing');
-
-        const user = await User.getById(userId);
-        const { wallet } = user;
-
-        return await RentalContract.signByOwner(wallet.walletAddress, contractAddress);
-    }
-
-    async readContract(
-
-    ) { }
 
     //takes a parameter days that specifies the number of days in the future to look for contracts where payTime is due
     async getContractsDueIn(days) {
@@ -117,7 +109,13 @@ class ContractService {
 
         const jsonContract = JSON.stringify(contract);
 
-        return crypto.hash(jsonContract);
+        const hash = crypto.hash(jsonContract);
+
+        const contractHash = await HashContract.create({
+            contractId,
+            hash,
+        });
+        return hash;
     }
 
     async getContractByHash(hashContract) {

@@ -217,6 +217,6 @@ router.post('/create-contract', contractController.createContract);
  *       '500':
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.post('/:contractAddress/sign-by-renter', contractController.signByRenter);
+router.post('/sign-by-renter', contractController.signByRenter);
 router.get('/:renterId', contractController.getContractByRenter);
 module.exports = router; 

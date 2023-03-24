@@ -68,6 +68,7 @@ const roomSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    lstTransaction: { type: String, default: "" }
   },
   {
     timestamps: true,
@@ -81,7 +82,7 @@ roomSchema.statics.getById = async (_id) => {
   const roomPineline = [
     {
       path: 'owner',
-      select: 'username email phone identity name avatar'
+      select: 'username email phone identity name avatar wallet'
     }
   ]
   const room = await Room.findById(_id)

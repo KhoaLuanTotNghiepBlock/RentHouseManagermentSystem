@@ -80,9 +80,20 @@ class RoomService {
         };
     }
 
-    async getOneRoom(roomId) {
-        const room = await Room.getById(roomId);
-
+    async getOneRoom(conditions = {}, projection = {}) {
+        const roomPineline = [
+            {
+                path: 'owner',
+                select: 'username email phone identity name avatar wallet'
+            },
+            {
+                path: 'services',
+                select: '-updatedAt'
+            }
+        ];
+        const room = await Room.findOne(conditions)
+            .populate(roomPineline)
+            .projection();
         return room;
     }
 }
