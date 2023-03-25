@@ -32,21 +32,22 @@ class RoomService {
             throw new NotFoundError('room servce=> not found user');
 
         room.owner = userOwner._id;
-        //set unity
+        // //set unity
         room.amentilities = amentilities;
 
         room.address = {};
         room.address = address;
-        // save
         await room.save();
-        // set sevrice 
+        // // set sevrice 
         room.services = {};
         await serviceApartment.createRoomService(room._id, services);
 
-        await rentalContract.setRoomForRent(room._id, userOwner.wallet.walletAddress, room.basePrice, room.deposit);
-        // await rentalContract.setRoomForRent("641c7bb881e925acffaf013e", userOwner.wallet.walletAddress, 10, 10);
+        const roomTransaction = await rentalContract.setRoomForRent(room._id, userOwner.wallet.walletAddress, room.basePrice, room.deposit);
+        // await rentalContract.setRoomForRent("641df3419b6935f136bb05e9", userOwner.wallet.walletAddress, 23000, 23000);
         return {
-            data: room
+            data: {
+                room, roomTransaction
+            }
         }
     }
 
@@ -91,7 +92,7 @@ class RoomService {
                 select: '-updatedAt'
             }
         ];
-        const room = await Room.findOne(conditions)
+        const room = await Room.findOne({ conditions })
             .populate(roomPineline)
             .projection();
         return room;

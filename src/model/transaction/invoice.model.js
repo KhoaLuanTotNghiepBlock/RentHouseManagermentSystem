@@ -33,9 +33,10 @@ const invoiceSchema = new mongoose.Schema(
         ref: "ServiceDemand",
       },
     ],
+    paymentDate: { type: Date, default: null },
     startDate: Date,
     endDate: Date,
-    enable: Boolean,
+    enable: { type: Boolean, default: true },
   },
   {
     versionKey: false,
@@ -44,6 +45,21 @@ const invoiceSchema = new mongoose.Schema(
 );
 
 invoiceSchema.plugin(Timezone);
-
+invoiceSchema.statics.getOne = async (
+  conditions = {},
+  projections = {}
+) => {
+  const invoice = await Invoice.findOne(conditions)
+    .populate([
+      {
+        path: 'contract',
+        select: '-updateAt'
+      },
+      {
+        path: 'serviceDemands',
+        select: '-updateAt'
+      }
+    ])
+}
 const Invoice = mongoose.model("Invoice", invoiceSchema);
 module.exports = Invoice;

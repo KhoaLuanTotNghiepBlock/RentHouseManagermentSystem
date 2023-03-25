@@ -107,18 +107,6 @@ const contractController = require('../controller/contract.controller');
  *               message: "create contract success"
  *               errorCode: 200
  *               data:
- *                 "period": 6
- *                 "renter": "640373e77ecb0c7ed28ed90e"
- *                 "room": "640376efcf8fb7daaa7d8b25"
- *                 "dateRent": "2023-02-19T17:00:00.000Z"
- *                 "payTime": "2023-02-19T17:00:00.000Z" 
- *                 "payMode": "VNPay"
- *                 "payment": 50000
- *                 "enable": true
- *                 "_id": "64037d570a1ec6c547b2f3af"
- *                 "lessor": "640374297ecb0c7ed28ed914"
- *                 "createdAt": "2023-03-05T00:18:15.495Z"
- *                 "updatedAt": "2023-03-04T17:18:15.495Z"
  *       400:
  *         $ref: '#/components/responses/BadRequest'
  *       401:
@@ -127,96 +115,8 @@ const contractController = require('../controller/contract.controller');
  *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/create-contract', contractController.createContract);
-/**
- * @swagger
- * /bh/contract/create-contract:
- *   post:
- *     summary: Create a new contract
- *     description: Create a new contract with the given data
- *     tags:
- *       - Contract
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               period:
- *                 type: string
- *               room:
- *                 type: string
- *               dateRent:
- *                 type: string
- *               payTime:
- *                 type: string
- *               payMode:
- *                 type: string
- *               payment:
- *                 type: number
- *             example:
- *               period: "3 months"
- *               room: "101"
- *               dateRent: "2023-03-22"
- *               payTime: "5:00 PM"
- *               payMode: "Cash"
- *               payment:
- *                 amount: 1500
- *                 method: "Cash"
- *     responses:
- *       '200':
- *         description: Successful operation
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 errorCode:
- *                   type: number
- *                 data:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: string
- *                     period:
- *                       type: string
- *                     room:
- *                       type: string
- *                     dateRent:
- *                       type: string
- *                     payTime:
- *                       type: string
- *                     payMode:
- *                       type: string
- *                     payment:
- *                       type: object
- *                       properties:
- *                         amount:
- *                           type: number
- *                         method:
- *                           type: string
- *             example:
- *               message: "create contract success"
- *               errorCode: 200
- *               data:
- *                 id: "b8de0e5e-7ef6-4c11-95e3-25c929e3a4d4"
- *                 period: "3 months"
- *                 room: "101"
- *                 dateRent: "2023-03-22"
- *                 payTime: "5:00 PM"
- *                 payMode: "Cash"
- *                 payment:
- *                   amount: 1500
- *                   method: "Cash"
- *       '400':
- *         $ref: '#/components/responses/BadRequest'
- *       '401':
- *         $ref: '#/components/responses/Unauthorized'
- *       '500':
- *         $ref: '#/components/responses/InternalServerError'
- */
+
 router.post('/sign-by-renter', contractController.signByRenter);
+
 router.get('/:renterId', contractController.getContractByRenter);
 module.exports = router; 

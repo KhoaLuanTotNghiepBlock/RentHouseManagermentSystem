@@ -12,6 +12,8 @@ const RentalContract = require('../blockchain/deploy/BHRentalContract');
 const datetimeHelper = require('../../../utils/datetime.helper');
 const RoomTransaction = require('../../../model/transaction/room-transaction.model');
 const roomService = require('./room.service');
+const commonHelper = require('../../../utils/common.helper');
+const Room = require('../../../model/room.model');
 
 class ContractService {
 
@@ -32,7 +34,7 @@ class ContractService {
 
         await demandService.createServiceDemandForRoom(contract._id);
         // create contract hash
-        const contractHash = await ContractService.hashContract(contract._id);
+        const contractHash = await this.hashContract(contract._id);
         return {
             contract, contractHash
         }
@@ -48,36 +50,40 @@ class ContractService {
     }
 
     async signByRenter(userId, roomId, contractHash) {
-
         if (!userId || !contractHash || !roomId)
             throw new ArgumentError('sign by renter missing');
 
-        // get room last transaction info
-        const { lstTransaction } = await roomService.getOneRoom({ _id: roomId }, { lstTransaction: 1 });
-
-        // get room transaction ==> return room smart-contract id
+        // get room transaction ==> return room smart - contract id
         const roomTransaction = await RoomTransaction.find({
             roomId,
             status: "available",
-            ...(lstTransaction && { transactionHash: lstTransaction })
         }).populate([
             {
-                path: roomId,
+                path: 'roomId',
                 select: "-updatedAt"
             },
             {
-                path: owner,
-
+                path: 'owner',
+                select: "-updateAt"
             }
         ]);
-        if (!roomTransaction) throw new MyError("room not available!");
-
-        // check payment
+        if (!roomTransaction || roomTransaction.length === 0) throw new MyError("room not available!");
+        const roomUid = roomTransaction[0].roomUid;
+        const rentAmount = roomTransaction[0].roomId.basePrice;
+        const depositAmount = roomTransaction[0].roomId.deposit;
+        // // check payment
         const { wallet } = await User.getById(userId);
         if (roomTransaction.value > wallet.balance)
             throw new MyError('Insufficient balance');
 
-        return await RentalContract.signByRenter(wallet?.walletAddress, contractHash, roomTransaction.roomUid);
+
+        return await RentalContract.signByRenter(
+            wallet?.walletAddress,
+            contractHash,
+            roomUid,
+            rentAmount,
+            depositAmount
+        );
     }
 
     //takes a parameter days that specifies the number of days in the future to look for contracts where payTime is due

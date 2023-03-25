@@ -26,6 +26,7 @@ class ContractController {
     async signByRenter(req, res, next) {
         try {
             const { userId } = req.auth;
+            const { roomId, contractHash } = req.body;
             const data = await contractService.signByRenter(userId, roomId, contractHash);
 
             return res.status(200).json({
@@ -37,6 +38,7 @@ class ContractController {
             next(error);
         }
     }
+
 
     // [GET] bh/contract/:renterId 
     async getContractByRenter(req, res, next) {

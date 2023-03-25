@@ -60,5 +60,19 @@ class InvoiceService {
 
         return paymentDay = datetimeHelper.toObject(paymentDay);
     }
+
+    async payForRentEachMonth(renterId, invoiceId) {
+        // get renter info
+        // get invoice info
+        const { contract, amount, startDate, endDate } = await Invoice.getOne({ _id: invoiceId });
+        if (!contract)
+            throw new MyError('invoice not found');
+        //check date to pay
+        // check balance
+
+        // payfor invoice
+        // uodate status of invoice
+
+    }
 };
 module.exports = new InvoiceService();

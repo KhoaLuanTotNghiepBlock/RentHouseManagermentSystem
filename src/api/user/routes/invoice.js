@@ -132,5 +132,5 @@ const InvoiceController = require('../controller/invoice.controller');
  *         description: Internal server error
  */
 router.post('/create', InvoiceController.createInvoice);
-
+router.post('/:invoiceId/payment', InvoiceController.payForRentEachMonth);
 module.exports = router;

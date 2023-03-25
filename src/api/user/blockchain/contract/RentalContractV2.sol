@@ -40,7 +40,10 @@ contract RentalContract {
         roomId++;
     }
 
-    function signByRenter(uint256 _roomId,  string memory _contractHash) public payable {
+    function signByRenter(
+        uint256 _roomId,
+        string memory _contractHash
+    ) public payable {
         require(rooms[_roomId].forRent, "!for rent");
         require(
             msg.value >=

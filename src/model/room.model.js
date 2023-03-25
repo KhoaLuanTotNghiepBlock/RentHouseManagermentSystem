@@ -83,6 +83,10 @@ roomSchema.statics.getById = async (_id) => {
     {
       path: 'owner',
       select: 'username email phone identity name avatar wallet'
+    },
+    {
+      path: "services",
+      select: "-updatedAt"
     }
   ]
   const room = await Room.findById(_id)

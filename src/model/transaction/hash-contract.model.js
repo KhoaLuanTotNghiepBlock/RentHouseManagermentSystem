@@ -25,7 +25,13 @@ const hashContractSchema = new mongoose.Schema(
 hashContractSchema.plugin(Timezone);
 
 hashContractSchema.statics.getByContractId = async (contractId) => {
-    const hashContract = await hashContract.findOne({ hash });
+    const hashContract = await HashContract.findOne({ _id: contractId })
+        .populate([
+            {
+                path: "contractId",
+                select: "-updatedAt"
+            }
+        ]);
 
     if (!hashContract)
         throw new NotFoundError('Hash contract not found');
@@ -33,8 +39,13 @@ hashContractSchema.statics.getByContractId = async (contractId) => {
 };
 
 hashContractSchema.statics.getByHash = async (hash) => {
-    const hashContract = await hashContract.findOne({ contractId: contractId });
-
+    const hashContract = await HashContract.findOne({ hash })
+        .populate([
+            {
+                path: "contractId",
+                select: "-updatedAt"
+            }
+        ]);
     if (!hashContract)
         throw new NotFoundError('Hash contract not found');
     return hashContract;
