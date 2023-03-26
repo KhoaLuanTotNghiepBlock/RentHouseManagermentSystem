@@ -81,7 +81,7 @@ class RoomService {
         };
     }
 
-    async getOneRoom(conditions = {}, projection = {}) {
+    async getOneRoom(roomId) {
         const roomPineline = [
             {
                 path: 'owner',
@@ -92,9 +92,8 @@ class RoomService {
                 select: '-updatedAt'
             }
         ];
-        const room = await Room.findOne({ conditions })
-            .populate(roomPineline)
-            .projection();
+        const room = await Room.findById(roomId)
+            .populate(roomPineline);
         return room;
     }
 }
