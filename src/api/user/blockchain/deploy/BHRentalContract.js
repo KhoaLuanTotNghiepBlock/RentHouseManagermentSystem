@@ -13,6 +13,7 @@ const { abi, bytecode } = JSON.parse(fs.readFileSync("src/api/user/blockchain/co
 const { SIGNER_PRIVATE_KEY } = process.env;
 // Creating a signing account from a private key
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
+
 const ContractRentalHouse = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
 const { USER_TRANSACTION_ACTION } = require('../../../../config/user-transaction');
 const InvoiceTransaction = require('../../../../model/transaction/invoice-transaction');
@@ -64,28 +65,36 @@ const RentalContract = {
     },
 
     signByRenter: async (renterAddress, contractHash, roomUid, rentAmount, depositAmount) => {
+        console.log("🚀 ~ file: BHRentalContract.js:67 ~ signByRenter: ~ renterAddress, contractHash, roomUid, rentAmount, depositAmount:", renterAddress, contractHash, roomUid, rentAmount, depositAmount)
         const { wallet, _id } = await User.getUserByWallet(renterAddress);
         const signRenter = await RentalContract.createSigner(renterAddress);
         // // convert payment to ether
-        const value = await vndToEth(rentAmount + depositAmount);
+        rentAmount = await vndToEth(rentAmount);
+        depositAmount = await vndToEth(depositAmount);
+        const valueRent = convertBalanceToWei(rentAmount); // price of room is wei
+        console.log("🚀 ~ file: BHRentalContract.js:75 ~ signByRenter: ~ valueRent:", valueRent)
+        const valueDeposit = convertBalanceToWei(depositAmount);
+        console.log("🚀 ~ file: BHRentalContract.js:77 ~ signByRenter: ~ valueDeposit:", valueDeposit)
+        const value = valueRent + valueDeposit;
         // // check balance of renter
         const userBalance = await RentalContract.getUserBalance(signRenter.address);
-        if (userBalance < value)
+        if (convertBalanceToWei(userBalance) < value)
             throw new MyError('renter not enough balance');
 
         const signRenterAbi = ContractRentalHouse.methods.signByRenter(roomUid, contractHash).encodeABI();
-
         const tx = {
             from: signRenter.address,
             to: CONTRACT_ADDRESS,
-            gasLimit: 300000,
-            value: convertBalanceToWei(value),
+            gasLimit: web3.utils.toHex(300000),
+            value: value,
             data: signRenterAbi
         };
+
         const signedTx = await web3.eth.accounts.signTransaction(tx, wallet.walletPrivateKey);
         const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
         const signTransactionHash = txReceipt.transactionHash;
         console.log(txReceipt);
+
         setTimeout(() => { console.log('Waited 2 seconds.') }, 2000);
 
         // const signTransactionHash = "0xbcef270a2e722afea66d1f0d07adbc1c883281a6f35dd3417b52795366809af9"
@@ -103,6 +112,13 @@ const RentalContract = {
                 value: 0,
                 status: "already-rent",
                 transactionHash: signTransactionHash
+            }
+        );
+
+        await Room.findOneAndUpdate(
+            { _id: roomTransaction.roomId },
+            {
+                status: "already-rent",
             }
         );
 
@@ -216,12 +232,14 @@ const RentalContract = {
             }
         );
 
+        if (!invoiceTransaction) throw new MyError("invoice not found");
 
-
-
-
-
-
+        await userWalletService.changeBalance(
+            _id,
+            rentAmount,
+            signTransactionHash,
+            USER_TRANSACTION_ACTION.SIGN_CONTRACT
+        );
 
     },
 

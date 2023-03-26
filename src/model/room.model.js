@@ -69,7 +69,8 @@ const roomSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    lstTransaction: { type: String, default: "" }
+    lstTransaction: { type: String, default: "" },
+    status: { type: String, enum: ["available", "already-rent", "not-available"], default: "available" },
   },
   {
     timestamps: true,

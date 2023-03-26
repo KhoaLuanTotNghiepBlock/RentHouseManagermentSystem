@@ -70,8 +70,8 @@ class ContractService {
 
         if (!roomTransaction || roomTransaction.length === 0) throw new MyError("room not available!");
         const roomUid = roomTransaction[0].roomUid;
-        const rentAmount = roomTransaction[0].roomId.basePrice;
-        const depositAmount = roomTransaction[0].roomId.deposit;
+        const rentAmount = roomTransaction[0].roomId.basePrice + 1000;
+        const depositAmount = roomTransaction[0].roomId.deposit + 1000;
         // // check payment
         const { wallet } = await User.getById(userId);
         if (roomTransaction.value > wallet.balance)
