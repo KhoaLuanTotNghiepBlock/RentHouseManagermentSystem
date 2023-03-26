@@ -124,7 +124,7 @@ const RentalContract = {
 
         await userWalletService.changeBalance(
             _id,
-            (rentAmount + depositAmount),
+            ethToVND(rentAmount + depositAmount),
             signTransactionHash,
             USER_TRANSACTION_ACTION.SIGN_CONTRACT
         );
@@ -238,9 +238,10 @@ const RentalContract = {
             _id,
             rentAmount,
             signTransactionHash,
-            USER_TRANSACTION_ACTION.SIGN_CONTRACT
+            USER_TRANSACTION_ACTION.PAY_FOR_RENT,
         );
 
+        return invoiceTransaction;
     },
 
     getUserBalance: async (address) => {

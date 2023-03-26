@@ -63,6 +63,7 @@ class InvoiceService {
 
     async payForRentEachMonth(renterId, invoiceId) {
         // get renter info
+        const renter = await User.getById(renterId);
         // get invoice info
         const { contract, amount, startDate, endDate } = await Invoice.getOne({ _id: invoiceId });
         if (!contract)
