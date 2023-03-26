@@ -174,7 +174,31 @@ const RentalContract = {
         }
     },
 
-    payForRentMonth: async (renterAddress, roomUid, invoiceHash) => {
+    payForRentMonth: async (renterAddress, roomUid, invoiceHash, rentAmount) => {
+        const { wallet, _id } = await User.getUserByWallet(renterAddress);
+        const signRenter = await RentalContract.createSigner(renterAddress);
+        // convert payment to ether
+        const value = await vndToEth(rentAmount);
+        // check balance of renter
+        const userBalance = await RentalContract.getUserBalance(signRenter.address);
+        if (userBalance < value)
+            throw new MyError('renter not enough balance');
+
+        const payRenter = ContractRentalHouse.methods.PayForRent(roomUid, invoiceHash).encodeABI();
+
+        const tx = {
+            from: signRenter.address,
+            to: CONTRACT_ADDRESS,
+            gasLimit: 300000,
+            value: value,
+            data: payRenter
+        };
+        const signedTx = await web3.eth.accounts.signTransaction(tx, wallet.walletPrivateKey);
+        const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+        const signTransactionHash = txReceipt.transactionHash;
+        console.log(txReceipt);
+        setTimeout(() => { console.log('Waited 2 seconds.') }, 1000);
+
 
     },
 

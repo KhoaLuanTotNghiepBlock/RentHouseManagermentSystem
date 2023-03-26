@@ -12,6 +12,7 @@ const roomSchema = new mongoose.Schema(
       type: Number,
       require: true,
     },
+    period: { type: Number, default: 6 },
     owner: {
       type: ObjectId,
       require: true,
