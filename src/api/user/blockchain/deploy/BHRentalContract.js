@@ -69,6 +69,7 @@ const RentalContract = {
         const { wallet, _id } = await User.getUserByWallet(renterAddress);
         const signRenter = await RentalContract.createSigner(renterAddress);
         // // convert payment to ether
+        const userPay = rentAmount + depositAmount;
         rentAmount = await vndToEth(rentAmount);
         depositAmount = await vndToEth(depositAmount);
         const valueRent = convertBalanceToWei(rentAmount); // price of room is wei
@@ -124,7 +125,7 @@ const RentalContract = {
 
         await userWalletService.changeBalance(
             _id,
-            ethToVND(rentAmount + depositAmount),
+            userPay,
             signTransactionHash,
             USER_TRANSACTION_ACTION.SIGN_CONTRACT
         );
@@ -249,7 +250,5 @@ const RentalContract = {
         const balanceEth = web3.utils.fromWei(balanceWei, 'ether');
         return balanceEth;
     },
-
-
 }
 module.exports = RentalContract;
