@@ -72,22 +72,22 @@ const RentalContract = {
         if (userBalance < value)
             throw new MyError('renter not enough balance');
 
-        // const signRenterAbi = ContractRentalHouse.methods.signByRenter(roomUid, contractHash).encodeABI();
+        const signRenterAbi = ContractRentalHouse.methods.signByRenter(roomUid, contractHash).encodeABI();
 
-        // const tx = {
-        //     from: signRenter.address,
-        //     to: CONTRACT_ADDRESS,
-        //     gasLimit: 300000,
-        //     value: convertBalanceToWei(value),
-        //     data: signRenterAbi
-        // };
-        // const signedTx = await web3.eth.accounts.signTransaction(tx, wallet.walletPrivateKey);
-        // const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
-        // const signTransactionHash = txReceipt.transactionHash;
-        // console.log(txReceipt);
-        // setTimeout(() => { console.log('Waited 2 seconds.') }, 2000);
+        const tx = {
+            from: signRenter.address,
+            to: CONTRACT_ADDRESS,
+            gasLimit: 300000,
+            value: convertBalanceToWei(value),
+            data: signRenterAbi
+        };
+        const signedTx = await web3.eth.accounts.signTransaction(tx, wallet.walletPrivateKey);
+        const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+        const signTransactionHash = txReceipt.transactionHash;
+        console.log(txReceipt);
+        setTimeout(() => { console.log('Waited 2 seconds.') }, 2000);
 
-        const signTransactionHash = "0xbcef270a2e722afea66d1f0d07adbc1c883281a6f35dd3417b52795366809af9"
+        // const signTransactionHash = "0xbcef270a2e722afea66d1f0d07adbc1c883281a6f35dd3417b52795366809af9"
 
         const event = await RentalContract.getGetEventFromTransaction(signTransactionHash, ContractRentalHouse);
         if (event.length === 0) throw new MyError('event not found');
@@ -106,7 +106,7 @@ const RentalContract = {
 
         await userWalletService.changeBalance(
             _id,
-            rentAmount + depositAmount,
+            -(rentAmount + depositAmount),
             signTransactionHash,
             USER_TRANSACTION_ACTION.SIGN_CONTRACT
         );
