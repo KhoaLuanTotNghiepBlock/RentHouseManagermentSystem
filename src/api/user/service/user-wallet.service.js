@@ -3,8 +3,15 @@ const { bugId } = require('../../../config/default.json');
 const MyError = require("../../../exception/MyError");
 const UserTransaction = require('../../../model/transaction/user-transaction');
 const commonHelper = require("../../../utils/common.helper");
-const { USER_TRANSACTION_ACTION } = require('../../../config/user-transaction')
+const { USER_TRANSACTION_ACTION, ACTION_FUNCTION } = require('../../../config/user-transaction')
 
+const calculate = (action, num1, num2) => {
+    if (ACTION_FUNCTION[action] === 'plus') {
+        return num1 + num2;
+    } else {
+        return num1 - num2;
+    }
+}
 class UserWalletService {
     async getBalance(userId) {
         const { wallet } = await User.getById(userId);
@@ -13,17 +20,22 @@ class UserWalletService {
     }
 
     async changeBalance(userId, amount, data, action, transactionId = bugId, withHistory = true) {
-
+        /**
+         * get action amount
+         * get user amount
+         * calculate amout
+         */
         const userBalance = await User.findOne({ _id: userId }).select('wallet');
         if (!userBalance)
             throw new MyError('user not found');
 
         amount = commonHelper.convertToNumber(amount);
-        let newAmount = commonHelper.convertToNumber(userBalance?.wallet?.balance);
+        let newAmount = commonHelper.convertToNumber(Math.abs(userBalance.wallet.balance));
         if (newAmount === Infinity) {
             newAmount = 0;
         }
-        newAmount += amount;
+        const oldBalance = newAmount;
+        newAmount = calculate(action, oldBalance, amount);
         userBalance.wallet.balance = newAmount;
         await userBalance.save();
 
@@ -32,7 +44,7 @@ class UserWalletService {
                 action,
                 actionAmount: amount,
                 transactionId,
-                prevBalance: userBalance?.balance || 0,
+                prevBalance: oldBalance || 0,
                 balance: userBalance.wallet.balance,
                 userId,
                 data,

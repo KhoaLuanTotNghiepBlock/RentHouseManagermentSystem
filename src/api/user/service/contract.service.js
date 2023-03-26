@@ -56,7 +56,7 @@ class ContractService {
         // get room transaction ==> return room smart - contract id
         const roomTransaction = await RoomTransaction.find({
             roomId,
-            status: "available",
+            // status: "available",
         }).populate([
             {
                 path: 'roomId',
@@ -67,6 +67,7 @@ class ContractService {
                 select: "-updateAt"
             }
         ]);
+
         if (!roomTransaction || roomTransaction.length === 0) throw new MyError("room not available!");
         const roomUid = roomTransaction[0].roomUid;
         const rentAmount = roomTransaction[0].roomId.basePrice;

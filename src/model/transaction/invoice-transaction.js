@@ -12,6 +12,7 @@ const invoiceTransactionSchema = new mongoose.Schema(
             required: true,
             ref: 'Invoice'
         },
+        renter: { type: ObjectId },
         hash: {
             type: String
         },

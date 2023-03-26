@@ -15,6 +15,7 @@ const { SIGNER_PRIVATE_KEY } = process.env;
 const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
 const ContractRentalHouse = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
 const { USER_TRANSACTION_ACTION } = require('../../../../config/user-transaction');
+const InvoiceTransaction = require('../../../../model/transaction/invoice-transaction');
 // 🚀 ~ file: test.test.js:23 ~ eth: 0.0005599012590399969
 // 🚀 ~ file: test.test.js:25 ~ vnd: 23000
 const RentalContract = {
@@ -65,9 +66,9 @@ const RentalContract = {
     signByRenter: async (renterAddress, contractHash, roomUid, rentAmount, depositAmount) => {
         const { wallet, _id } = await User.getUserByWallet(renterAddress);
         const signRenter = await RentalContract.createSigner(renterAddress);
-        // convert payment to ether
+        // // convert payment to ether
         const value = await vndToEth(rentAmount + depositAmount);
-        // check balance of renter
+        // // check balance of renter
         const userBalance = await RentalContract.getUserBalance(signRenter.address);
         if (userBalance < value)
             throw new MyError('renter not enough balance');
@@ -91,6 +92,7 @@ const RentalContract = {
 
         const event = await RentalContract.getGetEventFromTransaction(signTransactionHash, ContractRentalHouse);
         if (event.length === 0) throw new MyError('event not found');
+
         console.log("🚀 ~ file: BHRentalContract.js:151 ~ setRoomForRent: ~ event:", event)
         const { returnValues } = event[0];
 
@@ -106,7 +108,7 @@ const RentalContract = {
 
         await userWalletService.changeBalance(
             _id,
-            -(rentAmount + depositAmount),
+            (rentAmount + depositAmount),
             signTransactionHash,
             USER_TRANSACTION_ACTION.SIGN_CONTRACT
         );
@@ -197,7 +199,28 @@ const RentalContract = {
         const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
         const signTransactionHash = txReceipt.transactionHash;
         console.log(txReceipt);
-        setTimeout(() => { console.log('Waited 2 seconds.') }, 1000);
+
+        setTimeout(() => { console.log('Waited 1 seconds.') }, 1000);
+
+        const event = await RentalContract.getGetEventFromTransaction(signTransactionHash, ContractRentalHouse);
+        if (event.length === 0) throw new MyError('event not found');
+        console.log("🚀 ~ file: BHRentalContract.js:151 ~ setRoomForRent: ~ event:", event)
+        const { returnValues } = event[0];
+
+        // create invoice transaction
+        // update user balance
+        const invoiceTransaction = await InvoiceTransaction.findOneAndUpdate(
+            { hash: invoiceHash },
+            {
+                txhash: signTransactionHash
+            }
+        );
+
+
+
+
+
+
 
 
     },
