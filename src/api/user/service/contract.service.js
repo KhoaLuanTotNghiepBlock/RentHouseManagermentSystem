@@ -94,7 +94,6 @@ class ContractService {
 
         // Find contracts where payTime is within the specified range
         const contracts = await Contract.find({});
-
         return contracts;
     }
 

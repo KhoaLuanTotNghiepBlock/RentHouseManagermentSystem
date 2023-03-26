@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
 const Timezone = require("mongoose-timezone");
+const MyError = require("../../exception/MyError");
 
-const { ObjectId } = mongoose.Schema;
+const ObjectId = mongoose.Types.ObjectId;
 
 const invoiceSchema = new mongoose.Schema(
   {
@@ -35,8 +36,10 @@ const invoiceSchema = new mongoose.Schema(
     ],
     paymentDate: { type: Date, default: null },
     startDate: Date,
-    endDate: Date,
+    endDate: { type: Date, },
     enable: { type: Boolean, default: true },
+    hash: { type: String },
+    txhash: { type: String }
   },
   {
     versionKey: false,
@@ -45,21 +48,22 @@ const invoiceSchema = new mongoose.Schema(
 );
 
 invoiceSchema.plugin(Timezone);
-invoiceSchema.statics.getOne = async (
-  conditions = {},
-  projections = {}
-) => {
-  const invoice = await Invoice.findOne(conditions)
+invoiceSchema.statics.getOne = async (invoiceId) => {
+  const invoice = await Invoice.findById(invoiceId)
     .populate([
       {
         path: 'contract',
-        select: '-updateAt'
+        select: '-updatedAt'
       },
       {
         path: 'serviceDemands',
-        select: '-updateAt'
+        select: '-updatedAt'
       }
     ])
+  if (!invoice)
+    throw new MyError('invoice not found');
+
+  return invoice;
 }
 const Invoice = mongoose.model("Invoice", invoiceSchema);
 module.exports = Invoice;

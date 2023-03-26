@@ -14,5 +14,5 @@ router.put('/service-demand', serviceApartmentController.updateServiceDemand);
  *         description: A list of rooms
  */
 router.get('/unit', serviceApartmentController.getAllUnit);
-
+router.get('/:roomId/service-demand', serviceApartmentController.getServiceDemand)
 module.exports = router;

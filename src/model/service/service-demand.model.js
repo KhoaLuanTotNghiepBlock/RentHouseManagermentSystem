@@ -54,7 +54,7 @@ const serviceDemandSchema = new mongoose.Schema(
 serviceDemandSchema.plugin(Timezone);
 
 serviceDemandSchema.statics.getNewestservice = async (serviceId) => {
-  const serviceDemands = await ServiceDemand.find({ servicce: serviceId }).sort({ _id: -1 });
+  const serviceDemands = await ServiceDemand.find({ service: serviceId }).sort({ _id: -1 });
 
   if (serviceDemandSchema.length === 0)
     return null;
@@ -63,7 +63,11 @@ serviceDemandSchema.statics.getNewestservice = async (serviceId) => {
 }
 
 serviceDemandSchema.statics.getLastService = async (serviceId, lastMonth) => {
-  const serviceDemand = await ServiceDemand.findOne({ servicce: serviceId, atMonth: lastMonth });
+  const serviceDemand = await ServiceDemand.findOne({ service: serviceId, atMonth: lastMonth })
+    .populate({
+      path: 'service',
+      select: 'name description basePrice unit'
+    });
   if (!serviceDemand)
     return null;
 
@@ -71,7 +75,11 @@ serviceDemandSchema.statics.getLastService = async (serviceId, lastMonth) => {
 }
 
 serviceDemandSchema.statics.getPresentService = async (serviceId, presentMonth) => {
-  const serviceDemand = await ServiceDemand.findOne({ servicce: serviceId, atMonth: presentMonth });
+  const serviceDemand = await ServiceDemand.findOne({ service: serviceId, atMonth: presentMonth })
+    .populate({
+      path: 'service',
+      select: 'name description basePrice unit'
+    });
 
   if (!serviceDemand)
     throw new MyError('service demand invalid');

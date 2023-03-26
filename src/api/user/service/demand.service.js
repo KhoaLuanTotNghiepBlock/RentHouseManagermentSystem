@@ -1,6 +1,7 @@
 const ArgumentError = require("../../../exception/ArgumentError");
 const MyError = require("../../../exception/MyError");
 const NotFoundError = require("../../../exception/NotFoundError");
+const Room = require("../../../model/room.model");
 const ServiceDemand = require("../../../model/service/service-demand.model");
 const Service = require("../../../model/service/service.model");
 const Contract = require("../../../model/transaction/contract.model");
@@ -34,6 +35,26 @@ class ServiceDemandService {
         return serviceDemand;
     }
 
+    async getListServiceDemandRoomAtMonth(roomId, atMonth) {
+        const { services } = await Room.findById(roomId).populate([
+            {
+                path: "services",
+                select: "-updateAt"
+            }
+        ]);
+
+        if (!services) throw new MyError('service not found');
+
+        const serviceDemands = [];
+        for (let i = 0; i < services.length; i++) {
+
+            const demand = await ServiceDemand.getPresentService(services[i]._id, atMonth);
+            serviceDemands.push(demand);
+        }
+
+        return serviceDemands;
+
+    }
     async createServiceDemandForRoom(contractId) {
         if (!(contractId))
             throw new ArgumentError('invoice service ==>');

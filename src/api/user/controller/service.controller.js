@@ -53,6 +53,24 @@ class ServiceApartmentController {
             next(error);
         }
     }
+
+    //[GET] /service/:roomId/service-demand
+    async getServiceDemand(req, res, next) {
+        try {
+            const atMonth = new Date();
+            const roomId = req.params.roomId;
+
+            const data = await demandService.getListServiceDemandRoomAtMonth(roomId, atMonth.getMonth() + 1);
+
+            return res.status(200).json({
+                message: "success",
+                errorCode: 200,
+                data
+            })
+        } catch (error) {
+            next(error)
+        }
+    }
 }
 
 module.exports = new ServiceApartmentController();

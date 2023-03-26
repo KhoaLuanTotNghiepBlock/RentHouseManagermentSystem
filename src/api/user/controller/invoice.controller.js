@@ -10,7 +10,7 @@ class InvoiceController {
             const { userId } = req.auth;
 
             const { contractId, invoiceInfo } = req.body;
-            const { data } = await invoiceService.createInvoice(userId, contractId, invoiceInfo);
+            const data = await invoiceService.createInvoice(userId, contractId, invoiceInfo);
 
             return res.status(200).json({
                 message: 'create success',
@@ -27,7 +27,7 @@ class InvoiceController {
         try {
             const { userId } = req.auth;
 
-            const { invoiceId } = req.params.invoiceId;
+            const invoiceId = req.params.invoiceId;
             const data = await invoiceService.payForRentEachMonth(userId, invoiceId)
             return res.status(200).json({
                 message: "success",

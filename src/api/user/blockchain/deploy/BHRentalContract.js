@@ -17,6 +17,8 @@ const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
 const ContractRentalHouse = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
 const { USER_TRANSACTION_ACTION } = require('../../../../config/user-transaction');
 const InvoiceTransaction = require('../../../../model/transaction/invoice-transaction');
+const Invoice = require('../../../../model/transaction/invoice.model');
+const crypto = require('../../../../utils/crypto.hepler');
 // 🚀 ~ file: test.test.js:23 ~ eth: 0.0005599012590399969
 // 🚀 ~ file: test.test.js:25 ~ vnd: 23000
 const RentalContract = {
@@ -193,7 +195,7 @@ const RentalContract = {
         }
     },
 
-    payForRentMonth: async (renterAddress, roomUid, invoiceHash, rentAmount) => {
+    payForRentMonth: async (renterAddress, roomUid, invoice, rentAmount) => {
         const { wallet, _id } = await User.getUserByWallet(renterAddress);
         const signRenter = await RentalContract.createSigner(renterAddress);
         // convert payment to ether
@@ -203,15 +205,17 @@ const RentalContract = {
         if (userBalance < value)
             throw new MyError('renter not enough balance');
 
-        const payRenter = ContractRentalHouse.methods.PayForRent(roomUid, invoiceHash).encodeABI();
+        const invoiceHash = crypto.hash(invoice);
+        const payRenter = ContractRentalHouse.methods.payForRentByMonth(roomUid, invoiceHash).encodeABI();
 
         const tx = {
             from: signRenter.address,
             to: CONTRACT_ADDRESS,
             gasLimit: 300000,
-            value: value,
+            value: convertBalanceToWei(value),
             data: payRenter
         };
+
         const signedTx = await web3.eth.accounts.signTransaction(tx, wallet.walletPrivateKey);
         const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
         const signTransactionHash = txReceipt.transactionHash;
@@ -224,17 +228,17 @@ const RentalContract = {
         console.log("🚀 ~ file: BHRentalContract.js:151 ~ setRoomForRent: ~ event:", event)
         const { returnValues } = event[0];
 
-        // create invoice transaction
-        // update user balance
-        const invoiceTransaction = await InvoiceTransaction.findOneAndUpdate(
-            { hash: invoiceHash },
+        // create invoice
+        const invoiceUpdate = await Invoice.findOneAndUpdate(
+            { _id: invoice._id },
             {
-                txhash: signTransactionHash
+                payStatus: "Complete",
+                txhash: signTransactionHash,
+                paymentDate: new Date(),
+                hash: invoiceHash
             }
-        );
-
-        if (!invoiceTransaction) throw new MyError("invoice not found");
-
+        )
+        // update user balance
         await userWalletService.changeBalance(
             _id,
             rentAmount,
@@ -242,7 +246,7 @@ const RentalContract = {
             USER_TRANSACTION_ACTION.PAY_FOR_RENT,
         );
 
-        return invoiceTransaction;
+        return invoiceUpdate;
     },
 
     getUserBalance: async (address) => {
