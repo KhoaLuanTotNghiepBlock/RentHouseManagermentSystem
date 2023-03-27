@@ -152,7 +152,7 @@ class RoomController {
             const { userId } = req.auth;
             const conditions = {
                 ...req.query,
-                lessor: userId
+                ...{ lessor: userId }
             };
             const sort = { createdAt: -1 };
             const projection = {
