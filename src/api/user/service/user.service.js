@@ -13,6 +13,11 @@ const District = require('../../../model/ditrict.model');
 const Street = require('../../../model/street.model');
 const Ward = require('../../../model/ward.model');
 const TokenTransaction = require('../../../model/transaction/token-transaction.model');
+const Contract = require('../../../model/transaction/contract.model');
+const Notification = require('../../../model/user/notification.model');
+const Request = require('../../../model/user/request.model');
+const RoomTransaction = require('../../../model/transaction/room-transaction.model');
+const RentalContract = require('../blockchain/deploy/BHRentalContract');
 
 
 class UserService {
@@ -104,7 +109,56 @@ class UserService {
     return user;
   }
 
+  async cancelRentalByRenter(renterId, contractId) {
 
+    const renter = await User.getById(renterId);
+
+    const contract = await Contract.findOne({
+      _id: contractId,
+      renter: renter._id
+    });
+
+    if (!contract) throw new MyError('Contract not found');
+
+    const notification = await Notification.create({
+      user: renter._id,
+      receiceUser: contract.lessor,
+      type: "CANCEL_CONTRACT",
+    });
+
+    const request = await Request.create({
+      from: renter._id,
+      to: contract.lessor,
+      type: 'CANCEL_RENTAL',
+      data: contract
+    });
+    return {
+      notification, request
+    }
+  }
+
+  async acceptCancelRentalRoom(ownerId) {
+    const owner = await User.getById(ownerId);
+
+    const request = await Request.findOne({
+      to: owner._id,
+      type: 'CANCEL_RENTAL'
+    })
+
+    if (!request) throw new MyError('request not found');
+
+    const roomTransaction = await RoomTransaction.findOne(
+      {
+        roomId: request?.data?.room,
+        status: "already-rent"
+      }
+    );
+
+    if (!roomTransaction)
+      throw new MyError('room not found');
+
+    const data = await RentalContract.endRent(owner.wallet.walletAddress, roomTransaction.roomUid);
+  }
 
 }
 
