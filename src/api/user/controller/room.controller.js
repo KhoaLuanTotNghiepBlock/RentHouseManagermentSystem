@@ -152,7 +152,7 @@ class RoomController {
             const { userId } = req.auth;
             const conditions = {
                 ...req.query,
-                ...{ lessor: userId }
+                ...{ owner: userId }
             };
             const sort = { createdAt: -1 };
             const projection = {
@@ -160,10 +160,20 @@ class RoomController {
                 dateRent: 1
             };
 
-            const { items, total, page, limit, totalPages } = await contractService.getAllRoomLessor(
+            const { items, total, page, limit, totalPages } = await roomService.getAllRoom(
                 conditions,
                 commonHelper.getPagination(req.query),
                 projection,
+                [
+                    {
+                        path: 'owner',
+                        select: '-updatedAt'
+                    },
+                    {
+                        path: 'services',
+                        select: '-updatedAt'
+                    }
+                ],
                 sort,
             );
             return res.status(200).json({
