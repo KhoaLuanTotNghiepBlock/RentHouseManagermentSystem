@@ -156,8 +156,6 @@ class RoomController {
             };
             const sort = { createdAt: -1 };
             const projection = {
-                room: 1,
-                dateRent: 1
             };
 
             const { items, total, page, limit, totalPages } = await roomService.getAllRoom(
