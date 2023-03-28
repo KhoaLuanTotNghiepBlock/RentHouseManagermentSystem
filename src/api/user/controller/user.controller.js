@@ -7,6 +7,9 @@ const axios = require('axios');
 const userWalletService = require("../service/user-wallet.service");
 const { USER_TRANSACTION_ACTION } = require('../../../config/user-transaction')
 const commonHelper = require('../../../utils/common.helper');
+const contractService = require("../service/contract.service");
+const NotificationService = require("../service/notification.service");
+const RequestService = require("../service/request.service");
 const { vnp_TmnCode } = process.env;
 const { vnp_HashSecret } = process.env;
 const { vnp_Url } = process.env;
@@ -102,6 +105,36 @@ class UserController {
     }
   }
 
+  //[POST] user/contract/:contractId/cancel-by-renter
+  async cancelByRenter(req, res, next) {
+    try {
+      const { userId } = req.auth;
+      const contractId = req.params.contractId;
+
+      const data = await contractService.cancelContractByRenter(userId, contractId);
+
+      return res.status(200).json({
+        message: "cancel sucess",
+        errorCode: 200,
+        data
+      });
+
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  //[POST] user/contract/:requestId
+  async acceptRequest(req, res, next) {
+    try {
+      const { userId } = req.auth;
+      const requestId = req.params.requestId;
+
+      const data = await userService.acceptRequest(userId, requestId);
+    } catch (error) {
+      next(error);
+    }
+  }
   async confirmPayment(req, res, next) {
     try {
       let vnp_Params = req.query;
@@ -236,6 +269,67 @@ class UserController {
     }
   }
 
+  // [GET] /user/notifications
+  async getNotification(req, res, next) {
+    try {
+      const { userId } = req.auth;
+      const conditions = {
+        ...req.query,
+        receiveUser: userId
+      };
+      const sort = {
+        createdAt: -1,
+      };
+
+      const { items, total, page, limit, totalPages } = await NotificationService.getListNotification(
+        conditions,
+        commonHelper.getPagination(req.query),
+        projection,
+        sort,
+      );
+
+      return res.status(200).json({
+        items,
+        total,
+        page,
+        limit,
+        totalPages
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // [GET] /user/requests
+  async getRequests(req, res, next) {
+    try {
+      const { userId } = req.auth;
+      const conditions = {
+        ...req.query,
+        to: userId
+      };
+      const sort = {
+        createdAt: -1,
+      };
+
+      const { items, total, page, limit, totalPages } = await RequestService.getAllRequest(
+        conditions,
+        commonHelper.getPagination(req.query),
+        projection,
+        sort,
+      );
+
+      return res.status(200).json({
+        items,
+        total,
+        page,
+        limit,
+        totalPages
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
   // [PUT] /bh/user/me/profile
   async updateProfile(req, res, next) {
     const userId = req.auth.userId;

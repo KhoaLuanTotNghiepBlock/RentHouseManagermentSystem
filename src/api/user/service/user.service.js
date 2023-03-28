@@ -13,7 +13,7 @@ const District = require('../../../model/ditrict.model');
 const Street = require('../../../model/street.model');
 const Ward = require('../../../model/ward.model');
 const TokenTransaction = require('../../../model/transaction/token-transaction.model');
-
+const Request = require('../../../model/user/request.model');
 
 class UserService {
   checkImage(file) {
@@ -104,6 +104,16 @@ class UserService {
     return user;
   }
 
+  async acceptRequest(userId, requestId) {
+    // get user
+    const user = await User.getById(userId);
+    // get request
+    const request = Request.getById(requestId);
+
+
+    // cancel rental
+    //delete request
+  }
 
 
 }

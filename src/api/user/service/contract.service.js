@@ -1,6 +1,7 @@
 const contractValidate = require('../validate/contract.validatation');
 const Contract = require('../../../model/transaction/contract.model');
 const User = require('../../../model/user/user.model');
+const Request = require('../../../model/user/request.model');
 const MyError = require('../../../exception/MyError');
 const demandService = require('./demand.service');
 const NotFoundError = require('../../../exception/NotFoundError');
@@ -14,6 +15,7 @@ const RoomTransaction = require('../../../model/transaction/room-transaction.mod
 const roomService = require('./room.service');
 const commonHelper = require('../../../utils/common.helper');
 const Room = require('../../../model/room.model');
+const { request } = require('express');
 
 class ContractService {
 
@@ -87,6 +89,36 @@ class ContractService {
         );
     }
 
+    async cancelContractByRenter(renterId, contractId) {
+        /**
+         * get user renter
+         * get contract
+         * send request to owner
+         * check period of contract 
+         *      => period => renter pay penalty fee, lost deposit fee
+         *      => !period => renter receive deposit
+         */
+        const renter = await User.getById(renterId);
+        // {lessor, period, room, }
+        const contract = await Contract.getOne(contractId);
+        const request = await Request.create({
+            type: 'CANCEL_REQUEST',
+            data: contract,
+            from: renter._id,
+            to: contract.lessor._id
+        });
+
+        const notification = await Notification.create({
+            userOwner: renter._id,
+            receiveUser: contract.lessor._id,
+            type: 'CANCEL_REQUEST'
+        });
+
+        return {
+            request,
+            notification
+        };
+    }
     //takes a parameter days that specifies the number of days in the future to look for contracts where payTime is due
     async getContractsDueIn(days) {
         const today = new Date();

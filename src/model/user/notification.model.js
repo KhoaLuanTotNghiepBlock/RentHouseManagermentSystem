@@ -5,12 +5,12 @@ const { ObjectId } = mongoose.Types;
 
 const NotificationSchema = new mongoose.Schema(
   {
-    user: {
+    userOwner: {
       type: ObjectId,
       ref: "User",
       required: true,
     },
-    requestedUser: {
+    receiveUser: {
       type: ObjectId,
       ref: "User",
       required: true,
@@ -19,27 +19,13 @@ const NotificationSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    relatedUsers: {
-      from: {
-        type: String,
-      },
-      of: {
-        type: String,
-      },
-    },
     isChecked: {
       type: Boolean,
       default: false,
     },
-    tag: [
-      {
-        type: ObjectId,
-        require: true,
-      },
-    ],
     enable: {
       type: Boolean,
-
+      default: true
     },
   },
   {

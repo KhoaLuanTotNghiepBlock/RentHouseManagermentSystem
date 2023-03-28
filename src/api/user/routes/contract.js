@@ -115,8 +115,7 @@ const contractController = require('../controller/contract.controller');
  *         $ref: '#/components/responses/InternalServerError'
  */
 router.post('/create-contract', contractController.createContract);
-
 router.post('/sign-by-renter', contractController.signByRenter);
-
+router.post('/:contractId/cancel-by-renter', contractController.cancelRentRoomByRenter);
 router.get('/:renterId', contractController.getContractByRenter);
 module.exports = router; 

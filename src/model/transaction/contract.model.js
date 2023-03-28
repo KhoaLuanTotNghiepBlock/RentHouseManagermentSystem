@@ -42,7 +42,7 @@ const contractSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-
+    status: { type: String, enum: ["available", "not-available"], default: "avaiable" },
     plusContract: { type: String, default: "" }
   },
   {
