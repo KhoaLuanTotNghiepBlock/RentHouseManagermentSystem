@@ -126,13 +126,18 @@ class UserController {
     }
   }
 
-  //[POST] user/contract/:requestId
+  //[POST] user/contract/accept
   async acceptRequest(req, res, next) {
     try {
       const { userId } = req.auth;
       const requestId = req.params.requestId;
 
-      const data = await userService.acceptRequest(userId, requestId);
+      const data = await userService.acceptCancelRentalRoom(userId, requestId);
+      return res.status(200).json({
+        message: 'success',
+        errorCode: 200,
+        data
+      })
     } catch (error) {
       next(error);
     }

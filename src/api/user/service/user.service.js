@@ -137,13 +137,14 @@ class UserService {
     }
   }
 
-  async acceptCancelRentalRoom(ownerId) {
+  async acceptCancelRentalRoom(ownerId, requestId) {
     const owner = await User.getById(ownerId);
 
     const request = await Request.findOne({
-      to: owner._id,
-      type: 'CANCEL_RENTAL'
+      _id: requestId,
+
     })
+    console.log("🚀 ~ file: user.service.js:148 ~ UserService ~ acceptCancelRentalRoom ~ request:", request)
 
     if (!request) throw new MyError('request not found');
 
@@ -158,6 +159,7 @@ class UserService {
       throw new MyError('room not found');
 
     const data = await RentalContract.endRent(owner.wallet.walletAddress, roomTransaction.roomUid);
+    return data;
   }
 
 }

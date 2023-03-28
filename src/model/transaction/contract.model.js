@@ -42,7 +42,7 @@ const contractSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    status: { type: String, enum: ["available", "not-available"], default: "avaiable" },
+    status: { type: String, enum: ["available", "not-available"], default: "available" },
     plusContract: { type: String, default: "" }
   },
   {
@@ -52,6 +52,7 @@ const contractSchema = new mongoose.Schema(
 );
 
 contractSchema.plugin(Timezone);
+
 contractSchema.statics.getOne = async (contractId, projection = { updatedAt: 0 }) => {
   const roomLookup = {
     from: "rooms",
