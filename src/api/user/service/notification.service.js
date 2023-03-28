@@ -1,11 +1,12 @@
-const Notification = require("../../../model/user/notification.model");
-
 const NotificationService = {};
+const Notification = require('../../../model/user/notification.model');
 
-NotificationService.getListNotification = async (
+
+NotificationService.getAll = async (
     conditions = {},
     pagination,
-    sort = {},
+    projection,
+    sort = {}
 ) => {
     const filter = { ...conditions };
     const { limit, page, skip } = pagination;
@@ -19,18 +20,17 @@ NotificationService.getListNotification = async (
             .limit(limit)
             .populate([
                 {
-                    path: 'userOwner',
-                    select: "_id username avatar phone email wallet"
+                    path: 'user',
+                    select: '-updatedAt'
                 },
                 {
-                    path: 'receiveUser',
-                    select: "_id username avatar phone email wallet"
+                    path: 'receiceUser',
+                    select: '-updatedAt'
                 }
             ])
             .lean(),
         Notification.countDocuments(filter),
     ]);
-
     return {
         items,
         total,
@@ -38,6 +38,5 @@ NotificationService.getListNotification = async (
         limit,
         totalPages: Math.ceil(total / limit),
     };
-};
-
+}
 module.exports = NotificationService;

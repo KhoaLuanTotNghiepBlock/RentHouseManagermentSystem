@@ -249,6 +249,11 @@ const RentalContract = {
         return invoiceUpdate;
     },
 
+    endRent: async (ownerAddress, roomUid) => {
+        const { wallet, _id } = await User.getUserByWallet(ownerAddress);
+        const signOwner = await RentalContract.createSigner(ownerAddress);
+    },
+
     getUserBalance: async (address) => {
         const balanceWei = await web3.eth.getBalance(address);
         const balanceEth = web3.utils.fromWei(balanceWei, 'ether');

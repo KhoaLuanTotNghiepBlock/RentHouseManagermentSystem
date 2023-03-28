@@ -1,11 +1,12 @@
-const Request = require("../../../model/user/request.model");
+const Request = require('../../../model/user/request.model');
 
 const RequestService = {};
 
-RequestService.getAllRequest = async (
+RequestService.getAll = async (
     conditions = {},
     pagination,
-    sort = {},
+    projection,
+    sort = {}
 ) => {
     const filter = { ...conditions };
     const { limit, page, skip } = pagination;
@@ -19,18 +20,17 @@ RequestService.getAllRequest = async (
             .limit(limit)
             .populate([
                 {
-                    path: 'from',
-                    select: "_id username avatar phone email wallet"
+                    path: "from",
+                    select: '-updatedAt'
                 },
                 {
-                    path: 'to',
-                    select: "_id username avatar phone email wallet"
-                }
+                    path: "to",
+                    select: '-updatedAt'
+                },
             ])
             .lean(),
         Request.countDocuments(filter),
     ]);
-
     return {
         items,
         total,
@@ -38,6 +38,6 @@ RequestService.getAllRequest = async (
         limit,
         totalPages: Math.ceil(total / limit),
     };
-};
+}
 
 module.exports = RequestService;

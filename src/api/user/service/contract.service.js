@@ -315,6 +315,7 @@ class ContractService {
         delete filter.page;
         const { lessor } = filter;
         lessor && (filter.lessor = toObjectId(lessor));
+        console.log("🚀 ~ file: contract.service.js:286 ~ ContractService ~ filter.lessor:", filter.lessor)
 
         const roomLookup = {
             from: "rooms",
@@ -335,6 +336,7 @@ class ContractService {
                                     phone: 1,
                                     email: 1,
                                     identity: 1,
+                                    wallet: 1
                                 },
                             },
                         ],
@@ -345,16 +347,6 @@ class ContractService {
                         let: { serviceIds: "$services" },
                         pipeline: [
                             { $match: { $expr: { $in: ["$_id", "$$serviceIds"] } } },
-                            {
-                                $project: {
-                                    _id: 1,
-                                    name: 1,
-                                    avatar: 1,
-                                    phone: 1,
-                                    email: 1,
-                                    identity: 1,
-                                },
-                            },
                         ],
                         as: "services",
                     }
@@ -366,61 +358,73 @@ class ContractService {
 
         const renterLookup = {
             from: "users",
-            let: { userId: "$renter" },
+            let: {
+                renterId: "$renter",
+            },
             pipeline: [
                 {
-                    $match: { $expr: { $eq: ["$_id", "$$userId"] } },
-                },
-                {
-                    $project: {
-                        _id: 1,
-                        name: 1,
-                        avatar: 1,
-                        phone: 1,
-                        email: 1,
-                        identity: 1,
+                    $match: {
+                        $expr: {
+                            $eq: ["$_id", "$$renterId"],
+                        },
                     },
                 },
             ],
             as: "renter",
         };
 
-        const lessorLookup = {
-            from: "users",
-            let: { userId: "$lessor" },
-            pipeline: [
-                {
-                    $match: { $expr: { $eq: ["$_id", "$$userId"] } },
-                },
-                {
-                    $project: {
-                        _id: 1,
-                        name: 1,
-                        avatar: 1,
-                        phone: 1,
-                        email: 1,
-                        identity: 1,
-                    },
-                },
-            ],
-            as: "lessor",
-        };
+        // const lessorLookup = {
+        //     from: "users",
+        //     let: { userId: "$lessor" },
+        //     pipeline: [
+        //         {
+        //             $match: { $expr: { $eq: ["$_id", "$$userId"] } },
+        //         },
+        //         {
+        //             $project: {
+        //                 _id: 1,
+        //                 name: 1,
+        //                 avatar: 1,
+        //                 phone: 1,
+        //                 email: 1,
+        //                 identity: 1,
+        //                 wallet: 1
+        //             },
+        //         },
+        //     ],
+        //     as: "lessor",
+        // };
+        // Contract.aggregate([
+        //     { $match: { lessor: filter.lessor } },
+        //     { $lookup: renterLookup },
+        //     { $unwind: "$renter" },
+        //     { $lookup: roomLookup },
+        //     { $unwind: "$room" },
+        //     // { $lookup: lessorLookup },
+        //     // { $unwind: "$lessor" },
+        //     { $limit: limit },
+        //     { $skip: skip },
+        //     { $sort: sort },
+        //     { $project: projection },
+        // ]),
         let [items, total] = await Promise.all([
+            Contract.find(conditions, projection)
+                .populate([
+                    {
+                        path: 'room',
+                        select: "-updatedAt"
+                    },
+                    {
+                        path: 'renter',
+                        select: "-updatedAt"
+                    },
+                    {
+                        path: 'lessor',
+                        select: "-updatedAt"
+                    }
+                ]).sort(sort).skip(skip).limit(limit),
             Contract.aggregate([
                 { $match: { lessor: filter.lessor } },
-                { $lookup: roomLookup },
-                { $unwind: "$room" },
-                { $lookup: renterLookup },
-                { $unwind: "$renter" },
-                { $lookup: lessorLookup },
-                { $unwind: "$lessor" },
-                { $limit: limit },
-                { $skip: skip },
-                { $sort: sort },
-                { $project: projection },
-            ]),
-            Contract.aggregate([
-                { $match: { renter: filter.renter } },
                 { $count: "totalValue" },
             ]),
         ]);

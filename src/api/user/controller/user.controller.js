@@ -1,6 +1,8 @@
 const multer = require("multer");
 const userService = require("../service/user.service");
 const addressService = require('../service/address.service');
+const notificationService = require('../service/notification.service');
+const requestService = require('../service/request.service');
 const Street = require("../../../model/street.model");
 const User = require("../../../model/user/user.model");
 const axios = require('axios');
@@ -365,6 +367,95 @@ class UserController {
     }
   }
 
+  //[GET] /users/notifications
+  async getUserNotification(req, res, next) {
+    try {
+      const { userId } = req.auth;
+      const conditions = {
+        ...req.query,
+        ...{ receiceUser: userId }
+      };
+      const sort = { createdAt: -1 };
+
+      const { items, total, page, limit, totalPages } = await notificationService.getAll(
+        conditions,
+        commonHelper.getPagination(req.query),
+        {},
+        sort,
+      );
+
+      return res.status(200).json({
+        data: { items, total, page, limit, totalPages },
+        message: "success",
+        errorCode: 200
+      });
+
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  //[GET] /users/requests
+  async getUserRequest(req, res, next) {
+    try {
+      const { userId } = req.auth;
+      const conditions = {
+        ...req.query,
+        ...{ to: userId }
+      };
+      const sort = { createdAt: -1 };
+
+      const { items, total, page, limit, totalPages } = await requestService.getAll(
+        conditions,
+        commonHelper.getPagination(req.query),
+        {},
+        sort,
+      );
+      return res.status(200).json({
+        data: { items, total, page, limit, totalPages },
+        message: "success",
+        errorCode: 200
+      });
+
+    } catch (error) {
+      next(error);
+    }
+  }
+
+
+  //[POST]/users/:contractId/cancel-by-renter
+  async sendRequestToCancel(req, res, next) {
+    try {
+      const { userId } = req.auth;
+      const contractId = req.params.contractId;
+
+      const data = await userService.cancelRentalByRenter(userId, contractId);
+      return res.status(200).json({
+        message: 'send request success!',
+        data,
+        errorCode: 200
+      });
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  // [POST] /user/accept-cancel-rental
+  async acceptCancelRental(req, res, next) {
+    try {
+      const { userId } = req.auth;
+
+      const data = await userService.acceptCancelRentalRoom(userId);
+
+      return res.status(200).json({
+        message: 'end rent success',
+        errorCode: 200,
+        data
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 
 }
 
