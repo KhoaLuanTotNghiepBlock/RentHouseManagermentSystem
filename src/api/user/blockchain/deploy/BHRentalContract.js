@@ -42,7 +42,7 @@ const RentalContract = {
         depositAmount = await vndToEth(depositAmount);
         const valueRent = convertBalanceToWei(rentAmount); // price of room is wei
         const valueDeposit = convertBalanceToWei(depositAmount);
-        const value = valueRent + valueDeposit;
+        const value = valueRent + valueDeposit + 50;
 
         // // check balance of renter
         const userBalance = await RentalContract.getUserBalance(signRenter.address);
@@ -73,20 +73,13 @@ const RentalContract = {
         console.log("🚀 ~ file: BHRentalContract.js:151 ~ setRoomForRent: ~ event:", event)
         const { returnValues } = event[0];
 
-        const roomTransaction = await RoomTransaction.findOneAndUpdate(
+        const room = await Room.findOneAndUpdate(
             { roomUid: returnValues._roomId, status: "available" },
             {
                 renter: returnValues.renter,
                 value: 0,
                 status: "already-rent",
-                transactionHash: signTransactionHash
-            }
-        );
-
-        await Room.findOneAndUpdate(
-            { _id: roomTransaction.roomId },
-            {
-                status: "already-rent",
+                lstTransaction: signTransactionHash
             }
         );
 
@@ -96,13 +89,13 @@ const RentalContract = {
             signTransactionHash,
             USER_TRANSACTION_ACTION.SIGN_CONTRACT
         );
-        return roomTransaction;
+        return room;
     },
 
     setRoomForRent: async (roomId, ownerAddress, amountRent, deposit) => {
         const { wallet, _id } = await User.getUserByWallet(ownerAddress);
         const signOwner = await RentalContract.createSigner(ownerAddress);
-        // const rentalContract = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
+
         amountRent = await vndToEth(amountRent);
         deposit = await vndToEth(deposit);
         const valueRent = convertBalanceToWei(amountRent); // price of room is wei
@@ -128,22 +121,18 @@ const RentalContract = {
 
         if (event.length === 0) throw new MyError('event not found');
         const { returnValues } = event[0];
-        const [roomTransaction, roomUpdate] = await Promise.all([
-            RoomTransaction.create({
-                transactionHash,
-                owner: _id,
-                status: "available",
-                roomUid: returnValues._roomId,
-                roomId,
-                value: amountRent + deposit
-            }),
+        const [roomUpdate] = await Promise.all([
             Room.findOneAndUpdate(
                 { _id: roomId },
-                { lstTransaction: transactionHash }
+                {
+                    lstTransaction: transactionHash,
+                    status: "available",
+                    roomUid: returnValues._roomId,
+                }
             )
         ]);
         return {
-            roomTransaction
+            roomUpdate
         }
     },
 
@@ -160,24 +149,25 @@ const RentalContract = {
         }
     },
 
-    payForRentMonth: async (renterAddress, roomUid, invoice, rentAmount) => {
+    payForRentMonth: async (renterAddress, roomUid, invoice, invoiceAmount, rentAmount) => {
         const { wallet, _id } = await User.getUserByWallet(renterAddress);
         const signRenter = await RentalContract.createSigner(renterAddress);
         // convert payment to ether
-        const value = await vndToEth(rentAmount);
+        const valueInvoiceFee = await vndToEth(invoiceAmount);
+        const valuePay = await vndToEth(rentAmount);
         // check balance of renter
         const userBalance = await RentalContract.getUserBalance(signRenter.address);
         if (userBalance < value)
             throw new MyError('renter not enough balance');
 
         const invoiceHash = crypto.hash(invoice);
-        const payRenter = ContractRentalHouse.methods.payForRentByMonth(roomUid, invoiceHash).encodeABI();
+        const payRenter = ContractRentalHouse.methods.payForRentByMonth(roomUid, invoiceHash, convertBalanceToWei(valueInvoiceFee)).encodeABI();
 
         const tx = {
             from: signRenter.address,
             to: CONTRACT_ADDRESS,
             gasLimit: 300000,
-            value: convertBalanceToWei(value),
+            value: convertBalanceToWei(valueInvoiceFee + valuePay),
             data: payRenter
         };
 
@@ -207,7 +197,7 @@ const RentalContract = {
         await userWalletService.changeBalance(
             _id,
             rentAmount,
-            signTransactionHash,
+            valueInvoiceFee + valuePay,
             USER_TRANSACTION_ACTION.PAY_FOR_RENT,
         );
 

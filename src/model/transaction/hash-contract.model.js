@@ -43,8 +43,13 @@ hashContractSchema.statics.getByHash = async (hash) => {
         .populate([
             {
                 path: "contractId",
-                select: "-updatedAt"
-            }
+                select: "-updatedAt",
+                populate: {
+                    path: "room",
+                    select: "-updatedAt",
+                },
+            },
+
         ]);
     if (!hashContract)
         throw new NotFoundError('Hash contract not found');

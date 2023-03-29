@@ -10,6 +10,7 @@ const contractService = require("./contract.service");
 const User = require("../../../model/user/user.model");
 const RentalContract = require("../blockchain/deploy/BHRentalContract");
 const RoomTransaction = require("../../../model/transaction/room-transaction.model");
+const Room = require("../../../model/room.model");
 
 class InvoiceService {
 
@@ -76,28 +77,28 @@ class InvoiceService {
         const renter = await User.getById(renterId);
         // get invoice info { contract, amount, startDate, endDate }
         const invoice = await Invoice.getOne(invoiceId);
-        console.log("🚀 ~ file: invoice.service.js:78 ~ InvoiceService ~ payForRentEachMonth ~ invoice:", invoice)
 
-
-        const roomTransaction = await RoomTransaction.findOne({
+        const room = await Room.findOne({
             roomId: invoice.contract.room,
             status: "already-rent"
         });
 
-        if (!roomTransaction) throw new MyError('room not found');
+        if (!room) throw new MyError('room not found');
         //check date to pay
         const datePay = new Date();
-        // let penatyFee = 0;
-        // if (invoice.endDate < datePay) {
-        //     penatyFee = "10000";
-        // }
+        let penaltyFee = 0;
+        if (datePay > invoice.endDate)
+            penaltyFee = invoice.amount * 0.05;
 
+        const rentAmount = room.basePrice;
+        const invoiceFee = invoice.amount - rentAmount + penaltyFee;
 
         const data = await RentalContract.payForRentMonth(
             renter.wallet.walletAddress,
-            roomTransaction.roomUid,
+            room.roomUid,
             invoice,
-            invoice.amount
+            invoiceFee,
+            rentAmount
         );
 
         return data;

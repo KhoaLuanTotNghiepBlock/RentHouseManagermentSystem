@@ -5,13 +5,8 @@ const attachment = require("./shema/attachment");
 const NotFoundError = require("../exception/NotFoundError");
 const roomSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-    },
-    acreage: {
-      type: Number,
-      require: true,
-    },
+    name: { type: String },
+    acreage: { type: Number, require: true },
     period: { type: Number, default: 6 },
     owner: {
       type: ObjectId,
@@ -65,12 +60,10 @@ const roomSchema = new mongoose.Schema(
         ref: "Service"
       }
     ],
-    enable: {
-      type: Boolean,
-      default: true,
-    },
+    enable: { type: Boolean, default: true },
     lstTransaction: { type: String, default: "" },
     status: { type: String, enum: ["available", "already-rent", "not-available"], default: "available" },
+    roomUid: { type: Number, default: -1 }
   },
   {
     timestamps: true,

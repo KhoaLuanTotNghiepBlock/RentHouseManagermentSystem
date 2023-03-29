@@ -55,37 +55,22 @@ class ContractService {
         if (!userId || !contractHash || !roomId)
             throw new ArgumentError('sign by renter missing');
 
-        // get room transaction ==> return room smart - contract id
-        const roomTransaction = await RoomTransaction.find({
-            roomId,
-            // status: "available",
-        }).populate([
-            {
-                path: 'roomId',
-                select: "-updatedAt"
-            },
-            {
-                path: 'owner',
-                select: "-updateAt"
-            }
-        ]);
+        const contract = await HashContract.getByHash(contractHash);
+        console.log("🚀 ~ file: contract.service.js:59 ~ ContractService ~ signByRenter ~ contract:", contract)
 
-        if (!roomTransaction || roomTransaction.length === 0) throw new MyError("room not available!");
-        const roomUid = roomTransaction[0].roomUid;
-        const rentAmount = roomTransaction[0].roomId.basePrice + 1000;
-        const depositAmount = roomTransaction[0].roomId.deposit + 1000;
+        const value = contract.room.deposit + contract.payment;
         // // check payment
         const { wallet } = await User.getById(userId);
-        if (roomTransaction.value > wallet.balance)
+        if (value > wallet.balance)
             throw new MyError('Insufficient balance');
 
 
         return await RentalContract.signByRenter(
             wallet?.walletAddress,
             contractHash,
-            roomUid,
-            rentAmount,
-            depositAmount
+            contract.room.roomUid,
+            contract.payment,
+            contract.room.deposit
         );
     }
 
@@ -229,7 +214,6 @@ class ContractService {
         delete filter.page;
         const { lessor } = filter;
         lessor && (filter.lessor = toObjectId(lessor));
-        console.log("🚀 ~ file: contract.service.js:286 ~ ContractService ~ filter.lessor:", filter.lessor)
 
 
         //     from: "users",

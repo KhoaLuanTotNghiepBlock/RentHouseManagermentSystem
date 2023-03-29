@@ -18,8 +18,10 @@ contract RentalContract {
 
     event SetRoomForRent(uint256 _roomId);
     event RentStarted(uint256 _roomId, address renter, string _contractHash);
-    event PayForRent(uint256 _roomId, string _invoiceHash);
+
+    event PayForRent(uint256 _roomId, string _invoiceHash, uint256 invoiceFee);
     event RentEnded(uint256 _roomId);
+    event EndRentWithPenalty(uint256 _roomId, uint256 penaltyFee);
     event ReOpen(uint256 _roomId);
 
     function setRoomForRent(
@@ -61,14 +63,21 @@ contract RentalContract {
 
     function payForRentByMonth(
         uint256 _roomId,
-        string memory _invoiceHash
+        string memory _invoiceHash,
+        uint256 invoiceFee
     ) public payable {
         require(rooms[_roomId].forRent, "!for rent");
         require(rooms[_roomId].renter == payable(msg.sender), "!renter");
         require(msg.value >= rooms[_roomId].rentAmountPerMonth, "!balance");
         rooms[_roomId].invoiceHash = _invoiceHash;
-        rooms[_roomId].owner.transfer(rooms[_roomId].rentAmountPerMonth);
-        emit PayForRent(_roomId, _invoiceHash);
+        rooms[_roomId].owner.transfer(
+            rooms[_roomId].rentAmountPerMonth + invoiceFee
+        );
+        emit PayForRent(
+            _roomId,
+            _invoiceHash,
+            invoiceFee + rooms[_roomId].rentAmountPerMonth
+        );
     }
 
     function endRent(uint256 _roomId) public {
@@ -88,15 +97,36 @@ contract RentalContract {
         emit RentEnded(_roomId);
     }
 
+    function endRentWithPenalty(
+        uint256 _roomId,
+        uint256 penaltyFee
+    ) public payable {
+        require(rooms[_roomId].forRent, "!for rent");
+        require(rooms[_roomId].renter == payable(msg.sender), "!owner");
+        rooms[_roomId].owner.transfer(
+            rooms[_roomId].depositAmount + penaltyFee
+        );
+        rooms[_roomId] = Room(
+            "",
+            "",
+            0,
+            0,
+            payable(rooms[_roomId].owner),
+            payable(address(0)),
+            false,
+            false
+        );
+        emit RentEnded(_roomId);
+    }
+
     function reOpenRoomForRent(
         uint256 _roomId,
-        string memory contractHash,
         uint256 rentAmountPerMonth,
         uint256 depositAmount
     ) public {
         require(rooms[_roomId].owner == payable(msg.sender), "!owner");
         rooms[_roomId] = Room(
-            contractHash,
+            "",
             "",
             rentAmountPerMonth,
             depositAmount,
