@@ -17,12 +17,12 @@ contract RentalContract {
     mapping(uint256 => Room) public rooms;
 
     event SetRoomForRent(uint256 _roomId);
-    event RentStarted(uint256 _roomId, address renter, string _contractHash);
+    event RentStarted(uint256 _roomId, address renter, string _contractHash, uint256 _rentAmount,  uint256 _deposit);
 
     event PayForRent(uint256 _roomId, string _invoiceHash, uint256 invoiceFee);
     event RentEnded(uint256 _roomId, uint256 depositAmount);
     event EndRentWithPenalty(uint256 _roomId, uint256 penaltyFee);
-    event ReOpen(uint256 _roomId);
+    event ReOpen(uint256 _roomId, uint256 _rentAmountPerMonth, uint256 _depositAmount);
 
     function setRoomForRent(
         uint256 rentAmountPerMonth,
@@ -58,7 +58,7 @@ contract RentalContract {
         rooms[_roomId].renter = payable(msg.sender);
         rooms[_roomId].contractHash = _contractHash;
         rooms[_roomId].owner.transfer(rooms[_roomId].rentAmountPerMonth);
-        emit RentStarted(_roomId, msg.sender, rooms[_roomId].contractHash);
+        emit RentStarted(_roomId, msg.sender, rooms[_roomId].contractHash, rooms[_roomId].rentAmountPerMonth ,rooms[_roomId].depositAmount);
     }
 
     function payForRentByMonth(
@@ -84,6 +84,7 @@ contract RentalContract {
         require(rooms[_roomId].forRent, "!for rent");
         require(rooms[_roomId].owner == payable(msg.sender), "!owner");
         rooms[_roomId].renter.transfer(rooms[_roomId].depositAmount);
+        emit RentEnded(_roomId, rooms[_roomId].depositAmount);
         rooms[_roomId] = Room(
             "",
             "",
@@ -94,7 +95,6 @@ contract RentalContract {
             false,
             false
         );
-        emit RentEnded(_roomId, rooms[_roomId].depositAmount);
     }
 
     function endRentWithPenalty(
@@ -106,6 +106,7 @@ contract RentalContract {
         rooms[_roomId].owner.transfer(
             rooms[_roomId].depositAmount + penaltyFee
         );
+        emit RentEnded(_roomId, rooms[_roomId].depositAmount + penaltyFee);
         rooms[_roomId] = Room(
             "",
             "",
@@ -116,7 +117,7 @@ contract RentalContract {
             false,
             false
         );
-        emit RentEnded(_roomId);
+       
     }
 
     function reOpenRoomForRent(
@@ -135,6 +136,6 @@ contract RentalContract {
             false,
             true
         );
-        emit ReOpen(_roomId);
+        emit ReOpen(_roomId,  rentAmountPerMonth, depositAmount );
     }
 }

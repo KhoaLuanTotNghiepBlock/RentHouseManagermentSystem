@@ -56,10 +56,9 @@ class ContractService {
             throw new ArgumentError('sign by renter missing');
 
         const contract = await HashContract.getByHash(contractHash);
-        console.log("🚀 ~ file: contract.service.js:59 ~ ContractService ~ signByRenter ~ contract:", contract)
-
-        const value = contract.room.deposit + contract.payment;
-        // // check payment
+        const { contractId } = contract;
+        const value = contractId.room.deposit + contractId.payment;
+        //  check payment
         const { wallet } = await User.getById(userId);
         if (value > wallet.balance)
             throw new MyError('Insufficient balance');
@@ -68,9 +67,9 @@ class ContractService {
         return await RentalContract.signByRenter(
             wallet?.walletAddress,
             contractHash,
-            contract.room.roomUid,
-            contract.payment,
-            contract.room.deposit
+            contractId.room.roomUid,
+            contractId.payment,
+            contract.contractId.room?.deposit
         );
     }
 

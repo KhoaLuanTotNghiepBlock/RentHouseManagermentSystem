@@ -20,6 +20,7 @@ const InvoiceTransaction = require('../../../../model/transaction/invoice-transa
 const Invoice = require('../../../../model/transaction/invoice.model');
 const crypto = require('../../../../utils/crypto.hepler');
 const Contract = require('../../../../model/transaction/contract.model');
+const Notification = require('../../../../model/user/notification.model');
 // 🚀 ~ file: test.test.js:23 ~ eth: 0.0005599012590399969
 // 🚀 ~ file: test.test.js:25 ~ vnd: 23000
 const RentalContract = {
@@ -200,6 +201,14 @@ const RentalContract = {
             valueInvoiceFee + valuePay,
             USER_TRANSACTION_ACTION.PAY_FOR_RENT,
         );
+
+        // // update owner balance
+        // await userWalletService.changeBalance(
+        //     _id,
+        //     rentAmount,
+        //     valueInvoiceFee + valuePay,
+        //     USER_TRANSACTION_ACTION.PAY_FOR_RENT,
+        // );
 
         return invoiceUpdate;
     },
