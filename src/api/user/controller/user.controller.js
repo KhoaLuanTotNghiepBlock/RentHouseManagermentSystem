@@ -481,6 +481,28 @@ class UserController {
       next(error)
     }
   }
+
+  //[GET] /users/invoices/:invoiceId
+  async getInvoiceById(req, res, next) {
+    try {
+      const { userId } = req.auth;
+      const conditions = {
+        ...req.query,
+        ...userId,
+        ...invoiceId
+      };
+
+      const data = await invoiceService.getOne(conditions);
+
+      return res.status(200).json({
+        message: 'success!',
+        data,
+        errorCode: 200
+      });
+    } catch (error) {
+      next(error)
+    }
+  }
   //[POST]/users/:contractId/cancel-by-renter
   async sendRequestToCancel(req, res, next) {
     try {

@@ -109,6 +109,39 @@ class InvoiceService {
         };
     }
 
+    async getOne(conditions) {
+        let { payStatus, invoiceId } = conditions;
+        const filter = {
+            ...(invoiceId && { _id: invoiceId }),
+            ...(payStatus && { payStatus }),
+        };
+
+        const invoice = await Invoice.findOne(filter, projection).populate([
+            {
+                path: 'contract',
+                select: '-updatedAt',
+                populate: [
+                    {
+                        path: 'room',
+                        select: '-updatedAt',
+                    },
+                    {
+                        path: 'renter',
+                        select: '_id username name avatar phone email',
+                    },
+                    {
+                        path: 'renter',
+                        select: '_id username name avatar phone email'
+                    }
+                ]
+
+            }
+        ]);
+
+        if (!invoice) throw new MyError('invoice not found!')
+        return invoice;
+    }
+
     checkDueInvoiceDay(dateRent, paymentDay, period) {
         if (!(dateRent && paymentDay))
             throw new ArgumentError('invoice service ==> date rent, payment day ');

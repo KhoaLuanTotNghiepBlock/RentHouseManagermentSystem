@@ -64,6 +64,7 @@ const userRouter = (io) => {
   router.get('/requests', userController.getUserRequest);
   router.get('/invoices/rented', userController.getAllInvoiceRenter);
   router.get('/invoices/leased', userController.getAllInvoiceOwner);
+  router.get('/invoices/:invoiceId', userController.getAllInvoice);
   router.post('/contract/:contractId/cancel-by-renter', userController.cancelByRenter);
   router.post('/contract/accept/:requestId', userController.acceptRequest);
   router.get("/me/profile", userController.getProfile); // not yet
