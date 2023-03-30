@@ -11,7 +11,7 @@ const User = require("../../../model/user/user.model");
 const RentalContract = require("../blockchain/deploy/BHRentalContract");
 const RoomTransaction = require("../../../model/transaction/room-transaction.model");
 const Room = require("../../../model/room.model");
-
+const { toObjectId } = require('../../../utils/common.helper');
 class InvoiceService {
 
     async createInvoice(userId, contractId, invoiceInfo) {
@@ -61,6 +61,54 @@ class InvoiceService {
 
     }
 
+    async getAll(
+        conditions = {},
+        pagination,
+        projection = {}, forRent = false, forOwner = false) {
+        let { payStatus, userId } = conditions;
+        const { limit, page, skip } = pagination;
+        const filter = {
+            ...(payStatus && { payStatus }),
+            ...((userId && forRent) && { "contract.renter": userId }),
+            ...((userId && forOwner) && { "contract.lessor": userId }),
+        };
+        const [items, total] = await Promise.all([
+            Invoice.find(filter, projection).populate([
+                {
+                    path: 'contract',
+                    select: '-updatedAt',
+                    populate: [
+                        {
+                            path: 'room',
+                            select: '-updatedAt',
+                        },
+                        {
+                            path: 'renter',
+                            select: '_id username name avatar phone email',
+                        },
+                        {
+                            path: 'renter',
+                            select: '_id username name avatar phone email'
+                        }
+                    ]
+
+                }
+            ])
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit),
+            Invoice.countDocuments(filter),
+        ]);
+
+        return {
+            items,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        };
+    }
+
     checkDueInvoiceDay(dateRent, paymentDay, period) {
         if (!(dateRent && paymentDay))
             throw new ArgumentError('invoice service ==> date rent, payment day ');
@@ -70,7 +118,6 @@ class InvoiceService {
 
         return paymentDay;
     }
-
 
     async payForRentEachMonth(renterId, invoiceId) {
         // get renter info

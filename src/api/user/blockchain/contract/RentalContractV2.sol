@@ -20,7 +20,7 @@ contract RentalContract {
     event RentStarted(uint256 _roomId, address renter, string _contractHash);
 
     event PayForRent(uint256 _roomId, string _invoiceHash, uint256 invoiceFee);
-    event RentEnded(uint256 _roomId);
+    event RentEnded(uint256 _roomId, uint256 depositAmount);
     event EndRentWithPenalty(uint256 _roomId, uint256 penaltyFee);
     event ReOpen(uint256 _roomId);
 
@@ -94,7 +94,7 @@ contract RentalContract {
             false,
             false
         );
-        emit RentEnded(_roomId);
+        emit RentEnded(_roomId, rooms[_roomId].depositAmount);
     }
 
     function endRentWithPenalty(

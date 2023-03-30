@@ -12,6 +12,8 @@ const commonHelper = require('../../../utils/common.helper');
 const contractService = require("../service/contract.service");
 const NotificationService = require("../service/notification.service");
 const RequestService = require("../service/request.service");
+const invoiceService = require("../service/invoice.service");
+const { getPagination } = require("../../../utils/common.helper");
 const { vnp_TmnCode } = process.env;
 const { vnp_HashSecret } = process.env;
 const { vnp_Url } = process.env;
@@ -142,6 +144,7 @@ class UserController {
       next(error);
     }
   }
+
   async confirmPayment(req, res, next) {
     try {
       let vnp_Params = req.query;
@@ -427,7 +430,57 @@ class UserController {
     }
   }
 
+  //[GET] /users/invoices/rented
+  async getAllInvoiceRenter(req, res, next) {
+    try {
+      const { userId } = req.auth;
+      const conditions = {
+        ...req.query,
+        ...userId,
+      };
 
+      const data = await invoiceService.getAll(
+        conditions,
+        getPagination(req.query),
+        {},
+        true
+      );
+
+      return res.status(200).json({
+        message: 'success!',
+        data,
+        errorCode: 200
+      });
+    } catch (error) {
+      next(error)
+    }
+  }
+  //[GET] /users/invoices/leased
+  async getAllInvoiceOwner(req, res, next) {
+    try {
+      const { userId } = req.auth;
+      const conditions = {
+        ...req.query,
+        ...userId,
+      };
+
+      const data = await invoiceService.getAll(
+        conditions,
+        getPagination(req.query),
+        {},
+        false,
+        true
+      );
+
+      return res.status(200).json({
+        message: 'success!',
+        data,
+        errorCode: 200
+      });
+    } catch (error) {
+      next(error)
+    }
+  }
   //[POST]/users/:contractId/cancel-by-renter
   async sendRequestToCancel(req, res, next) {
     try {
