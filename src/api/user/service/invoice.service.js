@@ -12,6 +12,8 @@ const RentalContract = require("../blockchain/deploy/BHRentalContract");
 const RoomTransaction = require("../../../model/transaction/room-transaction.model");
 const Room = require("../../../model/room.model");
 const { toObjectId } = require('../../../utils/common.helper');
+const Notification = require("../../../model/user/notification.model");
+const Request = require("../../../model/user/request.model");
 class InvoiceService {
 
     async createInvoice(userId, contractId, invoiceInfo) {
@@ -20,7 +22,7 @@ class InvoiceService {
 
         const contract = await Contract.getOne(contractId);
 
-        const { period, payMode, dateRent, lessor, payment } = contract;
+        const { period, payMode, dateRent, lessor, renter, payment } = contract;
 
         // if (userId !== lessor._id)
         //     throw new MyError('Unauthorize to create invoices');
@@ -32,12 +34,6 @@ class InvoiceService {
         if (!serviceDemands || !serviceDemands.length) {
             throw new MyError('invoice service ==> listServiceDemand ');
         }
-        // let total = payment;
-        // serviceDemands.forEach(demand => {
-        //     console.log("🚀 ~ file: invoice.service.js:33 ~ InvoiceService ~ createInvoice ~ demand:", demand)
-        //     total += demand.amount; // total amount for all demands
-        // });
-        // console.log("🚀 ~ file: invoice.service.js:33 ~ InvoiceService ~ createInvoice ~ total:", total)
 
         // use reduce to calculate sum of service demand 
         const amount = serviceDemands.reduce((sum, demand) => sum + demand.amount, payment);
@@ -54,9 +50,20 @@ class InvoiceService {
             amount,
             serviceDemands: serviceDemandIds
         });
+        let notification = {};
+        let request = {};
 
+        if (invoice) {
+            notification = await Notification.create({
+                userOwner: lessor._id,
+                type: 'INVOICE_TO_PAY',
+                content: 'You have a invoice ready to pay',
+                tag: [lessor._id, renter._id]
+            });
+        }
         return {
-            invoice
+            invoice,
+            notification,
         }
 
     }
@@ -157,6 +164,7 @@ class InvoiceService {
         const renter = await User.getById(renterId);
         // get invoice info { contract, amount, startDate, endDate }
         const invoice = await Invoice.getOne(invoiceId);
+        console.log("🚀 ~ file: invoice.service.js:167 ~ InvoiceService ~ payForRentEachMonth ~ invoice:", invoice);
 
         const room = await Room.findOne({
             roomId: invoice.contract.room,
@@ -164,7 +172,7 @@ class InvoiceService {
         });
 
         if (!room) throw new MyError('room not found');
-        //check date to pay
+        // check date to pay
         const datePay = new Date();
         let penaltyFee = 0;
         if (datePay > invoice.endDate)

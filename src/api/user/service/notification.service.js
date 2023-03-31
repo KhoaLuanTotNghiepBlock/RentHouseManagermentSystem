@@ -20,11 +20,11 @@ NotificationService.getAll = async (
             .limit(limit)
             .populate([
                 {
-                    path: 'user',
+                    path: 'userOwner',
                     select: '-updatedAt'
                 },
                 {
-                    path: 'receiceUser',
+                    path: 'tag',
                     select: '-updatedAt'
                 }
             ])

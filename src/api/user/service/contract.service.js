@@ -16,12 +16,14 @@ const roomService = require('./room.service');
 const commonHelper = require('../../../utils/common.helper');
 const Room = require('../../../model/room.model');
 const Notification = require('../../../model/user/notification.model');
+const { ADMIN } = require('../../../config/default');
 
 class ContractService {
 
     async createContract(renterId, contractInfo) {
         // get owner 
         const renter = await User.getById(renterId);
+        console.log("🚀 ~ file: contract.service.js:25 ~ ContractService ~ createContract ~ renter:", renter)
 
         // validate contract info 
         let contract = await contractValidate.validateContractInfo(contractInfo);
@@ -37,6 +39,16 @@ class ContractService {
         await demandService.createServiceDemandForRoom(contract._id);
         // create contract hash
         const contractHash = await this.hashContract(contract._id);
+
+        const notification = await Notification.create({
+            userOwner: ADMIN._id,
+            type: 'NOTIFICATION',
+            tag: [
+                owner._id,
+                renter._id
+            ],
+            content: 'create contract sucess'
+        });
         return {
             contract, contractHash
         }
@@ -94,8 +106,9 @@ class ContractService {
 
         const notification = await Notification.create({
             userOwner: renter._id,
-            receiveUser: contract.lessor._id,
-            type: 'CANCEL_REQUEST'
+            type: 'CANCEL_REQUEST',
+            content: 'end rent room',
+            tag: [renter._id, contract.lessor._id]
         });
 
         return {

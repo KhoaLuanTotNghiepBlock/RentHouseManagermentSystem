@@ -54,6 +54,7 @@
     "swagger-jsdoc": "^6.0.1",
     "swagger-ui-express": "^4.1.6",
     "truffle-hdwallet-provider": "^1.0.17",
+    "unorm": "^1.6.0",
     "uuid": "^9.0.0",
     "web3": "^1.8.2"
   },

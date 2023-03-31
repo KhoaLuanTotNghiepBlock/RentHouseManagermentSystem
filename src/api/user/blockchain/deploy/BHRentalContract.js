@@ -21,6 +21,7 @@ const Invoice = require('../../../../model/transaction/invoice.model');
 const crypto = require('../../../../utils/crypto.hepler');
 const Contract = require('../../../../model/transaction/contract.model');
 const Notification = require('../../../../model/user/notification.model');
+const { ADMIN } = require('../../../../config/default');
 // 🚀 ~ file: test.test.js:23 ~ eth: 0.0005599012590399969
 // 🚀 ~ file: test.test.js:25 ~ vnd: 23000
 const RentalContract = {
@@ -34,7 +35,6 @@ const RentalContract = {
     },
 
     signByRenter: async (renterAddress, contractHash, roomUid, rentAmount, depositAmount) => {
-        console.log("🚀 ~ file: BHRentalContract.js:67 ~ signByRenter: ~ renterAddress, contractHash, roomUid, rentAmount, depositAmount:", renterAddress, contractHash, roomUid, rentAmount, depositAmount)
         const { wallet, _id } = await User.getUserByWallet(renterAddress);
         const signRenter = await RentalContract.createSigner(renterAddress);
         // // convert payment to ether
@@ -65,8 +65,6 @@ const RentalContract = {
         console.log(txReceipt);
 
         await setTimeout(() => { console.log('Waited 2 seconds.') }, 2000);
-
-        // const signTransactionHash = "0xbcef270a2e722afea66d1f0d07adbc1c883281a6f35dd3417b52795366809af9"
 
         const event = await RentalContract.getGetEventFromTransaction(signTransactionHash, ContractRentalHouse);
         if (event.length === 0) throw new MyError('event not found');
@@ -132,8 +130,15 @@ const RentalContract = {
                 }
             )
         ]);
+
+        const notification = await Notification.create({
+            userOwner: ADMIN._id,
+            type: 'NOTIFICATION',
+            tag: [_id],
+            content: 'create room for rent success!'
+        })
         return {
-            roomUpdate
+            roomUpdate, notification
         }
     },
 
@@ -177,7 +182,7 @@ const RentalContract = {
         const signTransactionHash = txReceipt.transactionHash;
         console.log(txReceipt);
 
-        await setTimeout(() => { console.log('Waited 1 seconds.') }, 2000);
+        await setTimeout(() => { console.log('Waited 2 seconds.') }, 2000);
 
         const event = await RentalContract.getGetEventFromTransaction(signTransactionHash, ContractRentalHouse);
         if (event.length === 0) throw new MyError('event not found');
@@ -203,12 +208,11 @@ const RentalContract = {
         );
 
         // // update owner balance
-        // await userWalletService.changeBalance(
-        //     _id,
-        //     rentAmount,
-        //     valueInvoiceFee + valuePay,
-        //     USER_TRANSACTION_ACTION.PAY_FOR_RENT,
-        // );
+        await userWalletService.changeBalance(
+            invoice.contract.lessor,
+            invoiceAmount + rentAmount,
+            USER_TRANSACTION_ACTION.RECEIVE_INVOICE_PAYMENT,
+        );
 
         return invoiceUpdate;
     },

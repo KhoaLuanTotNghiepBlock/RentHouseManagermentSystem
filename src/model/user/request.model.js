@@ -6,7 +6,7 @@ const RequestSchema = new mongoose.Schema(
     {
         type: {
             type: String,
-            enum: ['CANCEL_RENTAL'],
+            enum: ['CANCEL_RENTAL', 'INVOICE_TO_PAY'],
             required: true,
             default: 'CANCEL_RENTAL'
         },

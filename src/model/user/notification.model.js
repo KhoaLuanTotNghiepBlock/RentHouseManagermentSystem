@@ -8,12 +8,6 @@ const NotificationSchema = new mongoose.Schema(
     userOwner: {
       type: ObjectId,
       ref: "User",
-      required: true,
-    },
-    receiveUser: {
-      type: ObjectId,
-      ref: "User",
-      required: true,
     },
     type: {
       type: String,
@@ -23,10 +17,17 @@ const NotificationSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    tag: [
+      {
+        type: ObjectId,
+        ref: "User",
+      }
+    ],
     enable: {
       type: Boolean,
       default: true
     },
+    content: { type: String, default: "" }
   },
   {
     timestamps: true,

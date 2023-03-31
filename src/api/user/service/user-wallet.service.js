@@ -1,5 +1,5 @@
 const User = require("../../../model/user/user.model");
-const { bugId } = require('../../../config/default.json');
+const { bugId } = require('../../../config/default');
 const MyError = require("../../../exception/MyError");
 const UserTransaction = require('../../../model/transaction/user-transaction');
 const commonHelper = require("../../../utils/common.helper");

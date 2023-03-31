@@ -18,7 +18,8 @@ const { vnp_TmnCode } = process.env;
 const { vnp_HashSecret } = process.env;
 const { vnp_Url } = process.env;
 const { vnp_ReturnUrl } = process.env;
-
+const { ADMIN } = require('../../../config/default');
+const Notification = require("../../../model/user/notification.model");
 
 const sortObject = (obj) => {
   var sorted = {};
@@ -157,6 +158,14 @@ class UserController {
 
       const data = await userWalletService.changeBalance(userId, amount, null, USER_TRANSACTION_ACTION.PAYMENT);
 
+      const notification = await Notification.create({
+        userOwner: ADMIN._id,
+        tag: [userId],
+        type: 'NOTIFICATION',
+        content: `You top up success full ${amount}`
+      });
+
+
       vnp_Params = sortObject(vnp_Params);
       const tmnCode = vnp_TmnCode;
       let secretKey = vnp_HashSecret;
@@ -167,19 +176,14 @@ class UserController {
       const hmac = crypto.createHmac("sha512", secretKey);
       const signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex");
 
-      if (secureHash === signed) {
-        res.status(200).json({
-          message: 'success',
-          errorCode: 200,
-          data
-        })
-      } else {
-        res.status(200).json({
-          message: 'success',
-          errorCode: 200,
-          data
-        })
-      }
+      res.status(200).json({
+        message: 'success',
+        errorCode: 200,
+        data: {
+          ...data,
+          ...notification
+        }
+      });
     } catch (error) {
       next(error)
     }
@@ -285,8 +289,9 @@ class UserController {
       const { userId } = req.auth;
       const conditions = {
         ...req.query,
-        receiveUser: userId
+        ...{ tag: { $in: [toObjectId(userId)] } }
       };
+
       const sort = {
         createdAt: -1,
       };

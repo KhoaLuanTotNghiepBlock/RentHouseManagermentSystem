@@ -30,16 +30,6 @@ class UserService {
   async cityData() {
     const listDitrict = await addressService.getDitrictsFromDatabase();
     const city = await City.findOne({ _id: "6415ee77cc372ede59b64c1a" })
-    // add drestirct
-    // for (let i = 0; i < listDitrict.length; i++) {
-    //   const ditrict = new District({
-    //     name: listDitrict[i].name,
-    //     type: listDitrict[i].pre,
-    //     typename: `${listDitrict[i].pre} ${listDitrict[i].name}`,
-    //     parent_code: city._id
-    //   });
-    //   await ditrict.save();
-    // }
 
     for (let i = 0; i < listDitrict.length; i++) {
       const list = await addressService.getWardByDitrict(listDitrict[i].name)
@@ -122,8 +112,9 @@ class UserService {
 
     const notification = await Notification.create({
       user: renter._id,
-      receiceUser: contract.lessor,
       type: "CANCEL_CONTRACT",
+      content: 'end rent room',
+      tag: [renter._id, contract.lessor]
     });
 
     const request = await Request.create({
