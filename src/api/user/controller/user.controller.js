@@ -136,6 +136,7 @@ class UserController {
       const requestId = req.params.requestId;
 
       const data = await userService.acceptCancelRentalRoom(userId, requestId);
+
       return res.status(200).json({
         message: 'success',
         errorCode: 200,
@@ -289,17 +290,16 @@ class UserController {
       const { userId } = req.auth;
       const conditions = {
         ...req.query,
-        ...{ tag: { $in: [toObjectId(userId)] } }
+        ...{ tag: { $in: [commonHelper.toObjectId(userId)] } }
       };
 
       const sort = {
         createdAt: -1,
       };
 
-      const { items, total, page, limit, totalPages } = await NotificationService.getListNotification(
+      const { items, total, page, limit, totalPages } = await NotificationService.getAll(
         conditions,
         commonHelper.getPagination(req.query),
-        projection,
         sort,
       );
 
@@ -315,23 +315,17 @@ class UserController {
     }
   }
 
-  // [GET] /user/requests
-  async getRequests(req, res, next) {
+  //[GET] /users/contract/rented
+  async getContractRented(req, res, next) {
     try {
       const { userId } = req.auth;
       const conditions = {
         ...req.query,
-        to: userId
-      };
-      const sort = {
-        createdAt: -1,
-      };
-
-      const { items, total, page, limit, totalPages } = await RequestService.getAllRequest(
+        ...{ renter: commonHelper.toObjectId(userId) }
+      }
+      const { items, total, page, limit, totalPages } = await contractService.getAllContract(
         conditions,
         commonHelper.getPagination(req.query),
-        projection,
-        sort,
       );
 
       return res.status(200).json({
@@ -341,10 +335,38 @@ class UserController {
         limit,
         totalPages
       });
+
     } catch (error) {
       next(error);
     }
   }
+
+  //[GET] /users/contract/leased
+  async getContractLeased(req, res, next) {
+    try {
+      const { userId } = req.auth;
+      const conditions = {
+        ...req.query,
+        ...{ lessor: commonHelper.toObjectId(userId) }
+      }
+      const { items, total, page, limit, totalPages } = await contractService.getAllContract(
+        conditions,
+        commonHelper.getPagination(req.query),
+      );
+
+      return res.status(200).json({
+        items,
+        total,
+        page,
+        limit,
+        totalPages
+      });
+
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // [PUT] /bh/user/me/profile
   async updateProfile(req, res, next) {
     const userId = req.auth.userId;
@@ -377,34 +399,6 @@ class UserController {
       });
     } catch (error) {
 
-    }
-  }
-
-  //[GET] /users/notifications
-  async getUserNotification(req, res, next) {
-    try {
-      const { userId } = req.auth;
-      const conditions = {
-        ...req.query,
-        ...{ receiceUser: userId }
-      };
-      const sort = { createdAt: -1 };
-
-      const { items, total, page, limit, totalPages } = await notificationService.getAll(
-        conditions,
-        commonHelper.getPagination(req.query),
-        {},
-        sort,
-      );
-
-      return res.status(200).json({
-        data: { items, total, page, limit, totalPages },
-        message: "success",
-        errorCode: 200
-      });
-
-    } catch (error) {
-      next(error);
     }
   }
 

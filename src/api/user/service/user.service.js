@@ -18,6 +18,7 @@ const Notification = require('../../../model/user/notification.model');
 const Request = require('../../../model/user/request.model');
 const RoomTransaction = require('../../../model/transaction/room-transaction.model');
 const RentalContract = require('../blockchain/deploy/BHRentalContract');
+const contractService = require('./contract.service');
 
 
 class UserService {
@@ -129,28 +130,23 @@ class UserService {
   }
 
   async acceptCancelRentalRoom(ownerId, requestId) {
-    const owner = await User.getById(ownerId);
-
     const request = await Request.findOne({
-      _id: requestId,
-
+      _id: requestId
     })
-    console.log("🚀 ~ file: user.service.js:148 ~ UserService ~ acceptCancelRentalRoom ~ request:", request)
+
+    const { data } = request;
 
     if (!request) throw new MyError('request not found');
+    //check contract due
+    const dateEnd = new Date();
+    // in due
+    const inDue = await contractService.checkContractStatus(dateEnd, data._id);
+    let result;
 
-    const roomTransaction = await RoomTransaction.findOne(
-      {
-        roomId: request?.data?.room,
-        status: "already-rent"
-      }
-    );
-
-    if (!roomTransaction)
-      throw new MyError('room not found');
-
-    const data = await RentalContract.endRent(owner.wallet.walletAddress, roomTransaction.roomUid);
-    return data;
+    if (!inDue) {
+      result = await RentalContract.endRent(data?.lessor?.wallet.walletAddress, data.room, data?.renter?.wallet.walletAddress);
+    }
+    return result;
   }
 
 }

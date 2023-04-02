@@ -60,13 +60,19 @@ const userRouter = (io) => {
   router.post("/wallet-connect", userController.connectVNpaytoWallet);
   router.get('/me/transaction-history', userController.getTransactionHistory);
   router.get("/me/wallet", userController.getWallet);
-  router.get('/notifications', userController.getUserNotification);
+
+  router.get('/notifications', userController.getNotification);
   router.get('/requests', userController.getUserRequest);
+
   router.get('/invoices/rented', userController.getAllInvoiceRenter);
   router.get('/invoices/leased', userController.getAllInvoiceOwner);
   router.get('/invoices/:invoiceId', userController.getInvoiceById);
+
   router.post('/contract/:contractId/cancel-by-renter', userController.cancelByRenter);
   router.post('/contract/accept/:requestId', userController.acceptRequest);
+  router.get('/contract/rented', userController.getContractRented);
+  router.get('/contract/leased', userController.getContractLeased);
+
   router.get("/me/profile", userController.getProfile); // not yet
   router.patch("/me/avatar", userController.changeAvatar); // not yet
   return router;

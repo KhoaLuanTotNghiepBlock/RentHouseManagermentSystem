@@ -5,7 +5,6 @@ const Notification = require('../../../model/user/notification.model');
 NotificationService.getAll = async (
     conditions = {},
     pagination,
-    projection,
     sort = {}
 ) => {
     const filter = { ...conditions };
@@ -14,18 +13,18 @@ NotificationService.getAll = async (
     delete filter.page;
 
     const [items, total] = await Promise.all([
-        Notification.find(filter, projection)
+        Notification.find(filter)
             .sort(sort)
             .skip(skip)
             .limit(limit)
             .populate([
                 {
                     path: 'userOwner',
-                    select: '-updatedAt'
+                    select: '_id username name avatar phone email'
                 },
                 {
                     path: 'tag',
-                    select: '-updatedAt'
+                    select: '_id username name avatar phone email'
                 }
             ])
             .lean(),

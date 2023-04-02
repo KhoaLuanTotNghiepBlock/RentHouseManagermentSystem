@@ -42,7 +42,7 @@ const contractSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    status: { type: String, enum: ["available", "not-available"], default: "available" },
+    status: { type: String, enum: ["available", "not-available", "continue"], default: "available" },
     plusContract: { type: String, default: "" }
   },
   {
@@ -73,6 +73,7 @@ contractSchema.statics.getOne = async (contractId, projection = { updatedAt: 0 }
                 phone: 1,
                 email: 1,
                 identity: 1,
+                wallet: 1
               },
             },
           ],
@@ -81,19 +82,7 @@ contractSchema.statics.getOne = async (contractId, projection = { updatedAt: 0 }
         $lookup: {
           from: "services",
           let: { serviceIds: "$services" },
-          pipeline: [
-            { $match: { $expr: { $in: ["$_id", "$$serviceIds"] } } },
-            {
-              $project: {
-                _id: 1,
-                name: 1,
-                avatar: 1,
-                phone: 1,
-                email: 1,
-                identity: 1,
-              },
-            },
-          ],
+          pipeline: [{ $match: { $expr: { $in: ["$_id", "$$serviceIds"] } } }],
           as: "services",
         }
       },
@@ -117,6 +106,7 @@ contractSchema.statics.getOne = async (contractId, projection = { updatedAt: 0 }
           phone: 1,
           email: 1,
           identity: 1,
+          wallet: 1
         },
       },
     ],
@@ -138,6 +128,7 @@ contractSchema.statics.getOne = async (contractId, projection = { updatedAt: 0 }
           phone: 1,
           email: 1,
           identity: 1,
+          wallet: 1
         },
       },
     ],

@@ -28,7 +28,7 @@ class InvoiceController {
             const { userId } = req.auth;
 
             const invoiceId = req.params.invoiceId;
-            const data = await invoiceService.payForRentEachMonth(userId, invoiceId)
+            const data = await invoiceService.payForRentEachMonth(userId, invoiceId);
             return res.status(200).json({
                 message: "success",
                 errorCode: 200,

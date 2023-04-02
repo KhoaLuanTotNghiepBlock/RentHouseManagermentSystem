@@ -1,5 +1,7 @@
 require('dotenv').config();
 const { BigNumber } = require("@ethersproject/bignumber");
+const BN = require("bignumber.js");
+
 const web3 = require("../config/web3-init");
 const fs = require("fs");
 const HashContract = require('../../../../model/transaction/hash-contract.model');
@@ -39,11 +41,11 @@ const RentalContract = {
         const signRenter = await RentalContract.createSigner(renterAddress);
         // // convert payment to ether
         const userPay = rentAmount + depositAmount;
-        rentAmount = await vndToEth(rentAmount);
+        rentAmount = await vndToEth(rentAmount + 100);
         depositAmount = await vndToEth(depositAmount);
         const valueRent = convertBalanceToWei(rentAmount); // price of room is wei
         const valueDeposit = convertBalanceToWei(depositAmount);
-        const value = valueRent + valueDeposit + 50;
+        const value = valueRent + valueDeposit;
 
         // // check balance of renter
         const userBalance = await RentalContract.getUserBalance(signRenter.address);
@@ -88,7 +90,14 @@ const RentalContract = {
             signTransactionHash,
             USER_TRANSACTION_ACTION.SIGN_CONTRACT
         );
-        return room;
+
+        const notification = await Notification.create({
+            userOwner: ADMIN._id,
+            type: 'NOTIFICATION',
+            tag: [_id],
+            content: `You pay to sign contract ${valueInvoiceFee + valuePay}`
+        });
+        return { room, notification };
     },
 
     setRoomForRent: async (roomId, ownerAddress, amountRent, deposit) => {
@@ -156,24 +165,27 @@ const RentalContract = {
     },
 
     payForRentMonth: async (renterAddress, roomUid, invoice, invoiceAmount, rentAmount) => {
-        const { wallet, _id } = await User.getUserByWallet(renterAddress);
+        const { wallet, _id, username } = await User.getUserByWallet(renterAddress);
         const signRenter = await RentalContract.createSigner(renterAddress);
         // convert payment to ether
         const valueInvoiceFee = await vndToEth(invoiceAmount);
         const valuePay = await vndToEth(rentAmount);
+
         // check balance of renter
         const userBalance = await RentalContract.getUserBalance(signRenter.address);
-        if (userBalance < value)
+        if (userBalance < (valueInvoiceFee + valuePay))
             throw new MyError('renter not enough balance');
 
+        const val = new BN(convertBalanceToWei(valueInvoiceFee));
         const invoiceHash = crypto.hash(invoice);
-        const payRenter = ContractRentalHouse.methods.payForRentByMonth(roomUid, invoiceHash, convertBalanceToWei(valueInvoiceFee)).encodeABI();
+        const payRenter = ContractRentalHouse.methods.payForRentByMonth(roomUid, invoiceHash, val).encodeABI();
+        const value = convertBalanceToWei(valueInvoiceFee + valuePay)
 
         const tx = {
             from: signRenter.address,
             to: CONTRACT_ADDRESS,
             gasLimit: 300000,
-            value: convertBalanceToWei(valueInvoiceFee + valuePay),
+            value: BN(value).toNumber(),
             data: payRenter
         };
 
@@ -187,7 +199,7 @@ const RentalContract = {
         const event = await RentalContract.getGetEventFromTransaction(signTransactionHash, ContractRentalHouse);
         if (event.length === 0) throw new MyError('event not found');
         console.log("🚀 ~ file: BHRentalContract.js:151 ~ setRoomForRent: ~ event:", event)
-        const { returnValues } = event[0];
+        // const { returnValues } = event[0];
 
         // create invoice
         const invoiceUpdate = await Invoice.findOneAndUpdate(
@@ -198,7 +210,7 @@ const RentalContract = {
                 paymentDate: new Date(),
                 hash: invoiceHash
             }
-        )
+        );
         // update user balance
         await userWalletService.changeBalance(
             _id,
@@ -207,20 +219,45 @@ const RentalContract = {
             USER_TRANSACTION_ACTION.PAY_FOR_RENT,
         );
 
+        await Notification.create({
+            userOwner: ADMIN._id,
+            type: 'NOTIFICATION',
+            tag: [_id],
+            content: `You pay for invoice ${valueInvoiceFee + valuePay}`
+        });
         // // update owner balance
         await userWalletService.changeBalance(
             invoice.contract.lessor,
             invoiceAmount + rentAmount,
+            signTransactionHash,
             USER_TRANSACTION_ACTION.RECEIVE_INVOICE_PAYMENT,
         );
 
-        return invoiceUpdate;
+        await Notification.create({
+            userOwner: ADMIN._id,
+            type: 'NOTIFICATION',
+            tag: [invoice.contract.lessor],
+            content: `You receive from ${username} ${valueInvoiceFee + valuePay} for invoice`
+        });
+
+        const notification = await Notification.create({
+            userOwner: ADMIN._id,
+            type: 'NOTIFICATION',
+            tag: [_id, invoice.contract.lessor],
+            content: 'Invoice pay success!'
+        });
+
+        return { invoiceUpdate, notification };
     },
 
-    endRent: async (ownerAddress, roomUid) => {
+    endRent: async (ownerAddress, room, renterAddress) => {
+        if (!ownerAddress || !room)
+            throw new MyError('missing parameter');
         const { wallet, _id } = await User.getUserByWallet(ownerAddress);
+        const renter = await User.getUserByWallet(renterAddress);
         const signOwner = await RentalContract.createSigner(ownerAddress);
 
+        const { roomUid, deposit } = room;
         const endRentTransaction = ContractRentalHouse.methods.endRent(roomUid).encodeABI();
         const tx = {
             from: signOwner.address,
@@ -230,46 +267,57 @@ const RentalContract = {
             data: endRentTransaction
         };
 
-        const signedTx = await web3.eth.accounts.signTransaction(tx, wallet.walletPrivateKey);
-        const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+        const signedTx = await web3.eth.accounts.signTransaction(tx, wallet.walletPrivateKey).catch((error) => { throw new MyError(error) });
+        const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction).catch((error) => { throw new MyError(error) });
         const signTransactionHash = txReceipt.transactionHash;
         console.log(txReceipt);
 
         await setTimeout(() => { console.log('Waited 1 seconds.') }, 1000);
 
-        const event = await RentalContract.getGetEventFromTransaction(signTransactionHash, ContractRentalHouse);
+        const event = await RentalContract.getGetEventFromTransaction(signTransactionHash, ContractRentalHouse)
+            .catch((error) => { throw new MyError(error) });
+
         if (event.length === 0) throw new MyError('event not found');
-        const { returnValues } = event[0];
-        // get room 
-        const roomTransaction = await RoomTransaction.findOne({
-            owner: _id,
-            roomUid,
-            status: "already-rent"
+
+        const [updateRoom, updateContract] = await Promise.all([
+            Room.updateOne(
+                { _id: room._id },
+                {
+                    status: "not-available",
+                    lstTransaction: signTransactionHash
+                }),
+            Contract.updateOne(
+                { room: room._id, renter: renter._id },
+                {
+                    status: "not-available"
+                })
+        ]);
+
+        if (updateRoom.modifiedCount < 1) throw new MyError('update room fail!');
+        if (updateContract.modifiedCount < 1) throw new MyError('update contract fail!');
+
+        const notification = await Notification.create({
+            userOwner: ADMIN._id,
+            type: 'NOTIFICATION',
+            tag: [_id, renter._id],
+            content: 'End rent room success'
         });
-        if (!roomTransaction) throw new MyError('Room not found');
-
-        // return deposit for us
-        const { roomId, renter } = roomTransaction;
-        const renterUser = await User.getUserByWallet(renter);
-
-        const room = await Room.findOne({ _id: roomId });
-        console.log("🚀 ~ file: BHRentalContract.js:255 ~ endRent: ~ room:", room)
-        room.status = "available"
-        room.save();
-
-        const contract = await Contract.findOne({ renter: renterUser._id, lessor: _id });
-        contract.status = "not-available";
-        contract.save();
 
         // update user balance
         await userWalletService.changeBalance(
-            renterUser._id,
-            parseFloat(room.deposit),
+            renter._id,
+            parseFloat(deposit),
             signTransactionHash,
             USER_TRANSACTION_ACTION.DEPOSIT,
         );
 
-        return roomTransaction;
+        await Notification.create({
+            userOwner: ADMIN._id,
+            type: 'NOTIFICATION',
+            tag: [renter._id],
+            content: `you receive deposit ${deposit}`
+        });
+        return { notification };
     },
 
     getUserBalance: async (address) => {

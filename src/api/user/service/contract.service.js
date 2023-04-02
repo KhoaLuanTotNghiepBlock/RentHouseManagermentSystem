@@ -63,6 +63,45 @@ class ContractService {
         }
     }
 
+    async getAllContract(
+        conditions = {},
+        pagination) {
+
+        const filter = { ...conditions };
+        const { limit, page, skip } = pagination;
+        delete filter.limit;
+        delete filter.page;
+
+        const [items, total] = await Promise.all([
+            await Contract.find(conditions)
+                .populate([
+                    {
+                        path: 'renter',
+                        select: '_id username name phone email avatar'
+                    },
+                    {
+                        path: 'lessor',
+                        select: '_id username name phone email avatar'
+                    },
+                    {
+                        path: 'room',
+                        select: "-updatedAt -lstTransaction"
+                    }])
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            Contract.countDocuments(filter),
+        ]);
+        return {
+            items,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        };
+    }
+
     async signByRenter(userId, roomId, contractHash) {
         if (!userId || !contractHash || !roomId)
             throw new ArgumentError('sign by renter missing');
@@ -97,12 +136,20 @@ class ContractService {
         const renter = await User.getById(renterId);
         // {lessor, period, room, }
         const contract = await Contract.getOne(contractId);
-        const request = await Request.create({
+        let request = await Request.findOne({
             type: 'CANCEL_RENTAL',
-            data: contract,
             from: renter._id,
             to: contract.lessor._id
         });
+
+        if (!request) {
+            request = await Request.create({
+                type: 'CANCEL_RENTAL',
+                data: contract,
+                from: renter._id,
+                to: contract.lessor._id
+            });
+        }
 
         const notification = await Notification.create({
             userOwner: renter._id,
