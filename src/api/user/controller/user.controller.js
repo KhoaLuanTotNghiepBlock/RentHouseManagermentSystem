@@ -20,6 +20,7 @@ const { vnp_Url } = process.env;
 const { vnp_ReturnUrl } = process.env;
 const { ADMIN } = require('../../../config/default');
 const Notification = require("../../../model/user/notification.model");
+const Contract = require("../../../model/transaction/contract.model");
 
 const sortObject = (obj) => {
   var sorted = {};
@@ -353,6 +354,37 @@ class UserController {
 
       return res.status(200).json({
         data: { items, total, page, limit, totalPages },
+        message: "success",
+        errorCode: 200
+      });
+
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  //[GET] /users/contract/:roomId
+  async getContractOfRoom(req, res, next) {
+    try {
+      const { roomId } = req.params;
+
+      const contract = await Contract.findOne({ room: commonHelper.toObjectId(roomId) })
+        .populate([
+          {
+            path: 'renter',
+            select: '_id username name phone email avatar'
+          },
+          {
+            path: 'lessor',
+            select: '_id username name phone email avatar'
+          },
+          {
+            path: 'room',
+            select: "-updatedAt -lstTransaction"
+          }]);
+
+      return res.status(200).json({
+        data: { contract },
         message: "success",
         errorCode: 200
       });
