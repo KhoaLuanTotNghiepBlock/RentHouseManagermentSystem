@@ -42,6 +42,7 @@ const contractSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    penaltyFeeEndRent: { type: Number, default: 0 },
     status: { type: String, enum: ["available", "not-available", "continue"], default: "available" },
     plusContract: { type: String, default: "" }
   },

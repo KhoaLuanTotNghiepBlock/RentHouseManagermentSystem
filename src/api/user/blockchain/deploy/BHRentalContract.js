@@ -320,6 +320,75 @@ const RentalContract = {
         return { notification };
     },
 
+    endRentInDue: async (ownerAddress, room, renterAddress, penaltyFee) => {
+        if (!ownerAddress || !room)
+            throw new MyError('missing parameter');
+        const { wallet, _id } = await User.getUserByWallet(ownerAddress);
+        const renter = await User.getUserByWallet(renterAddress);
+        const signOwner = await RentalContract.createSigner(ownerAddress);
+
+        const { roomUid, deposit } = room;
+        const endRentTransaction = ContractRentalHouse.methods.endRent(roomUid).encodeABI();
+        const tx = {
+            from: signOwner.address,
+            to: CONTRACT_ADDRESS,
+            gasLimit: 300000,
+            value: 0,
+            data: endRentTransaction
+        };
+
+        const signedTx = await web3.eth.accounts.signTransaction(tx, wallet.walletPrivateKey).catch((error) => { throw new MyError(error) });
+        const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction).catch((error) => { throw new MyError(error) });
+        const signTransactionHash = txReceipt.transactionHash;
+        console.log(txReceipt);
+
+        await setTimeout(() => { console.log('Waited 1 seconds.') }, 1000);
+
+        const event = await RentalContract.getGetEventFromTransaction(signTransactionHash, ContractRentalHouse)
+            .catch((error) => { throw new MyError(error) });
+
+        if (event.length === 0) throw new MyError('event not found');
+
+        const [updateRoom, updateContract] = await Promise.all([
+            Room.updateOne(
+                { _id: room._id },
+                {
+                    status: "not-available",
+                    lstTransaction: signTransactionHash
+                }),
+            Contract.updateOne(
+                { room: room._id, renter: renter._id },
+                {
+                    status: "not-available"
+                })
+        ]);
+
+        if (updateRoom.modifiedCount < 1) throw new MyError('update room fail!');
+        if (updateContract.modifiedCount < 1) throw new MyError('update contract fail!');
+
+        const notification = await Notification.create({
+            userOwner: ADMIN._id,
+            type: 'NOTIFICATION',
+            tag: [_id, renter._id],
+            content: 'End rent room success'
+        });
+
+        // update user balance
+        await userWalletService.changeBalance(
+            renter._id,
+            parseFloat(deposit),
+            signTransactionHash,
+            USER_TRANSACTION_ACTION.DEPOSIT,
+        );
+
+        await Notification.create({
+            userOwner: ADMIN._id,
+            type: 'NOTIFICATION',
+            tag: [renter._id],
+            content: `you receive deposit ${deposit}`
+        });
+        return { notification };
+    },
     getUserBalance: async (address) => {
         const balanceWei = await web3.eth.getBalance(address);
         const balanceEth = web3.utils.fromWei(balanceWei, 'ether');
