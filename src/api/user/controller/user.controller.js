@@ -367,8 +367,8 @@ class UserController {
   async getContractOfRoom(req, res, next) {
     try {
       const { roomId } = req.params;
-
-      const contract = await Contract.findOne({ room: commonHelper.toObjectId(roomId) })
+      console.log('gau gau')
+      const contract = await Contract.findOne({ room: commonHelper.toObjectId(roomId), status: "available" })
         .populate([
           {
             path: 'renter',
