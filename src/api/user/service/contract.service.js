@@ -125,6 +125,7 @@ class ContractService {
     }
 
     async cancelContractByRenter(renterId, contractId) {
+        console.log("🚀 ~ file: contract.service.js:128 ~ ContractService ~ cancelContractByRenter ~ contractId:", contractId)
         /**
          * get user renter
          * get contract
@@ -134,8 +135,10 @@ class ContractService {
          *      => !period => renter receive deposit
          */
         const renter = await User.getById(renterId);
-        // {lessor, period, room, }
         const contract = await Contract.getOne(contractId);
+        if (contract.lessor._id === renter._id)
+            throw new MyError('You not renter');
+
         let request = await Request.findOne({
             type: 'CANCEL_RENTAL',
             from: renter._id,

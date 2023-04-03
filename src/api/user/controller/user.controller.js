@@ -116,7 +116,6 @@ class UserController {
     try {
       const { userId } = req.auth;
       const contractId = req.params.contractId;
-
       const data = await contractService.cancelContractByRenter(userId, contractId);
 
       return res.status(200).json({
