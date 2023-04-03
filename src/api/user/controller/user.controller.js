@@ -304,12 +304,11 @@ class UserController {
       );
 
       return res.status(200).json({
-        items,
-        total,
-        page,
-        limit,
-        totalPages
+        data: { items, total, page, limit, totalPages },
+        message: "success",
+        errorCode: 200
       });
+
     } catch (error) {
       next(error);
     }
@@ -329,11 +328,9 @@ class UserController {
       );
 
       return res.status(200).json({
-        items,
-        total,
-        page,
-        limit,
-        totalPages
+        data: { items, total, page, limit, totalPages },
+        message: "success",
+        errorCode: 200
       });
 
     } catch (error) {
@@ -355,11 +352,9 @@ class UserController {
       );
 
       return res.status(200).json({
-        items,
-        total,
-        page,
-        limit,
-        totalPages
+        data: { items, total, page, limit, totalPages },
+        message: "success",
+        errorCode: 200
       });
 
     } catch (error) {
