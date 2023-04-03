@@ -129,6 +129,16 @@ class UserController {
     }
   }
 
+  //[POST] user/contract/:contractId/continuous
+  async continuesContract(req, res, next) {
+    try {
+      const { userId } = req.auth;
+      const contractId = req.params.contractId;
+    } catch (error) {
+      next(error);
+    }
+  }
+
   //[POST] user/contract/accept
   async acceptRequest(req, res, next) {
     try {
