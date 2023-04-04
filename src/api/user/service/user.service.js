@@ -16,7 +16,6 @@ const TokenTransaction = require('../../../model/transaction/token-transaction.m
 const Contract = require('../../../model/transaction/contract.model');
 const Notification = require('../../../model/user/notification.model');
 const Request = require('../../../model/user/request.model');
-const RoomTransaction = require('../../../model/transaction/room-transaction.model');
 const RentalContract = require('../blockchain/deploy/BHRentalContract');
 const contractService = require('./contract.service');
 

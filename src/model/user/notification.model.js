@@ -11,7 +11,7 @@ const NotificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      default: "",
+      default: "NOTIFICATION",
     },
     isChecked: {
       type: Boolean,

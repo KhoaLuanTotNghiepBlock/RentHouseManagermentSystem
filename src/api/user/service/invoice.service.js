@@ -9,7 +9,6 @@ const commonHelper = require('../../../utils/common.helper');
 const contractService = require("./contract.service");
 const User = require("../../../model/user/user.model");
 const RentalContract = require("../blockchain/deploy/BHRentalContract");
-const RoomTransaction = require("../../../model/transaction/room-transaction.model");
 const Room = require("../../../model/room.model");
 const { toObjectId } = require('../../../utils/common.helper');
 const Notification = require("../../../model/user/notification.model");

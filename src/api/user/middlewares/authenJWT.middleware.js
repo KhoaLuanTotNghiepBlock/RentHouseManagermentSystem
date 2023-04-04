@@ -14,9 +14,9 @@ module.exports = {
       // if (payload.isAdmin) { throw new Error("Admin is not allowed to access"); } else { req.auth = payload; }
       req.auth = payload;
 
-      if (!(await User.exists({ _id: payload.userId, deleted: false }))) {
-        throw new Error("User is disable or deleted");
-      }
+      // if (!(await User.exists({ _id: payload.userId, deleted: false }))) {
+      //   throw new Error("User is disable or deleted");
+      // }
       next();
     } catch (err) {
       console.log(`${err.name}: ${err.message}`);

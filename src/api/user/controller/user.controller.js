@@ -129,11 +129,19 @@ class UserController {
     }
   }
 
-  //[POST] user/contract/:contractId/continuous
+  //[POST] user/contract/continuous
   async continuesContract(req, res, next) {
     try {
       const { userId } = req.auth;
-      const contractId = req.params.contractId;
+      const { contractId, newPeriod } = req.body;
+
+      const data = await contractService.continueContract(userId, contractId, newPeriod);
+
+      return res.status(200).json({
+        message: "sucess",
+        errorCode: 200,
+        data
+      });
     } catch (error) {
       next(error);
     }

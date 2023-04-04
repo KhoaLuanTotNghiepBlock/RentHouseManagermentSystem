@@ -5,7 +5,6 @@ const BN = require("bignumber.js");
 const web3 = require("../config/web3-init");
 const fs = require("fs");
 const HashContract = require('../../../../model/transaction/hash-contract.model');
-const RoomTransaction = require('../../../../model/transaction/room-transaction.model');
 const User = require('../../../../model/user/user.model');
 const MyError = require('../../../../exception/MyError');
 const Room = require('../../../../model/room.model');

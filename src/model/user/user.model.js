@@ -48,7 +48,7 @@ const UserSchema = new mongoose.Schema(
     },
     avatar: {
       type: String,
-      default: "",
+      default: "https://d2rd596stqiu8q.cloudfront.net/75adabd1-40a3-472e-883c-d3b5f0f58ae41680602481296bee.png",
     },
     wallet,
     identityImg: [
@@ -219,6 +219,16 @@ UserSchema.statics.getUserByWallet = async (walletAddress) => {
   };
 
 }
+
+// UserSchema.pre("save", function (next) {
+//   if (this.gender === "Man")
+//     this.avatar = "https://d2rd596stqiu8q.cloudfront.net/81df5229-72dc-4a24-8e56-2464e3b7c3b41680602368164man.png"
+//   else if (this.gender === "Female")
+//     this.avatar = "https://d2rd596stqiu8q.cloudfront.net/736993f4-36d1-42e3-8fe4-7d1d3b16c3281680602456890woman.png"
+//   else
+//     this.avatar = "https://d2rd596stqiu8q.cloudfront.net/75adabd1-40a3-472e-883c-d3b5f0f58ae41680602481296bee.png"
+//   next();
+// });
 
 const User = mongoose.model("User", UserSchema);
 

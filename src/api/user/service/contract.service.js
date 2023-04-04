@@ -7,11 +7,10 @@ const demandService = require('./demand.service');
 const NotFoundError = require('../../../exception/NotFoundError');
 const crypto = require('../../../utils/crypto.hepler');
 const HashContract = require('../../../model/transaction/hash-contract.model');
-const { toObjectId } = require('../../../utils/common.helper');
+const { toObjectId, convertToNumber } = require('../../../utils/common.helper');
 const ArgumentError = require('../../../exception/ArgumentError');
 const RentalContract = require('../blockchain/deploy/BHRentalContract');
 const datetimeHelper = require('../../../utils/datetime.helper');
-const RoomTransaction = require('../../../model/transaction/room-transaction.model');
 const roomService = require('./room.service');
 const commonHelper = require('../../../utils/common.helper');
 const Room = require('../../../model/room.model');
@@ -125,7 +124,6 @@ class ContractService {
     }
 
     async cancelContractByRenter(renterId, contractId) {
-        console.log("🚀 ~ file: contract.service.js:128 ~ ContractService ~ cancelContractByRenter ~ contractId:", contractId)
         /**
          * get user renter
          * get contract
@@ -165,6 +163,41 @@ class ContractService {
             request,
             notification
         };
+    }
+
+    async continueContract(renterId, contractId, newPeriod) {
+        const renter = await User.getById(renterId);
+        const contract = await Contract.findOne({ _id: contractId })
+            .populate[{
+                path: 'room',
+                select: '_id name description'
+            }].lean();
+
+        if (renter._id === contract.lessor) throw new MyError('just for renter!');
+        //check contract due
+        const date = new Date();
+        // in due
+        const inDue = await this.checkContractStatus(date, data._id);
+        if (inDue) throw new MyError('the contract due in the period');
+
+        contract.period = convertToNumber(newPeriod);
+        contract.dateRent = date;
+        contract.payTime = date;
+        await contract.save();
+
+        const renterNotificaiton = await Notification.create({
+            userOwner: ADMIN._id,
+            tag: [renter._id],
+            content: `you extend the contract period of room ${contract?.room?.name} success full `
+        });
+
+        const ownerNotificaiton = await Notification.create({
+            userOwner: ADMIN._id,
+            tag: [contract.lessor],
+            content: `your contract of the room ${contract?.room?.name} is extended success`
+        });
+
+        return { renterNotificaiton, ownerNotificaiton };
     }
     //takes a parameter days that specifies the number of days in the future to look for contracts where payTime is due
     async getContractsDueIn(days) {
