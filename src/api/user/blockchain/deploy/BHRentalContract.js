@@ -434,10 +434,13 @@ const RentalContract = {
         });
         return { notification };
     },
+
     getUserBalance: async (address) => {
         const balanceWei = await web3.eth.getBalance(address);
         const balanceEth = web3.utils.fromWei(balanceWei, 'ether');
         return balanceEth;
     },
+
+
 }
 module.exports = RentalContract;

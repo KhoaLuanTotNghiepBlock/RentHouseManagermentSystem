@@ -53,10 +53,11 @@ class RoomService {
 
     async reOpenRoom(ownerId, roomInfo) {
         const user = await User.getById(ownerId);
+
         if (!roomInfo) throw new MyError('missing parameter => re-openRoom')
         const { roomId, basePrice, deposit } = roomInfo;
-
         const room = await this.getOneRoom(roomId);
+
         return await rentalContract.reOpenRoomForRent(
             room,
 
