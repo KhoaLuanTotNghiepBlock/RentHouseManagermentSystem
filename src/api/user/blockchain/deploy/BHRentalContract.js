@@ -38,17 +38,14 @@ const RentalContract = {
     signByRenter: async (renterAddress, contractHash, roomUid, rentAmount, depositAmount) => {
         const { wallet, _id } = await User.getUserByWallet(renterAddress);
         const signRenter = await RentalContract.createSigner(renterAddress);
+
         // // convert payment to ether
-        const userPay = rentAmount + depositAmount;
-        rentAmount = await vndToEth(rentAmount + 100);
-        depositAmount = await vndToEth(depositAmount);
-        const valueRent = convertBalanceToWei(rentAmount); // price of room is wei
-        const valueDeposit = convertBalanceToWei(depositAmount);
-        const value = valueRent + valueDeposit;
+        let userPay = await vndToEth(rentAmount + depositAmount + 100);
+        const value = convertBalanceToWei(userPay);
 
         // // check balance of renter
         const userBalance = await RentalContract.getUserBalance(signRenter.address);
-        if (convertBalanceToWei(userBalance) < value)
+        if (userBalance < userPay)
             throw new MyError('renter not enough balance');
 
         const signRenterAbi = ContractRentalHouse.methods.signByRenter(roomUid, contractHash).encodeABI();
@@ -76,8 +73,6 @@ const RentalContract = {
         const room = await Room.findOneAndUpdate(
             { roomUid: returnValues._roomId, status: "available" },
             {
-                renter: returnValues.renter,
-                value: 0,
                 status: "already-rent",
                 lstTransaction: signTransactionHash
             }
@@ -94,7 +89,7 @@ const RentalContract = {
             userOwner: ADMIN._id,
             type: 'NOTIFICATION',
             tag: [_id],
-            content: `You pay to sign contract ${valueInvoiceFee + valuePay}`
+            content: `You pay to sign contract ${rentAmount + depositAmount}`
         });
         return { room, notification };
     },
