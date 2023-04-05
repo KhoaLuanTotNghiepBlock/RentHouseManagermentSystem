@@ -22,7 +22,6 @@ class ContractService {
     async createContract(renterId, contractInfo) {
         // get owner 
         const renter = await User.getById(renterId);
-        console.log("🚀 ~ file: contract.service.js:25 ~ ContractService ~ createContract ~ renter:", renter)
 
         // validate contract info 
         let contract = await contractValidate.validateContractInfo(contractInfo);

@@ -51,6 +51,18 @@ class RoomService {
         }
     }
 
+    async reOpenRoom(ownerId, roomInfo) {
+        const user = await User.getById(ownerId);
+        if (!roomInfo) throw new MyError('missing parameter => re-openRoom')
+        const { roomId, basePrice, deposit } = roomInfo;
+
+        const room = await this.getOneRoom(roomId);
+        return await rentalContract.reOpenRoomForRent(
+            room,
+
+        );
+    }
+
     async getAllRoom(
         conditions = {},
         pagination,
@@ -94,8 +106,12 @@ class RoomService {
         ];
         const room = await Room.findById(roomId)
             .populate(roomPineline);
+
+        if (!room) throw new MyError('room not found');
         return room;
     }
+
+
 }
 
 module.exports = new RoomService();
