@@ -70,7 +70,8 @@ const userRouter = (io) => {
 
   router.post('/contract/:contractId/cancel-by-renter', userController.cancelByRenter);
   router.post('/contract/accept/:requestId', userController.acceptRequest);
-  router.post('/contract/continuous', userController.continuesContract)
+  // router.post('/contract/continuous', userController.continuesContract)
+  router.post('/contract/continuous', userController.confirmPayment)
   // router.get('/contract/rented', userController.getContractRented);
   router.get('/contract/:roomId', userController.getContractOfRoom);
   // router.get('/contract/leased', userController.getContractLeased);

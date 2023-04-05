@@ -21,6 +21,7 @@ const { vnp_ReturnUrl } = process.env;
 const { ADMIN } = require('../../../config/default');
 const Notification = require("../../../model/user/notification.model");
 const Contract = require("../../../model/transaction/contract.model");
+const MyError = require("../../../exception/MyError");
 
 const sortObject = (obj) => {
   var sorted = {};
@@ -167,40 +168,49 @@ class UserController {
 
   async confirmPayment(req, res, next) {
     try {
-      let vnp_Params = req.query;
+      // let vnp_Params = req.query;
 
-      const secureHash = vnp_Params['vnp_SecureHash'];
-      delete vnp_Params['vnp_SecureHash'];
-      delete vnp_Params['vnp_SecureHashType'];
-      const amount = vnp_Params["vnp_Amount"];
-      const userId = vnp_Params["vnp_OrderInfo"];
+      // const secureHash = vnp_Params['vnp_SecureHash'];
+      // delete vnp_Params['vnp_SecureHash'];
+      // delete vnp_Params['vnp_SecureHashType'];
+      // const amount = vnp_Params["vnp_Amount"];
+      // const userId = vnp_Params["vnp_OrderInfo"];
 
-      const data = await userWalletService.changeBalance(userId, amount, null, USER_TRANSACTION_ACTION.PAYMENT);
+      // const data = await userWalletService.changeBalance(userId, amount, null, USER_TRANSACTION_ACTION.PAYMENT);
+      // const result = await userWalletService.receiveMoney(ADMIN._id, userId, amount);
+      const result = await userWalletService.receiveMoney(ADMIN._id, "64298991ae395f7690c6e998", 2300).catch((error) => { throw new MyError(error) });
+      // const notification = await Notification.create({
+      //   userOwner: ADMIN._id,
+      //   tag: [userId],
+      //   type: 'NOTIFICATION',
+      //   content: `You top up success full ${amount}`
+      // });
 
-      const notification = await Notification.create({
-        userOwner: ADMIN._id,
-        tag: [userId],
-        type: 'NOTIFICATION',
-        content: `You top up success full ${amount}`
-      });
 
+      // vnp_Params = sortObject(vnp_Params);
+      // const tmnCode = vnp_TmnCode;
+      // let secretKey = vnp_HashSecret;
 
-      vnp_Params = sortObject(vnp_Params);
-      const tmnCode = vnp_TmnCode;
-      let secretKey = vnp_HashSecret;
+      // const querystring = require('qs');
+      // const signData = querystring.stringify(vnp_Params, { encode: false });
+      // const crypto = require("crypto");
+      // const hmac = crypto.createHmac("sha512", secretKey);
+      // const signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex");
 
-      const querystring = require('qs');
-      const signData = querystring.stringify(vnp_Params, { encode: false });
-      const crypto = require("crypto");
-      const hmac = crypto.createHmac("sha512", secretKey);
-      const signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex");
-
+      // res.status(200).json({
+      //   message: 'success',
+      //   errorCode: 200,
+      //   data: {
+      //     ...data,
+      //     ...notification,
+      //     ...result
+      //   }
+      // });
       res.status(200).json({
         message: 'success',
         errorCode: 200,
         data: {
-          ...data,
-          ...notification
+          ...result
         }
       });
     } catch (error) {

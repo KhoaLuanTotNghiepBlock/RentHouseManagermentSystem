@@ -7,6 +7,7 @@ const validateAddress = require('../validate/address.validate');
 const User = require('../../../model/user/user.model');
 const NotFoundError = require('../../../exception/NotFoundError');
 const rentalContract = require('../blockchain/deploy/BHRentalContract');
+const { compare } = require('../../../utils/object.helper');
 class RoomService {
     async createRoom(_id, roomInfo) {
 
@@ -55,13 +56,30 @@ class RoomService {
         const user = await User.getById(ownerId);
 
         if (!roomInfo) throw new MyError('missing parameter => re-openRoom')
-        const { roomId, basePrice, deposit } = roomInfo;
-        const room = await this.getOneRoom(roomId);
+        const { roomId, basePrice, deposit, totalNbPeople, gender } = roomInfo;
+        const room = await Room.findById(roomId);
 
-        return await rentalContract.reOpenRoomForRent(
+        if (!compare(room.owner, user._id))
+            throw new MyError('not you room');
+
+        const data = await rentalContract.reOpenRoomForRent(
             room,
-
+            user?.wallet?.walletAddress,
+            basePrice,
+            deposit
         );
+
+        if (data) {
+            room.basePrice = basePrice;
+            room.deposit = deposit;
+            room.totalNbPeople = totalNbPeople;
+            room.gender = gender;
+            await room.save();
+        }
+        return {
+            room,
+            data
+        }
     }
 
     async getAllRoom(
@@ -98,7 +116,7 @@ class RoomService {
         const roomPineline = [
             {
                 path: 'owner',
-                select: 'username email phone identity name avatar wallet'
+                select: '_id username email phone identity name avatar wallet'
             },
             {
                 path: 'services',

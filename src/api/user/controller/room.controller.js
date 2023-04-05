@@ -25,7 +25,9 @@ class RoomController {
     async reOpenRoom(req, res, next) {
         try {
             const { userId } = req.auth;
-            const { data } = await roomService.createRoom(userId, req.body);
+            const roomId = req.params.roomId;
+            const { basePrice, deposit, totalNbPeople, gender } = req.body;
+            const { data } = await roomService.reOpenRoom(userId, { basePrice, deposit, totalNbPeople, gender, roomId });
 
             return res.status(200).json({
                 errorCode: 200,

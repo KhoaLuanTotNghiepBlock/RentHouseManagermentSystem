@@ -209,6 +209,7 @@ const RentalContract = {
     },
 
     payForRentMonth: async (renterAddress, roomUid, invoice, invoiceAmount, rentAmount) => {
+        console.log("🚀 ~ file: BHRentalContract.js:212 ~ payForRentMonth: ~ roomUid:", roomUid)
         const { wallet, _id, username } = await User.getUserByWallet(renterAddress);
         const signRenter = await RentalContract.createSigner(renterAddress);
         // convert payment to ether
@@ -441,6 +442,26 @@ const RentalContract = {
         return balanceEth;
     },
 
+    transferBalance: async (fromAddress, toAddress, amount) => {
+        const from = await RentalContract.createSigner(fromAddress);
+        const { wallet } = await User.getUserByWallet(fromAddress);
+        const to = await RentalContract.createSigner(toAddress);
 
+        amount = await vndToEth(amount);
+        const value = convertBalanceToWei(amount);
+        const pay = ContractRentalHouse.methods.transfer(to.address, value).encodeABI();
+
+        const tx = {
+            from: from.address,
+            to: CONTRACT_ADDRESS,
+            gasLimit: 300000,
+            value: BN(value).toNumber(),
+            data: pay
+        };
+
+        const signedTx = await web3.eth.accounts.signTransaction(tx, wallet.walletPrivateKey).catch((error) => { throw new MyError(error) });
+        const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction).catch((error) => { throw new MyError(error) });
+        return txReceipt;
+    },
 }
 module.exports = RentalContract;

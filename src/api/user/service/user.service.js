@@ -104,8 +104,7 @@ class UserService {
     const renter = await User.getById(renterId);
 
     const contract = await Contract.findOne({
-      _id: contractId,
-      renter: renter._id
+      _id: contractId
     });
 
     if (!contract) throw new MyError('Contract not found');
@@ -146,7 +145,7 @@ class UserService {
     //   result = await RentalContract.endRent(data?.lessor?.wallet.walletAddress, data.room, data?.renter?.wallet.walletAddress);
     // }
 
-    // result = await RentalContract.endRent(data?.lessor?.wallet.walletAddress, data.room, data?.renter?.wallet.walletAddress);
+    result = await RentalContract.endRent(data?.lessor?.wallet.walletAddress, data.room, data?.renter?.wallet.walletAddress);
 
     return result;
   }
