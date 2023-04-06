@@ -17,12 +17,29 @@ contract RentalContract {
     mapping(uint256 => Room) public rooms;
 
     event SetRoomForRent(uint256 _roomId);
-    event RentStarted(uint256 _roomId, address renter, string _contractHash, uint256 _rentAmount,  uint256 _deposit);
+    event RentStarted(
+        uint256 _roomId,
+        address renter,
+        string _contractHash,
+        uint256 _rentAmount,
+        uint256 _deposit
+    );
 
     event PayForRent(uint256 _roomId, string _invoiceHash, uint256 invoiceFee);
     event RentEnded(uint256 _roomId, uint256 depositAmount);
     event EndRentWithPenalty(uint256 _roomId, uint256 penaltyFee);
-    event ReOpen(uint256 _roomId, uint256 _rentAmountPerMonth, uint256 _depositAmount);
+    event ReOpen(
+        uint256 _roomId,
+        uint256 _rentAmountPerMonth,
+        uint256 _depositAmount
+    );
+    event TransferBalance(
+        address payable from,
+        address payable to,
+        uint256 amount,
+        string action
+    );
+    event ExtendRentalRoom(uint256 _roomId, string _contractHash);
 
     function setRoomForRent(
         uint256 rentAmountPerMonth,
@@ -42,6 +59,14 @@ contract RentalContract {
         roomId++;
     }
 
+    function extendRentalRoom(
+        uint256 _roomId,
+        string memory _contractHash
+    ) public {
+        rooms[_roomId].contractHash = _contractHash;
+        emit ExtendRentalRoom(_roomId, _contractHash);
+    }
+
     function signByRenter(
         uint256 _roomId,
         string memory _contractHash
@@ -58,7 +83,13 @@ contract RentalContract {
         rooms[_roomId].renter = payable(msg.sender);
         rooms[_roomId].contractHash = _contractHash;
         rooms[_roomId].owner.transfer(rooms[_roomId].rentAmountPerMonth);
-        emit RentStarted(_roomId, msg.sender, rooms[_roomId].contractHash, rooms[_roomId].rentAmountPerMonth ,rooms[_roomId].depositAmount);
+        emit RentStarted(
+            _roomId,
+            msg.sender,
+            rooms[_roomId].contractHash,
+            rooms[_roomId].rentAmountPerMonth,
+            rooms[_roomId].depositAmount
+        );
     }
 
     function payForRentByMonth(
@@ -117,7 +148,6 @@ contract RentalContract {
             false,
             false
         );
-       
     }
 
     function reOpenRoomForRent(
@@ -136,6 +166,18 @@ contract RentalContract {
             false,
             true
         );
-        emit ReOpen(_roomId,  rentAmountPerMonth, depositAmount );
+        emit ReOpen(_roomId, rentAmountPerMonth, depositAmount);
+    }
+
+    function transferBalance(
+        address payable from,
+        address payable to,
+        uint256 amount,
+        string memory action
+    ) public payable {
+        require(from != to, "!not transfer for selt");
+        require(msg.value >= amount, "!not enough balance");
+        from.transfer(amount);
+        emit TransferBalance(from, to, amount, action);
     }
 }

@@ -4,7 +4,6 @@ const MyError = require("../../../exception/MyError");
 const UserTransaction = require('../../../model/transaction/user-transaction');
 const commonHelper = require("../../../utils/common.helper");
 const { USER_TRANSACTION_ACTION, ACTION_FUNCTION } = require('../../../config/user-transaction');
-const RentalContract = require("../blockchain/deploy/BHRentalContract");
 const { compare } = require("../../../utils/object.helper");
 
 const calculate = (action, num1, num2) => {
@@ -87,17 +86,6 @@ class UserWalletService {
             limit,
             totalPages: Math.ceil(total / limit),
         };
-    }
-
-    async receiveMoney(userFromId, userToId, amount) {
-        const from = await User.getById(userFromId);
-        const to = await User.getById(userToId);
-
-        if (amount < 0)
-            throw new MyError('amount not invalid!');
-
-        if (compare(from._id, to._id)) throw new MyError('can not transfer for self');
-        return await RentalContract.transferBalance(from?.wallet?.walletAddress, to?.wallet?.walletAddress, amount);
     }
 };
 
