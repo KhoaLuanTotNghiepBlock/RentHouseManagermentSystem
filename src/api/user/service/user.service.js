@@ -5,14 +5,9 @@ const User = require("../../../model/user/user.model");
 const userValidate = require("../validate/user.validation");
 const awsS3ServiceHelper = require("../../../utils/aws-s3-service.helper");
 const MyError = require("../../../exception/MyError");
-const ArgumentError = require("../../../exception/ArgumentError");
-const commonHelper = require('../../../utils/common.helper');
 const City = require('../../../model/city.model');
 const addressService = require('./address.service');
-const District = require('../../../model/ditrict.model');
-const Street = require('../../../model/street.model');
 const Ward = require('../../../model/ward.model');
-const TokenTransaction = require('../../../model/transaction/token-transaction.model');
 const Contract = require('../../../model/transaction/contract.model');
 const Notification = require('../../../model/user/notification.model');
 const Request = require('../../../model/user/request.model');
@@ -147,6 +142,18 @@ class UserService {
 
     result = await RentalContract.endRent(data?.lessor?.wallet.walletAddress, data.room, data?.renter?.wallet.walletAddress);
 
+    return result;
+  }
+
+  async transferBalance(fromUserId, toUserId, amount, action) {
+    const from = await User.getById(fromUserId);
+    const to = await User.getById(toUserId);
+
+    if (amount < 0)
+      throw new MyError('amount not invalid!');
+
+    if (compare(from._id, to._id)) throw new MyError('can not transfer for self');
+    const result = await RentalContract.transferBalance(from?.wallet?.walletAddress, to?.wallet?.walletAddress, amount);
     return result;
   }
 

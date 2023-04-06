@@ -18,7 +18,7 @@ const { vnp_TmnCode } = process.env;
 const { vnp_HashSecret } = process.env;
 const { vnp_Url } = process.env;
 const { vnp_ReturnUrl } = process.env;
-const { ADMIN } = require('../../../config/default');
+const { ADMIN, ACTION_TRANSFER } = require('../../../config/default');
 const Notification = require("../../../model/user/notification.model");
 const Contract = require("../../../model/transaction/contract.model");
 const MyError = require("../../../exception/MyError");
@@ -179,7 +179,9 @@ class UserController {
       const userId = vnp_Params["vnp_OrderInfo"];
 
       const data = await userWalletService.changeBalance(userId, amount, null, USER_TRANSACTION_ACTION.PAYMENT);
-      // const result = await userWalletService.receiveMoney(ADMIN._id, userId, amount);
+
+      const result = await userService.transferBalance(ADMIN._id, userId, amount, ACTION_TRANSFER.TOP_UP);
+
       const notification = await Notification.create({
         userOwner: ADMIN._id,
         tag: [userId],
@@ -222,13 +224,12 @@ class UserController {
         throw new MyError('amount not invalid!');
 
       if (compare(from._id, to._id)) throw new MyError('can not transfer for self');
-      const result = await RentalContract.transferBalance(from?.wallet?.walletAddress, to?.wallet?.walletAddress, amount);
-      // const result = await userWalletService.receiveMoney(ADMIN._id, "64298991ae395f7690c6e998", 2300).catch((error) => { throw new MyError(error) });
+      // const result = await userService.transferBalance(from?.wallet?.walletAddress, to?.wallet?.walletAddress, amount);
       res.status(200).json({
         message: 'success',
         errorCode: 200,
         data: {
-          ...result
+          // ...result
         }
       });
     } catch (error) {

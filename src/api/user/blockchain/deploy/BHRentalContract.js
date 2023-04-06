@@ -442,21 +442,21 @@ const RentalContract = {
         return balanceEth;
     },
 
-    transferBalance: async (fromAddress, toAddress, amount) => {
+    transferBalance: async (fromAddress, toAddress, amount, action = "transfer") => {
         const from = await RentalContract.createSigner(fromAddress);
         const { wallet } = await User.getUserByWallet(fromAddress);
         const to = await RentalContract.createSigner(toAddress);
 
         amount = await vndToEth(amount + 500);
         const value = convertBalanceToWei(amount);
-        // const pay = ContractRentalHouse.methods.transfer(to.address, value).encodeABI();
+        const pay = ContractRentalHouse.methods.transferBalance(from.address, to.address, value, action).encodeABI();
 
         const tx = {
             from: from.address,
             to: CONTRACT_ADDRESS,
             gasLimit: 300000,
             value: BN(value).toNumber(),
-            // data: pay
+            data: pay
         };
 
         const signedTx = await web3.eth.accounts.signTransaction(tx, wallet.walletPrivateKey).catch((error) => { throw new MyError(error) });
