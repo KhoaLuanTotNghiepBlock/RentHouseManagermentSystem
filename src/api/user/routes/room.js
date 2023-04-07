@@ -46,9 +46,12 @@ const RoomController = require('../controller/room.controller');
 router.post('/create-room', RoomController.createRoomForRent);
 router.post('/re-open/:roomId', RoomController.reOpenRoom);
 
+router.put('/:roomId', RoomController.updateRoom);
 router.get('/', RoomController.getAllRoom);
 router.get('/:roomId', RoomController.getRoom);
 router.get('/:userId', RoomController.getOwnerRoom);
 router.get('/user/rented', RoomController.getRentedRoom);
 router.get('/user/leased', RoomController.getLeasedRoom);
+
+
 module.exports = router;

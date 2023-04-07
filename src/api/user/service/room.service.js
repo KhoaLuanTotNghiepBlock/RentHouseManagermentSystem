@@ -87,12 +87,17 @@ class RoomService {
         projection,
         populate = [],
         sort = {}) {
-
-        const filter = { ...conditions };
+        const { key } = conditions;
+        const filter = { ...(key && { key }) };
         const { limit, page, skip } = pagination;
         delete filter.limit;
         delete filter.page;
-
+        if (key) {
+            const words = key.replace(/　/g, " ").replace(/、/g, ",").replace(/,/g, " ").split(" ");
+            filter.$or = [
+                { $and: words.map((word) => ({ textSearch: new RegExp(word.replace(/\W/g, "\\$&"), "i") })) },
+            ];
+        }
         const [items, total] = await Promise.all([
             Room.find(filter, projection)
                 .sort(sort)
@@ -129,7 +134,11 @@ class RoomService {
         return room;
     }
 
-
+    async updateRoom(roomId, data) {
+        const { status } = Room.findById(roomId).projection({ status: 1 });
+        if (status === "already-rent") throw new MyError('the room is still rented, can not edit the information')
+        return Room.findByIdAndUpdate(roomId, data, { new: true });
+    }
 }
 
 module.exports = new RoomService();

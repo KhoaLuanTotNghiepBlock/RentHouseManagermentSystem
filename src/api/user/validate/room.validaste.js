@@ -69,7 +69,6 @@ const roomValidate = {
         });
     }
 
-
 }
 
 module.exports = roomValidate;

@@ -204,6 +204,21 @@ class RoomController {
         }
     }
 
+    //[PUT] bh/room/:roomId
+    async updateRoom(req, res, next) {
+        try {
+            const roomId = req.params.roomId;
+            const data = await roomService.updateRoom(roomId, data);
+
+            return res.status(200).json({
+                data,
+                message: "success",
+                errorCode: 200
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 
 }
 
