@@ -44,7 +44,6 @@ class RoomService {
         await serviceApartment.createRoomService(room._id, services);
 
         const roomTransaction = await rentalContract.setRoomForRent(room._id, userOwner.wallet.walletAddress, room.basePrice, room.deposit);
-        // await rentalContract.setRoomForRent("641df3419b6935f136bb05e9", userOwner.wallet.walletAddress, 23000, 23000);
         return {
             data: {
                 room, roomTransaction

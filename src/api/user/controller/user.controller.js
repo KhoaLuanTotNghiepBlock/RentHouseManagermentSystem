@@ -360,6 +360,24 @@ class UserController {
     }
   }
 
+  //[PUT] /user/notifications/:notificationId
+  async checkNotification(req, res, next) {
+    try {
+      const notificationId = req.params.notificationId;
+
+      const data = await NotificationService.checkNotification(notificationId);
+
+      return res.status(200).json({
+        data,
+        message: "success",
+        errorCode: 200
+      });
+
+    } catch (error) {
+      next(error);
+    }
+  }
+
   //[GET] /users/contract/rented
   async getContractRented(req, res, next) {
     try {

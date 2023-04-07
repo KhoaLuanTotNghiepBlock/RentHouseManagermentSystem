@@ -62,6 +62,7 @@ const userRouter = (io) => {
   router.get("/me/wallet", userController.getWallet);
 
   router.get('/notifications', userController.getNotification);
+  router.put('/notifications/:notificationId', userController.checkNotification);
   router.get('/requests', userController.getUserRequest);
 
   router.get('/invoices/rented', userController.getAllInvoiceRenter);
@@ -70,11 +71,9 @@ const userRouter = (io) => {
 
   router.post('/contract/:contractId/cancel-by-renter', userController.cancelByRenter);
   router.post('/contract/accept/:requestId', userController.acceptRequest);
-  // router.post('/contract/continuous', userController.continuesContract)
-  router.post('/payment-test', userController.testPayment)
-  // router.get('/contract/rented', userController.getContractRented);
+  router.post('/contract/continuous', userController.continuesContract)
+  // router.post('/payment-test', userController.testPayment)
   router.get('/contract/:roomId', userController.getContractOfRoom);
-  // router.get('/contract/leased', userController.getContractLeased);
 
   router.get("/me/profile", userController.getProfile); // not yet
   router.patch("/me/avatar", userController.changeAvatar); // not yet

@@ -38,4 +38,23 @@ NotificationService.getAll = async (
         totalPages: Math.ceil(total / limit),
     };
 }
+
+NotificationService.checkNotification = async (notificationId) => {
+    const notice = await Notification.findByIdAndUpdate(notificationId, { isChecked: true })
+        .populate([
+            {
+                path: 'userOwner',
+                select: '_id username name avatar phone email'
+            },
+            {
+                path: 'tag',
+                select: '_id username name avatar phone email'
+            }
+        ]).lean();
+
+    if (!notice)
+        throw new MyError('notification not found');
+
+    return notice;
+}
 module.exports = NotificationService;

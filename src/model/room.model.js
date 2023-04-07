@@ -63,7 +63,8 @@ const roomSchema = new mongoose.Schema(
     enable: { type: Boolean, default: true },
     lstTransaction: { type: String, default: "" },
     status: { type: String, enum: ["available", "already-rent", "not-available"], default: "available" },
-    roomUid: { type: Number, default: -1 }
+    roomUid: { type: Number, default: -1 },
+    textSearch: { type: String, default: "" },
   },
   {
     timestamps: true,
@@ -94,6 +95,18 @@ roomSchema.statics.getById = async (_id) => {
   return room;
 };
 
+roomSchema.pre("save", function (next) {
+  const accentRegex = /[\u00C0-\u017F]/;
+  const textSearch = `${this.name} ${this.gender} ${this.address.fullText} ${this.genre.join(" ")}`;
+  let textWithoutAccent = "";
+  if (accentRegex.test(textSearch)) {
+    textWithoutAccent = textSearch.normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\W/g, " ");
+  }
+  this.textSearch = `${textSearch.toLowerCase()} ${textWithoutAccent.toLowerCase()}`;
+  next();
+});
 
 const Room = mongoose.model("Room", roomSchema);
 
