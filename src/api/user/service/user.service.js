@@ -123,6 +123,34 @@ class UserService {
     }
   }
 
+  async extendContract(renterId, contractId) {
+
+    const renter = await User.getById(renterId);
+
+    const contract = await Contract.findOne({
+      _id: contractId
+    });
+
+    if (!contract) throw new MyError('Contract not found');
+
+    const notification = await Notification.create({
+      user: renter._id,
+      type: "CANCEL_CONTRACT",
+      content: 'end rent room',
+      tag: [renter._id, contract.lessor]
+    });
+
+    const request = await Request.create({
+      from: renter._id,
+      to: contract.lessor,
+      type: 'CANCEL_RENTAL',
+      data: contract
+    });
+    return {
+      notification, request
+    }
+  }
+
   async acceptCancelRentalRoom(ownerId, requestId) {
     const request = await Request.findOne({
       _id: requestId

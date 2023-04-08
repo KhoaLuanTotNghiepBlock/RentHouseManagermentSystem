@@ -39,7 +39,8 @@ const invoiceSchema = new mongoose.Schema(
     endDate: { type: Date, },
     enable: { type: Boolean, default: true },
     hash: { type: String },
-    txhash: { type: String }
+    txhash: { type: String },
+    isExtends: { type: Boolean, default: false }
   },
   {
     versionKey: false,

@@ -196,6 +196,7 @@ class InvoiceService {
         const invoice = await Invoice.findOne({ _id: invoiceId, status: "Pending" });
         const endDate = new Date((invoice.endDate).getTime() + 15 * 24 * 60 * 60 * 1000);
         invoice.endDate = endDate;
+        invoice.isExtends = true;
         invoice.save({ new: true });
         return {
             invoice

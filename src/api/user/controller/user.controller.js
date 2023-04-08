@@ -669,6 +669,23 @@ class UserController {
     }
   }
 
+  //[POST]/users/:contractId/extend-contract
+  async sendRequestToCancel(req, res, next) {
+    try {
+      const { userId } = req.auth;
+      const contractId = req.params.contractId;
+
+      const data = await userService.cancelRentalByRenter(userId, contractId);
+      return res.status(200).json({
+        message: 'send request success!',
+        data,
+        errorCode: 200
+      });
+    } catch (error) {
+      next(error)
+    }
+  }
+
   // [POST] /user/accept-cancel-rental
   async acceptCancelRental(req, res, next) {
     try {
