@@ -38,6 +38,25 @@ class InvoiceController {
             next(error);
         }
     }
+
+    //[POST] bh/invoice/:invoiceId/extends
+    async extendPaymentInvoice(req, res, next) {
+        try {
+            const { userId } = req.auth;
+
+            const invoiceId = req.params.invoiceId;
+            const data = await invoiceService.extendsPaymentDayInvoice(userId, invoiceId);
+
+            return res.status(200).json({
+                message: "success",
+                errorCode: 200,
+                data
+            })
+        } catch (error) {
+            next(error);
+        }
+    }
+
 };
 
 module.exports = new InvoiceController();

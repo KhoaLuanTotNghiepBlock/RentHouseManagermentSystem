@@ -133,4 +133,5 @@ const InvoiceController = require('../controller/invoice.controller');
  */
 router.post('/create', InvoiceController.createInvoice);
 router.post('/:invoiceId/payment', InvoiceController.payForRentEachMonth);
+router.post('/:invoiceId/extends', InvoiceController.extendPaymentInvoice);
 module.exports = router;
