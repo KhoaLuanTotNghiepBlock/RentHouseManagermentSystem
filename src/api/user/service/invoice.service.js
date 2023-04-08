@@ -198,6 +198,10 @@ class InvoiceService {
         invoice.endDate = endDate;
         invoice.isExtends = true;
         invoice.save({ new: true });
+
+        const notification = await Notification.create([
+
+        ]);
         return {
             invoice
         };

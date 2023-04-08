@@ -1,3 +1,4 @@
+const { Contract } = require('ethers');
 const commonHelper = require('../../../utils/common.helper');
 const contractService = require('../service/contract.service');
 const roomService = require('../service/room.service');
@@ -171,27 +172,15 @@ class RoomController {
             const { userId } = req.auth;
             const conditions = {
                 ...req.query,
-                ...{ owner: userId }
+                lessor: userId
             };
             const sort = { createdAt: -1 };
             const projection = {
             };
 
-            const { items, total, page, limit, totalPages } = await roomService.getAllRoom(
+            const { items, total, page, limit, totalPages } = await contractService.getAllRoomLessor(
                 conditions,
-                commonHelper.getPagination(req.query),
-                projection,
-                [
-                    {
-                        path: 'owner',
-                        select: '-updatedAt'
-                    },
-                    {
-                        path: 'services',
-                        select: '-updatedAt'
-                    }
-                ],
-                sort,
+                commonHelper.getPagination(req.query)
             );
             return res.status(200).json({
                 data: { items, total, page, limit, totalPages },

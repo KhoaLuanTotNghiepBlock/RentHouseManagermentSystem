@@ -263,25 +263,70 @@ class ContractService {
         const { renter } = filter;
         renter && (filter.renter = toObjectId(renter));
 
+        const userLookup = [
+            {
+                $lookup: {
+                    from: "users",
+                    let: { userId: "$owner" },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ["$_id", "$$userId"] } } },
+                        { $project: { avatar: 1, email: 1, phone: 1, wallet: 1, username: 1, name: 1, } },
+                    ],
+                    as: "owner",
+                },
+            },
+            { $unwind: "$owner" },
+        ]
 
+        const servicesLookup = [
+            {
+                $lookup: {
+                    from: "services",
+                    let: { serviceIds: "$services" },
+                    pipeline: [
+                        { $match: { $expr: { $and: [{ $in: ["$_id", "$$serviceIds"] }] } } },
+                        { $project: { name: 1, description: 1, basePrice: 1 } },
+                    ],
+                    as: "services",
+                },
+            }
+        ]
+
+        const roomLookup = [
+            {
+                $lookup: {
+                    from: "rooms",
+                    let: { roomId: "$room" },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ["$_id", "$$roomId"] } } },
+                        ...userLookup,
+                        ...servicesLookup
+                    ],
+                    as: "room",
+                },
+            },
+            {
+                $unwind: "$room",
+            },
+        ];
         let [items, total] = await Promise.all([
-            Contract.find(conditions, projection)
-                .populate([
-                    {
-                        path: 'room',
-                        select: "-updatedAt"
-                    },
-                    {
-                        path: 'renter',
-                        select: "-updatedAt"
-                    },
-                    {
-                        path: 'lessor',
-                        select: "-updatedAt"
-                    }
-                ]).sort(sort).skip(skip).limit(limit),
             Contract.aggregate([
                 { $match: { renter: filter.renter } },
+                ...roomLookup,
+                {
+                    $group: {
+                        _id: "$room._id",
+                        room: { $first: "$room" }
+                    }
+                },
+                { $sort: { createdAt: -1 } },
+                { $project: { _id: 0, room: 1 } },
+                { $skip: skip },
+                { $limit: limit }
+            ]),
+            Contract.aggregate([
+                { $match: { renter: filter.renter } },
+                { $group: { _id: "$room" } },
                 { $count: "totalValue" },
             ]),
         ]);
@@ -308,59 +353,73 @@ class ContractService {
         delete filter.page;
         const { lessor } = filter;
         lessor && (filter.lessor = toObjectId(lessor));
+        console.log("🚀 ~ file: contract.service.js:355 ~ ContractService ~ lessor:", lessor)
 
+        const userLookup = [
+            {
+                $lookup: {
+                    from: "users",
+                    let: { userId: "$owner" },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ["$_id", "$$userId"] } } },
+                        { $project: { avatar: 1, email: 1, phone: 1, wallet: 1, username: 1, name: 1, } },
+                    ],
+                    as: "owner",
+                },
+            },
+            { $unwind: "$owner" },
+        ]
 
-        //     from: "users",
-        //     let: { userId: "$lessor" },
-        //     pipeline: [
-        //         {
-        //             $match: { $expr: { $eq: ["$_id", "$$userId"] } },
-        //         },
-        //         {
-        //             $project: {
-        //                 _id: 1,
-        //                 name: 1,
-        //                 avatar: 1,
-        //                 phone: 1,
-        //                 email: 1,
-        //                 identity: 1,
-        //                 wallet: 1
-        //             },
-        //         },
-        //     ],
-        //     as: "lessor",
-        // };
-        // Contract.aggregate([
-        //     { $match: { lessor: filter.lessor } },
-        //     { $lookup: renterLookup },
-        //     { $unwind: "$renter" },
-        //     { $lookup: roomLookup },
-        //     { $unwind: "$room" },
-        //     // { $lookup: lessorLookup },
-        //     // { $unwind: "$lessor" },
-        //     { $limit: limit },
-        //     { $skip: skip },
-        //     { $sort: sort },
-        //     { $project: projection },
-        // ]),
+        const servicesLookup = [
+            {
+                $lookup: {
+                    from: "services",
+                    let: { serviceIds: "$services" },
+                    pipeline: [
+                        { $match: { $expr: { $and: [{ $in: ["$_id", "$$serviceIds"] }] } } },
+                        { $project: { name: 1, description: 1, basePrice: 1 } },
+                    ],
+                    as: "services",
+                },
+            }
+        ]
+
+        const roomLookup = [
+            {
+                $lookup: {
+                    from: "rooms",
+                    let: { roomId: "$room" },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ["$_id", "$$roomId"] } } },
+                        ...userLookup,
+                        ...servicesLookup
+                    ],
+                    as: "room",
+                },
+            },
+            {
+                $unwind: "$room",
+            },
+        ];
+
         let [items, total] = await Promise.all([
-            Contract.find(conditions, projection)
-                .populate([
-                    {
-                        path: 'room',
-                        select: "-updatedAt"
-                    },
-                    {
-                        path: 'renter',
-                        select: "-updatedAt"
-                    },
-                    {
-                        path: 'lessor',
-                        select: "-updatedAt"
-                    }
-                ]).sort(sort).skip(skip).limit(limit),
             Contract.aggregate([
                 { $match: { lessor: filter.lessor } },
+                ...roomLookup,
+                {
+                    $group: {
+                        _id: "$room._id",
+                        room: { $first: "$room" }
+                    }
+                },
+                { $sort: { createdAt: -1 } },
+                { $project: { _id: 0, room: 1 } },
+                { $skip: skip },
+                { $limit: limit }
+            ]),
+            Contract.aggregate([
+                { $match: { lessor: filter.lessor } },
+                { $group: { _id: "$room" } },
                 { $count: "totalValue" },
             ]),
         ]);

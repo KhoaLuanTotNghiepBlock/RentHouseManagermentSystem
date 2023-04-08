@@ -670,12 +670,13 @@ class UserController {
   }
 
   //[POST]/users/:contractId/extend-contract
-  async sendRequestToCancel(req, res, next) {
+  async sendRequestToExtendContract(req, res, next) {
     try {
       const { userId } = req.auth;
       const contractId = req.params.contractId;
 
-      const data = await userService.cancelRentalByRenter(userId, contractId);
+      const data = await userService.extendContract(userId, contractId);
+
       return res.status(200).json({
         message: 'send request success!',
         data,
