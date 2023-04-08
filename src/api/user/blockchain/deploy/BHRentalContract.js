@@ -208,7 +208,6 @@ const RentalContract = {
     },
 
     payForRentMonth: async (renterAddress, roomUid, invoice, invoiceAmount, rentAmount) => {
-        console.log("🚀 ~ file: BHRentalContract.js:212 ~ payForRentMonth: ~ roomUid:", roomUid)
         const { wallet, _id, username } = await User.getUserByWallet(renterAddress);
         const signRenter = await RentalContract.createSigner(renterAddress);
         // convert payment to ether
@@ -233,8 +232,8 @@ const RentalContract = {
             data: payRenter
         };
 
-        const signedTx = await web3.eth.accounts.signTransaction(tx, wallet.walletPrivateKey);
-        const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction);
+        const signedTx = await web3.eth.accounts.signTransaction(tx, wallet.walletPrivateKey).catch((error) => { throw new MyError(error) });
+        const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction).catch((error) => { throw new MyError(error) });
         const signTransactionHash = txReceipt.transactionHash;
         console.log(txReceipt);
 
