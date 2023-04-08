@@ -21,6 +21,9 @@ const RequestSchema = new mongoose.Schema(
             ref: 'User',
             required: true
         },
+        startDate: { type: Date, default: new Date() },
+        endDate: { type: Date },
+        enable: { type: Boolean, default: true },
     },
     {
         timestamps: true,
@@ -29,5 +32,10 @@ const RequestSchema = new mongoose.Schema(
 )
 
 RequestSchema.plugin(Timezone);
+RequestSchema.pre("save", function (next) {
+    let endDate = new Date((this.startDate).getTime() + 15 * 24 * 60 * 60 * 1000);
+    this.endDate = endDate;
+    next();
+});
 const Request = mongoose.model('Request', RequestSchema);
 module.exports = Request;

@@ -27,7 +27,7 @@ class InvoiceService {
         //     throw new MyError('Unauthorize to create invoices');
 
         let paymentDay = this.checkDueInvoiceDay(dateRent, new Date(), period);
-        let endDate = new Date(paymentDay.getTime() + 2 * 24 * 60 * 60 * 1000);;
+        let endDate = new Date(paymentDay.getTime() + 2 * 24 * 60 * 60 * 1000);
 
         const serviceDemands = invoiceInfo.listServiceDemands;
         if (!serviceDemands || !serviceDemands.length) {

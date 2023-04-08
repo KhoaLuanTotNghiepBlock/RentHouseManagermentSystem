@@ -17,7 +17,6 @@ const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
 
 const ContractRentalHouse = new web3.eth.Contract(abi, CONTRACT_ADDRESS);
 const { USER_TRANSACTION_ACTION } = require('../../../../config/user-transaction');
-const InvoiceTransaction = require('../../../../model/transaction/invoice-transaction');
 const Invoice = require('../../../../model/transaction/invoice.model');
 const crypto = require('../../../../utils/crypto.hepler');
 const Contract = require('../../../../model/transaction/contract.model');

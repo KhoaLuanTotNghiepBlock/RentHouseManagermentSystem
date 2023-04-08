@@ -208,7 +208,7 @@ class RoomController {
     async updateRoom(req, res, next) {
         try {
             const roomId = req.params.roomId;
-            const data = await roomService.updateRoom(roomId, data);
+            const data = await roomService.updateRoom(roomId, req.body);
 
             return res.status(200).json({
                 data,
