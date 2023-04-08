@@ -50,7 +50,6 @@ class UserController {
   async connectVNpaytoWallet(req, res, next) {
     try {
       const { walletAddress, amount } = req.body;
-      // const { walletAddress, amount } = { walletAddress: "0x7b54ea3b6f9Ed4D80925D7d6C7E820C4e245818d", amount: 100000 };
       // Validate the request body
       if (!walletAddress || !amount) {
         return res.status(400).json({ message: 'Request body is incomplete.', errorCode: 400, data: {} });
@@ -114,7 +113,68 @@ class UserController {
     }
   }
 
+  // async withdrawMoney(req, res, next) {
+  //   try {
+  //     const ipAddr = req.headers['x-forwarded-for'] ||
+  //       req.connection.remoteAddress ||
+  //       req.socket.remoteAddress ||
+  //       req.connection.socket.remoteAddress;
+  //     const user = await User.getUserByWallet(walletAddress);
+  //     const tmnCode = vnp_TmnCode;
+  //     let secretKey = vnp_HashSecret;
+  //     let vnpUrl = vnp_Url;
+  //     const returnUrl = vnp_ReturnUrl;
+
+  //     const date = new Date();
+  //     const createDate = date.getFullYear().toString() +
+  //       (date.getMonth() + 1).toString().padStart(2, '0') +
+  //       date.getDate().toString().padStart(2, '0') +
+  //       date.getHours().toString().padStart(2, '0') +
+  //       date.getMinutes().toString().padStart(2, '0') +
+  //       date.getSeconds().toString().padStart(2, '0');
+  //     const orderId = new Date().toISOString().slice(0, 19).replace('T', ' ');
+  //     const bankCode = 'NCB';
+
+  //     const orderInfo = "pay for wallet";
+  //     const orderType = 'topup';
+  //     const locale = 'vn';
+  //     const currCode = 'VND';
+
+  //     let vnp_Params = {};
+  //     vnp_Params['vnp_Version'] = '2.1.0';
+  //     vnp_Params['vnp_Command'] = 'pay';
+  //     vnp_Params['vnp_TmnCode'] = tmnCode;
+  //     // vnp_Params['vnp_Merchant'] = ''
+  //     vnp_Params['vnp_Locale'] = locale;
+  //     vnp_Params['vnp_CurrCode'] = currCode;
+  //     vnp_Params['vnp_TxnRef'] = user._id + new Date();
+  //     vnp_Params['vnp_OrderInfo'] = user._id;
+  //     vnp_Params['vnp_OrderType'] = orderType;
+  //     vnp_Params['vnp_Amount'] = amount * 100;
+  //     vnp_Params['vnp_ReturnUrl'] = returnUrl;
+  //     vnp_Params['vnp_IpAddr'] = ipAddr;
+  //     vnp_Params['vnp_CreateDate'] = createDate;
+  //     if (bankCode !== null && bankCode !== '') {
+  //       vnp_Params['vnp_BankCode'] = bankCode;
+  //     }
+
+  //     vnp_Params = sortObject(vnp_Params);
+  //     const querystring = require('qs');
+  //     let signData = querystring.stringify(vnp_Params, { encode: false });
+  //     const crypto = require("crypto");
+  //     const hmac = crypto.createHmac("sha512", secretKey);
+  //     const signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex");
+  //     vnp_Params['vnp_SecureHash'] = signed;
+  //     vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
+
+  //     return res.json({ paymentUrl: vnpUrl });
+  //   } catch (error) {
+  //     next(error);
+  //   }
+  // }
+
   //[POST] user/contract/:contractId/cancel-by-renter
+
   async cancelByRenter(req, res, next) {
     try {
       const { userId } = req.auth;
@@ -178,9 +238,8 @@ class UserController {
       const amount = vnp_Params["vnp_Amount"];
       const userId = vnp_Params["vnp_OrderInfo"];
 
-      const data = await userWalletService.changeBalance(userId, amount, null, USER_TRANSACTION_ACTION.PAYMENT);
-
-      const result = await userService.transferBalance(ADMIN._id, userId, amount, ACTION_TRANSFER.TOP_UP);
+      const data = await userWalletService.changeBalance(userId, amount / 100, null, USER_TRANSACTION_ACTION.PAYMENT);
+      const result = await userService.transferBalance(ADMIN._id, userId, amount / 100, ACTION_TRANSFER.TOP_UP);
 
       const notification = await Notification.create({
         userOwner: ADMIN._id,
@@ -218,18 +277,18 @@ class UserController {
     try {
       console.log('test pay ment');
       const from = await User.getById(ADMIN._id);
-      const to = await User.getById("64298991ae395f7690c6e998");
-      const amount = 2300;
+      const to = await User.getById("6431120c24fe4bc8bc0b828a");
+      const amount = 50000;
       if (amount < 0)
         throw new MyError('amount not invalid!');
 
-      if (compare(from._id, to._id)) throw new MyError('can not transfer for self');
-      // const result = await userService.transferBalance(from?.wallet?.walletAddress, to?.wallet?.walletAddress, amount);
+      // if (compare(from._id, to._id)) throw new MyError('can not transfer for self');
+      const result = await userService.transferBalance(from._id, to._id, amount, "top up");
       res.status(200).json({
         message: 'success',
         errorCode: 200,
         data: {
-          // ...result
+          ...result
         }
       });
     } catch (error) {
@@ -508,6 +567,7 @@ class UserController {
         {},
         sort,
       );
+
       return res.status(200).json({
         data: { items, total, page, limit, totalPages },
         message: "success",

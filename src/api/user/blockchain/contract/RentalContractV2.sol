@@ -177,7 +177,7 @@ contract RentalContract {
     ) public payable {
         require(from != to, "!not transfer for selt");
         require(msg.value >= amount, "!not enough balance");
-        from.transfer(amount);
+        to.transfer(amount);
         emit TransferBalance(from, to, amount, action);
     }
 }

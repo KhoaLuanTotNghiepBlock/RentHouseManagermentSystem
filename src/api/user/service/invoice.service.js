@@ -168,7 +168,6 @@ class InvoiceService {
             _id: invoice.contract.room,
             status: "already-rent"
         });
-        console.log("🚀 ~ file: invoice.service.js:172 ~ InvoiceService ~ payForRentEachMonth ~ room:", room)
 
         if (!room) throw new MyError('room not found');
         // check date to pay

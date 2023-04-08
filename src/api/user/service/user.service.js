@@ -13,6 +13,7 @@ const Notification = require('../../../model/user/notification.model');
 const Request = require('../../../model/user/request.model');
 const RentalContract = require('../blockchain/deploy/BHRentalContract');
 const contractService = require('./contract.service');
+const { compare } = require('../../../utils/object.helper');
 
 
 class UserService {
@@ -153,7 +154,7 @@ class UserService {
       throw new MyError('amount not invalid!');
 
     if (compare(from._id, to._id)) throw new MyError('can not transfer for self');
-    const result = await RentalContract.transferBalance(from?.wallet?.walletAddress, to?.wallet?.walletAddress, amount);
+    const result = await RentalContract.transferBalance(from?.wallet?.walletAddress, to?.wallet?.walletAddress, amount, action);
     return result;
   }
 

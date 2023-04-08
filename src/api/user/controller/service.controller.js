@@ -71,6 +71,8 @@ class ServiceApartmentController {
             next(error)
         }
     }
+
+
 }
 
 module.exports = new ServiceApartmentController();

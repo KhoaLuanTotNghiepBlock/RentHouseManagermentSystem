@@ -20,7 +20,7 @@ const invoiceSchema = new mongoose.Schema(
     },
     payStatus: {
       type: String,
-      enum: ["Unpaid", "Pending", "Complete", "Failed", "Declined", "Cancelled", "Abandoned", "Refunsed"],
+      enum: ["Pending", "Complete", "Failed", "Declined", "Cancelled", "Refunsed"],
       default: "Unpaid",
     },
     paymentMethod: {
@@ -62,7 +62,6 @@ invoiceSchema.statics.getOne = async (invoiceId) => {
     ])
   if (!invoice)
     throw new MyError('invoice not found');
-
   return invoice;
 }
 const Invoice = mongoose.model("Invoice", invoiceSchema);

@@ -107,7 +107,7 @@ const RentalContract = {
         const tx = {
             from: signOwner.address,
             to: CONTRACT_ADDRESS,
-            gasLimit: web3.utils.toHex(300000),
+            gasLimit: 300000,
             data: renterAbi,
             value: 0,
         };
@@ -448,14 +448,14 @@ const RentalContract = {
         const to = await RentalContract.createSigner(toAddress);
 
         amount = await vndToEth(amount + 500);
-        const value = convertBalanceToWei(amount);
+        const value = new BN(convertBalanceToWei(amount));
         const pay = ContractRentalHouse.methods.transferBalance(from.address, to.address, value, action).encodeABI();
 
         const tx = {
             from: from.address,
             to: CONTRACT_ADDRESS,
             gasLimit: 300000,
-            value: BN(value).toNumber(),
+            value: value,
             data: pay
         };
 

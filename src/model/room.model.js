@@ -97,7 +97,7 @@ roomSchema.statics.getById = async (_id) => {
 
 roomSchema.pre("save", function (next) {
   const accentRegex = /[\u00C0-\u017F]/;
-  const textSearch = `${this.name} ${this.gender} ${this.address.fullText} ${this.genre.join(" ")}`;
+  const textSearch = `${this.name} ${this.gender} ${this.address.fullText} ${this.amentilities.join(" ")}`;
   let textWithoutAccent = "";
   if (accentRegex.test(textSearch)) {
     textWithoutAccent = textSearch.normalize("NFD")
