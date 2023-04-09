@@ -718,6 +718,22 @@ class UserController {
     }
   }
 
+  //[POST] /users/:contractId/cancel-by-renter
+  async cancelContractByLessor(req, res, next) {
+    try {
+      const { userId } = req.auth;
+
+      const data = await userService.acceptCancelRentalRoom(userId);
+
+      return res.status(200).json({
+        message: 'end rent success',
+        errorCode: 200,
+        data
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = UserController;

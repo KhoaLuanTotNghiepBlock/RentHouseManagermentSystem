@@ -149,5 +149,11 @@ contractSchema.statics.getOne = async (contractId, projection = { updatedAt: 0 }
   ]);
   return items[0];
 }
+
+contractSchema.pre("save", function (next) {
+  this.penaltyFeeEndRent = (this.payment * 50) / 100;
+  next();
+});
+
 const Contract = mongoose.model("Contract", contractSchema);
 module.exports = Contract;

@@ -11,6 +11,7 @@ _this.bugId = "64183444b98701f5a86b9296";
 
 _this.ACTION_TRANSFER = {
     TOP_UP: 'top_up',
-    WITHDRAW: 'withdraw'
+    WITHDRAW: 'withdraw',
+    TRANSFER: 'transfer'
 }
 module.exports = _this;

@@ -14,6 +14,9 @@ const Request = require('../../../model/user/request.model');
 const RentalContract = require('../blockchain/deploy/BHRentalContract');
 const contractService = require('./contract.service');
 const { compare } = require('../../../utils/object.helper');
+const { ACTION_FUNCTION, USER_TRANSACTION_ACTION } = require('../../../config/user-transaction');
+const { ACTION_TRANSFER, ADMIN } = require('../../../config/default');
+const userWalletService = require('./user-wallet.service');
 
 
 class UserService {
@@ -172,6 +175,55 @@ class UserService {
     result = await RentalContract.endRentInDue(data?.lessor?.wallet.walletAddress, data.room, data?.renter?.wallet.walletAddress);
 
     return result;
+  }
+
+  async cancelContractByLessor(ownerId, contractId) {
+    const contract = await Contract.findOne({
+      _id: contractId,
+      status: "available"
+    }).populate([
+      {
+        path: "renter",
+        select: "_id wallet"
+      },
+      {
+        path: "lessor",
+        select: "_id wallet"
+      },
+      {
+        path: "room",
+        select: "-updatedAt"
+      }
+    ]);
+    if (!contract) throw new MyError('contract not found');
+
+    const { renter, lessor, room, penaltyFeeEndRent } = contract;
+
+    //check contract due
+    const dateEnd = new Date();
+    // in due
+    const inDue = await contractService.checkContractStatus(dateEnd, contractId);
+
+    const result = await RentalContract.endRent(lessor?.wallet.walletAddress, room.renter?.wallet.walletAddress);
+
+    if (inDue) {
+      const data = this.transferBalance(lessor._id, renter._id, penaltyFeeEndRent, ACTION_TRANSFER.TRANSFER);
+
+      await userWalletService.changeBalance(
+        renter._id,
+        penaltyFeeEndRent,
+        data,
+        USER_TRANSACTION_ACTION.PAYMENT);
+
+      const notification = Notification.create({
+        userOwner: ADMIN._id,
+        tag: [renter._id],
+        content: `you receive penalty fee from room ${room.name} for end rent in due`
+      });
+    }
+    return {
+      result
+    }
   }
 
   async transferBalance(fromUserId, toUserId, amount, action) {
