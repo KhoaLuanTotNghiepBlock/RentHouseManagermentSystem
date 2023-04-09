@@ -110,8 +110,9 @@ class RoomService {
                 .lean(),
             Room.countDocuments(filter),
         ]);
+        const array = items.map((val) => ({ room: val }));
         return {
-            items,
+            array,
             total,
             page,
             limit,
