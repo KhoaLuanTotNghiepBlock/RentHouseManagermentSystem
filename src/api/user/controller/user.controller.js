@@ -24,6 +24,7 @@ const Contract = require("../../../model/transaction/contract.model");
 const MyError = require("../../../exception/MyError");
 const RentalContract = require("../blockchain/deploy/BHRentalContract");
 const { compare } = require("../../../utils/object.helper");
+const roomService = require("../service/room.service");
 
 const sortObject = (obj) => {
   var sorted = {};
@@ -467,11 +468,25 @@ class UserController {
       const { userId } = req.auth;
       const conditions = {
         ...req.query,
-        ...{ lessor: commonHelper.toObjectId(userId) }
+        owner: userId
       }
-      const { items, total, page, limit, totalPages } = await contractService.getAllContract(
+      const populate = [
+        {
+          path: 'owner',
+          select: '_id username name wallet avatar phone email'
+        },
+        {
+          path: 'services',
+          select: "_id name description basePrice",
+        }
+      ];
+
+      const { items, total, page, limit, totalPages } = await roomService.getAllRoom(
         conditions,
         commonHelper.getPagination(req.query),
+        {},
+        populate,
+        { createdAt: -1 }
       );
 
       return res.status(200).json({

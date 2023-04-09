@@ -87,8 +87,11 @@ class RoomService {
         projection,
         populate = [],
         sort = {}) {
-        const { key } = conditions;
-        const filter = { ...(key && { key }) };
+        const { key, owner } = conditions;
+        const filter = {
+            ...(key && { key }),
+            ...(owner && { owner })
+        };
         const { limit, page, skip } = pagination;
         delete filter.limit;
         delete filter.page;
