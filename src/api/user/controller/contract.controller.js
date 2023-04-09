@@ -11,6 +11,7 @@ class ContractController {
             // owner id
             const { userId } = req.auth;
             const { period, room, dateRent, payTime, payMode, payment } = req.body;
+
             const data = await contractService.createContract(userId, { period, room, dateRent, payTime, payMode, payment });
 
             return res.status(200).json({

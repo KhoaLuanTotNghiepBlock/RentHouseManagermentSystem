@@ -107,7 +107,8 @@ contractSchema.statics.getOne = async (contractId, projection = { updatedAt: 0 }
           phone: 1,
           email: 1,
           identity: 1,
-          wallet: 1
+          wallet: 1,
+          username: 1
         },
       },
     ],
@@ -129,7 +130,8 @@ contractSchema.statics.getOne = async (contractId, projection = { updatedAt: 0 }
           phone: 1,
           email: 1,
           identity: 1,
-          wallet: 1
+          wallet: 1,
+          username: 1
         },
       },
     ],

@@ -23,9 +23,13 @@ class ContractService {
         // get owner 
         const renter = await User.getById(renterId);
 
+
         // validate contract info 
         let contract = await contractValidate.validateContractInfo(contractInfo);
+        contract = await Contract.findOne({
+            renter: renter._id,
 
+        });
         if (!contract)
             throw new MyError('contract service => contract invalid!');
 

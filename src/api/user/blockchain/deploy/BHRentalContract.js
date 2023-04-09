@@ -370,18 +370,21 @@ const RentalContract = {
         const { wallet, _id } = await User.getUserByWallet(ownerAddress);
         const renter = await User.getUserByWallet(renterAddress);
         const signOwner = await RentalContract.createSigner(ownerAddress);
+        const valuePay = await vndToEth(penaltyFee);
+
+        const val = new BN(convertBalanceToWei(valuePay));
 
         const { roomUid, deposit } = room;
-        const endRentTransaction = ContractRentalHouse.methods.endRent(roomUid).encodeABI();
+        const endRentTransaction = ContractRentalHouse.methods.endRentWithPenalty(roomUid, val).encodeABI();
         const tx = {
             from: signOwner.address,
             to: CONTRACT_ADDRESS,
             gasLimit: 300000,
-            value: 0,
+            value: val,
             data: endRentTransaction
         };
 
-        const signedTx = await web3.eth.accounts.signTransaction(tx, wallet.walletPrivateKey).catch((error) => { throw new MyError(error) });
+        const signedTx = await web3.eth.accounts.signTransaction(tx, renter.wallet.walletPrivateKey).catch((error) => { throw new MyError(error) });
         const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction).catch((error) => { throw new MyError(error) });
         const signTransactionHash = txReceipt.transactionHash;
         console.log(txReceipt);
