@@ -165,11 +165,11 @@ class UserService {
     const inDue = await contractService.checkContractStatus(dateEnd, data._id);
     let result;
 
-    // if (!inDue) {
-    //   result = await RentalContract.endRent(data?.lessor?.wallet.walletAddress, data.room, data?.renter?.wallet.walletAddress);
-    // }
-    // // const penaltyFee = ;
-    // result = await RentalContract.endRentInDue(data?.lessor?.wallet.walletAddress, data.room, data?.renter?.wallet.walletAddress);
+    if (!inDue) {
+      result = await RentalContract.endRent(data?.lessor?.wallet.walletAddress, data.room, data?.renter?.wallet.walletAddress);
+    }
+    // const penaltyFee = (data.payment * 50) / 100;
+    result = await RentalContract.endRentInDue(data?.lessor?.wallet.walletAddress, data.room, data?.renter?.wallet.walletAddress);
 
     return result;
   }

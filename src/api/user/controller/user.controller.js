@@ -606,8 +606,7 @@ class UserController {
       const data = await invoiceService.getAll(
         conditions,
         getPagination(req.query),
-        {},
-        true
+        {}
       );
 
       return res.status(200).json({

@@ -89,7 +89,10 @@ class ServiceDemandService {
     async updateServiceDemandInvoice(roomId, demandInfo) {
         // get time to find list service Demand of room
         const room = await roomValidate.validRoom(roomId);
-
+        // const contract = await Contract.findOne(
+        //     room: roomId,
+        //     status: "avaia"
+        // );
         if (!demandInfo)
             throw new ArgumentError('service demand ==> demandInfo ');
 
@@ -107,7 +110,10 @@ class ServiceDemandService {
                 }
             }
         }
-        const listServiceDemands = listDemand.map((val) => val._id);
+
+        const listServiceDemands = listDemand.map((val) => {
+            return val._id
+        })
         return {
             listServiceDemands
         };
@@ -125,7 +131,7 @@ class ServiceDemandService {
         servicePreDemand.oldIndicator = serviceLastDemand !== null ? serviceLastDemand.newIndicator : 0;
         servicePreDemand.newIndicator = newIndicator;
         servicePreDemand.quality = quality;
-        await servicePreDemand.save({ new: true });
+        await servicePreDemand.save();
 
         await this.calculateDemandFee(servicePreDemand._id);
         return servicePreDemand;

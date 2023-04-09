@@ -364,7 +364,7 @@ const RentalContract = {
         return { notification };
     },
 
-    endRentInDue: async (ownerAddress, room, renterAddress, penaltyFee) => {
+    endRentInDue: async (ownerAddress, room, renterAddress, penaltyFee = 0) => {
         if (!ownerAddress || !room)
             throw new MyError('missing parameter');
         const { wallet, _id } = await User.getUserByWallet(ownerAddress);
@@ -386,7 +386,7 @@ const RentalContract = {
         const signTransactionHash = txReceipt.transactionHash;
         console.log(txReceipt);
 
-        await setTimeout(() => { console.log('Waited 1 seconds.') }, 1000);
+        await setTimeout(() => { console.log('Waited 1 seconds.') }, 2000);
 
         const event = await RentalContract.getGetEventFromTransaction(signTransactionHash, ContractRentalHouse)
             .catch((error) => { throw new MyError(error) });
@@ -417,9 +417,9 @@ const RentalContract = {
             content: 'End rent room success'
         });
 
-        // update user balance
+        // lessor receive the deposit of renter
         await userWalletService.changeBalance(
-            renter._id,
+            _id,
             parseFloat(deposit),
             signTransactionHash,
             USER_TRANSACTION_ACTION.DEPOSIT,
@@ -428,8 +428,8 @@ const RentalContract = {
         await Notification.create({
             userOwner: ADMIN._id,
             type: 'NOTIFICATION',
-            tag: [renter._id],
-            content: `you receive deposit ${deposit}`
+            tag: [_id],
+            content: `you receive deposit from room ${room.name} ${deposit}`
         });
         return { notification };
     },

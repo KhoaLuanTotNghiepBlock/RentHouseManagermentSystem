@@ -71,42 +71,46 @@ class InvoiceService {
     async getAll(
         conditions = {},
         pagination,
-        projection = {}, forRent = false, forOwner = false) {
+        projection = {}) {
         let { payStatus, userId } = conditions;
         const { limit, page, skip } = pagination;
         const filter = {
             ...(payStatus && { payStatus }),
-            ...((userId && forRent) && { "contract.renter": userId }),
-            ...((userId && forOwner) && { "contract.lessor": userId }),
+            ...(userId && { "contract.renter": toObjectId(userId) }),
         };
-        const [items, total] = await Promise.all([
-            Invoice.find(filter, projection).populate([
-                {
-                    path: 'contract',
-                    select: '-updatedAt',
-                    populate: [
-                        {
-                            path: 'room',
-                            select: '-updatedAt',
-                        },
-                        {
-                            path: 'renter',
-                            select: '_id username name avatar phone email',
-                        },
-                        {
-                            path: 'renter',
-                            select: '_id username name avatar phone email'
-                        }
-                    ]
+        console.log("🚀 ~ file: invoice.service.js:78 ~ InvoiceService ~ filter:", filter)
 
-                }
-            ])
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit),
-            Invoice.countDocuments(filter),
+        let [items, total] = await Promise.all([
+            Invoice.aggregate([
+                {
+                    $lookup: {
+                        from: "contracts",
+                        let: { contractId: "$contract" },
+                        pipeline: [
+                            { $match: { $expr: { $eq: ["$_id", "$$contractId"] } } }
+                        ],
+                        as: "contract"
+                    }
+                },
+                { $match: { filter } }
+            ]),
+            Invoice.aggregate([
+                {
+                    $lookup: {
+                        from: "contracts",
+                        let: { contractId: "$contract" },
+                        pipeline: [
+                            { $match: { $expr: { $eq: ["$_id", "$$contractId"] } } }
+                        ],
+                        as: "contract"
+                    }
+                },
+                { $match: { filter } },
+                { $count: "totalValue" }
+            ]),
         ]);
 
+        total = total.length > 0 ? total[0].totalValue : 0;
         return {
             items,
             total,
