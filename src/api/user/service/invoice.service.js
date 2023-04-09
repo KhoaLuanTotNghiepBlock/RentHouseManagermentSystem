@@ -13,6 +13,7 @@ const Room = require("../../../model/room.model");
 const { toObjectId } = require('../../../utils/common.helper');
 const Notification = require("../../../model/user/notification.model");
 const Request = require("../../../model/user/request.model");
+const ServiceDemand = require("../../../model/service/service-demand.model");
 class InvoiceService {
 
     async createInvoice(userId, contractId, invoiceInfo) {
@@ -29,14 +30,16 @@ class InvoiceService {
         let paymentDay = this.checkDueInvoiceDay(dateRent, new Date(), period);
         let endDate = new Date(paymentDay.getTime() + 2 * 24 * 60 * 60 * 1000);
 
+
         const serviceDemands = invoiceInfo.listServiceDemands;
         if (!serviceDemands || !serviceDemands.length) {
             throw new MyError('invoice service ==> listServiceDemand ');
         }
-
-        // use reduce to calculate sum of service demand 
-        const amount = serviceDemands.reduce((sum, demand) => sum + demand.amount, payment);
-        const serviceDemandIds = serviceDemands.map(demand => demand._id);
+        let amountDemand = 0;
+        for (let i = 0; i < serviceDemands.length; i++) {
+            const { amount } = await ServiceDemand.findById(serviceDemands[i]);
+            amountDemand += amount;
+        }
 
         let invoice = await Invoice.create({
             contract: contract._id,
@@ -46,11 +49,10 @@ class InvoiceService {
             startDate: paymentDay,
             endDate,
             enable: true,
-            amount,
-            serviceDemands: serviceDemandIds
+            amount: amountDemand,
+            serviceDemands
         });
         let notification = {};
-        let request = {};
 
         if (invoice) {
             notification = await Notification.create({
@@ -64,7 +66,6 @@ class InvoiceService {
             invoice,
             notification,
         }
-
     }
 
     async getAll(

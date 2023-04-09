@@ -107,9 +107,9 @@ class ServiceDemandService {
                 }
             }
         }
-
+        const listServiceDemands = listDemand.map((val) => val._id);
         return {
-            listDemand
+            listServiceDemands
         };
     }
 
@@ -125,7 +125,7 @@ class ServiceDemandService {
         servicePreDemand.oldIndicator = serviceLastDemand !== null ? serviceLastDemand.newIndicator : 0;
         servicePreDemand.newIndicator = newIndicator;
         servicePreDemand.quality = quality;
-        await servicePreDemand.save();
+        await servicePreDemand.save({ new: true });
 
         await this.calculateDemandFee(servicePreDemand._id);
         return servicePreDemand;
@@ -133,18 +133,14 @@ class ServiceDemandService {
 
     async calculateDemandFee(serviceDemandId) {
         let serviceDemand = await ServiceDemand.getById(serviceDemandId);
-
         const { service, type } = serviceDemand;
 
         if (!service)
             throw new MyError('Not found service!');
 
         let amount = this.amountServiceDemand(type, serviceDemand, service.basePrice);
-        if (!amount)
-            throw new MyError('amount invalid!');
-
         serviceDemand.amount = amount;
-        await serviceDemand.save();
+        await serviceDemand.save({ new: true });
     }
 
     amountServiceDemand(type, serviceDemand, basePrice) {
