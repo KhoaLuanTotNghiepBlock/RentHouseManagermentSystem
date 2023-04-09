@@ -112,7 +112,7 @@ class RoomService {
         ]);
         const array = items.map((val) => ({ room: val }));
         return {
-            array,
+            items: array,
             total,
             page,
             limit,
