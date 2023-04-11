@@ -76,6 +76,8 @@ const userRouter = (io) => {
   router.post('/payment-test', userController.testPayment)
   router.get('/contract/:roomId', userController.getContractOfRoom);
 
+  router.post('/room/:roomId/feedback', userController.feedBackRoom);
+
   router.get("/me/profile", userController.getProfile); // not yet
   router.patch("/me/avatar", userController.changeAvatar); // not yet
   return router;

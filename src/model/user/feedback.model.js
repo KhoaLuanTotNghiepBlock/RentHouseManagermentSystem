@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
-
 const { Schema } = mongoose;
 
-const feebBackSchema = new mongoose.Schema(
+const feedBackSchema = new mongoose.Schema(
   {
     user: {
       type: Object,
@@ -20,10 +19,8 @@ const feebBackSchema = new mongoose.Schema(
       type: Schema.Types.ObjectId,
       ref: "Room",
     },
-    apartment: {
-      type: Schema.Types.ObjectId,
-      ref: "Apartment",
-    },
+    images: [],
+    totalLikes: { type: Number, default: 0 },
     enable: {
       type: Boolean,
       default: true,
@@ -35,5 +32,5 @@ const feebBackSchema = new mongoose.Schema(
   },
 );
 
-const FeebBack = mongoose.model("FeebBack", feebBackSchema, "FeedBack");
-module.exports = FeebBack;
+const FeedBack = mongoose.model("FeedBack", feedBackSchema);
+module.exports = FeedBack;

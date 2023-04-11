@@ -18,6 +18,8 @@ const { ACTION_FUNCTION, USER_TRANSACTION_ACTION } = require('../../../config/us
 const { ACTION_TRANSFER, ADMIN } = require('../../../config/default');
 const userWalletService = require('./user-wallet.service');
 const { toObjectId } = require('../../../utils/common.helper');
+const Room = require('../../../model/room.model');
+const FeedBack = require('../../../model/user/feedback.model');
 
 
 class UserService {
@@ -265,6 +267,49 @@ class UserService {
     return { notification };
   }
 
+  async feedBackRoom(roomId, userId, data) {
+    /**
+     * Flow:
+     * 1. check user has rented room
+     * 2. 
+     */
+    if (!roomId || !userId) throw new MyError('missing parameter');
+
+    let [roomFind, feedBack] = await Promise.all([
+      Room.findOne({ _id: roomId }),
+      FeedBack.findOne({ room: roomId, user: userId })
+    ]);
+
+    if (feedBack) return { message: 'you already feedback this room' };
+
+    const { content, rating, images } = data;
+
+    feedBack = await FeedBack.create({
+      user: userId,
+      content,
+      rating,
+      room: roomFind._id,
+      images
+    });
+
+    await Notification.create({
+      user: ADMIN._id,
+      type: "NOTIFICATION",
+      content: `your room ${roomFind.name} received a feedback from user`,
+      tag: [roomFind.owner]
+    });
+
+    await Notification.create({
+      user: ADMIN._id,
+      type: "NOTIFICATION",
+      content: `thank for your feedback room ${roomFind.name}`,
+      tag: [userId]
+    });
+
+    return {
+      feedBack
+    }
+  }
 
 }
 

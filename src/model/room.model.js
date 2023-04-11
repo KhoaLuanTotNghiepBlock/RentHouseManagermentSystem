@@ -65,6 +65,8 @@ const roomSchema = new mongoose.Schema(
     status: { type: String, enum: ["available", "already-rent", "not-available"], default: "available" },
     roomUid: { type: Number, default: -1 },
     textSearch: { type: String, default: "" },
+    totalStars: { type: Number, default: 0 },
+    totalReport: { type: Number, default: 0 },
   },
   {
     timestamps: true,

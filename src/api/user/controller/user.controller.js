@@ -690,6 +690,26 @@ class UserController {
       next(error);
     }
   }
+
+  //[POST] /room/:roomId/feedback
+  async feedBackRoom(req, res, next) {
+    try {
+      const { roomId } = req.params;
+      const { userId } = req.auth;
+
+      const { content, rating, images } = req.body;
+      const data = await userService.feedBackRoom(roomId, userId, { content, rating, images });
+
+      return res.status(200).json({
+        data,
+        message: 'feedback success',
+        errorCode: 200
+      });
+
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = UserController;
