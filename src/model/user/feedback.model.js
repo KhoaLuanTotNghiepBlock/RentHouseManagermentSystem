@@ -4,8 +4,9 @@ const { Schema } = mongoose;
 const feedBackSchema = new mongoose.Schema(
   {
     user: {
-      type: Object,
+      type: Schema.Types.ObjectId,
       require: true,
+      ref: 'User'
     },
     content: {
       type: String,

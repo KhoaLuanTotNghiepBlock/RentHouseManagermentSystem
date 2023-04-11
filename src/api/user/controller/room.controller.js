@@ -95,6 +95,27 @@ class RoomController {
         }
     }
 
+
+    // [GET] bh/room/:roomId/feedback
+    async getRoomFeedBack(req, res, next) {
+        try {
+            const conditions = {
+                room: req.params.roomId
+            }
+            const room = await roomService.getRoomFeedBack(
+                conditions,
+                commonHelper.getPagination(req.query),
+            );
+            return res.status(200).json({
+                data: room,
+                message: "success",
+                errorCode: 200
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     // [GET] bh/room/:userId
     async getOwnerRoom(req, res, next) {
         try {

@@ -49,9 +49,8 @@ router.post('/re-open/:roomId', RoomController.reOpenRoom);
 router.put('/:roomId', RoomController.updateRoom);
 router.get('/', RoomController.getAllRoom);
 router.get('/:roomId', RoomController.getRoom);
+router.get('/:roomId/feedback', RoomController.getRoomFeedBack);
 router.get('/:userId', RoomController.getOwnerRoom);
 router.get('/user/rented', RoomController.getRentedRoom);
 router.get('/user/leased', RoomController.getLeasedRoom);
-
-
 module.exports = router;

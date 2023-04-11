@@ -8,6 +8,7 @@ const User = require('../../../model/user/user.model');
 const NotFoundError = require('../../../exception/NotFoundError');
 const rentalContract = require('../blockchain/deploy/BHRentalContract');
 const { compare } = require('../../../utils/object.helper');
+const FeedBack = require('../../../model/user/feedback.model');
 class RoomService {
     async createRoom(_id, roomInfo) {
         let room = await roomValidate.validCreateRoom(_id, roomInfo);
@@ -137,6 +138,35 @@ class RoomService {
 
         if (!room) throw new MyError('room not found');
         return room;
+    }
+
+    async getRoomFeedBack(
+        conditions = {},
+        pagination) {
+        const { limit, page, skip } = pagination;
+        const [items, total] = await Promise.all([
+            FeedBack.find(conditions)
+                .populate([
+                    {
+                        path: 'user',
+                        select: 'avatar name username phone email'
+                    },
+                    {
+                        path: 'room',
+                        select: 'name'
+                    }
+                ]).skip(skip).limit(limit)
+                .lean(),
+            FeedBack.countDocuments(conditions),
+        ]);
+
+        return {
+            items,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        };
     }
 
     async updateRoom(roomId, data) {
