@@ -7,6 +7,7 @@ const reportSchema = new mongoose.Schema(
         user: {
             type: Object,
             require: true,
+            ref: 'User'
         },
         content: {
             type: String,
@@ -27,9 +28,9 @@ const reportSchema = new mongoose.Schema(
     },
 );
 
-reportSchema.post("findOneAndUpdate", async function (doc, next) {
+reportSchema.pre("save", async function (next) {
     await RoomModel.updateOne(
-        { _id: doc.room },
+        { _id: this.room },
         { $inc: { totalReport: 1 } }
     );
     next();

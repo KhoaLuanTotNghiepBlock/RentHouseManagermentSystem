@@ -20,6 +20,7 @@ const userWalletService = require('./user-wallet.service');
 const { toObjectId } = require('../../../utils/common.helper');
 const Room = require('../../../model/room.model');
 const FeedBack = require('../../../model/user/feedback.model');
+const ReportRoom = require('../../../model/user/report.model');
 
 
 class UserService {
@@ -311,6 +312,22 @@ class UserService {
     }
   }
 
+  async reportRoom(roomId, userId, data) {
+    /**
+     * Flow:
+     * 1. check user has rented room
+     * 2. 
+     */
+    if (!roomId || !userId) throw new MyError('missing parameter');
+    const report = await ReportRoom.create({
+      user: userId,
+      room: roomId,
+      ...data
+    });
+    return {
+      report
+    }
+  }
 }
 
 module.exports = new UserService();

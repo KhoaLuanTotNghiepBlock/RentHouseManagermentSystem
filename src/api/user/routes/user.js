@@ -77,6 +77,7 @@ const userRouter = (io) => {
   router.get('/contract/:roomId', userController.getContractOfRoom);
 
   router.post('/room/:roomId/feedback', userController.feedBackRoom);
+  router.post('/room/:roomId/report', userController.reportRoom);
 
   router.get("/me/profile", userController.getProfile); // not yet
   router.patch("/me/avatar", userController.changeAvatar); // not yet
