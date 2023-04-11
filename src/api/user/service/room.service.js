@@ -86,10 +86,11 @@ class RoomService {
         projection,
         populate = [],
         sort = {}) {
-        const { key, owner } = conditions;
+        const { key, owner, district } = conditions;
         const filter = {
             ...(key && { key }),
-            ...(owner && { owner })
+            ...(owner && { owner }),
+            ...(district && { "address.district": district }),
         };
         const { limit, page, skip } = pagination;
         delete filter.limit;
@@ -100,6 +101,7 @@ class RoomService {
                 { $and: words.map((word) => ({ textSearch: new RegExp(word.replace(/\W/g, "\\$&"), "i") })) },
             ];
         }
+
         const [items, total] = await Promise.all([
             Room.find(filter, projection)
                 .sort(sort)
