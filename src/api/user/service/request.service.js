@@ -40,4 +40,11 @@ RequestService.getAll = async (
     };
 }
 
+RequestService.executeRequestInDue = async () => {
+    /**
+     * 1. get date
+     * 2. check request due
+     * 3. auto accept request in due
+     */
+}
 module.exports = RequestService;
