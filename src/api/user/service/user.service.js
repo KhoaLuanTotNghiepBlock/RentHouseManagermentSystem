@@ -17,6 +17,7 @@ const { compare } = require('../../../utils/object.helper');
 const { ACTION_FUNCTION, USER_TRANSACTION_ACTION } = require('../../../config/user-transaction');
 const { ACTION_TRANSFER, ADMIN } = require('../../../config/default');
 const userWalletService = require('./user-wallet.service');
+const { toObjectId } = require('../../../utils/common.helper');
 
 
 class UserService {
@@ -138,7 +139,7 @@ class UserService {
 
     const notification = await Notification.create({
       user: renter._id,
-      type: "CANCEL_CONTRACT",
+      type: "NOTIFICATION",
       content: 'end rent room',
       tag: [renter._id, contract.lessor]
     });
@@ -237,6 +238,33 @@ class UserService {
     const result = await RentalContract.transferBalance(from?.wallet?.walletAddress, to?.wallet?.walletAddress, amount, action);
     return result;
   }
+
+  async withdrawMoney(userId, amount) {
+    console.log("🚀 ~ file: user.service.js:242 ~ UserService ~ withdrawMoney ~ userId, amount:", userId, amount)
+    if (!userId || amount < 0)
+      throw new MyError('missing parameter');
+
+    const { _id, wallet } = await User.findOne({ _id: toObjectId(userId) });
+    if (wallet?.balance < amount)
+      throw new MyError('not enough balance!');
+
+    await userWalletService.changeBalance(
+      _id,
+      amount,
+      {},
+      USER_TRANSACTION_ACTION.WITHDRAW,
+    );
+
+    const notification = await Notification.create({
+      user: ADMIN._id,
+      type: "NOTIFICATION",
+      content: `you withdraw ${amount} success`,
+      tag: [_id]
+    });
+
+    return { notification };
+  }
+
 
 }
 

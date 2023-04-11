@@ -49,12 +49,6 @@ module.exports = {
 
       console.log(`payloaf: ${JSON.stringify(payload)}`);
 
-      const checkUser = await User.exists({
-        _id: payload.userId,
-        deleted: false,
-      });
-
-      if (!checkUser) throw new Error("User is disabled or deleted");
 
       next();
     } catch (error) {

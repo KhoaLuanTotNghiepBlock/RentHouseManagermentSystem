@@ -51,6 +51,7 @@ class UserController {
   async connectVNpaytoWallet(req, res, next) {
     try {
       const { walletAddress, amount } = req.body;
+
       // Validate the request body
       if (!walletAddress || !amount) {
         return res.status(400).json({ message: 'Request body is incomplete.', errorCode: 400, data: {} });
@@ -113,69 +114,24 @@ class UserController {
       next(error);
     }
   }
+  //[POST] user/wallet-withdraw
+  async withdrawMoney(req, res, next) {
+    try {
+      const { userId } = req.auth;
+      const { amount } = req.body;
+      const data = await userService.withdrawMoney(userId, amount);
 
-  // async withdrawMoney(req, res, next) {
-  //   try {
-  //     const ipAddr = req.headers['x-forwarded-for'] ||
-  //       req.connection.remoteAddress ||
-  //       req.socket.remoteAddress ||
-  //       req.connection.socket.remoteAddress;
-  //     const user = await User.getUserByWallet(walletAddress);
-  //     const tmnCode = vnp_TmnCode;
-  //     let secretKey = vnp_HashSecret;
-  //     let vnpUrl = vnp_Url;
-  //     const returnUrl = vnp_ReturnUrl;
+      return res.status(200).json({
+        data,
+        message: 'success',
+        errorCode: 200
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 
-  //     const date = new Date();
-  //     const createDate = date.getFullYear().toString() +
-  //       (date.getMonth() + 1).toString().padStart(2, '0') +
-  //       date.getDate().toString().padStart(2, '0') +
-  //       date.getHours().toString().padStart(2, '0') +
-  //       date.getMinutes().toString().padStart(2, '0') +
-  //       date.getSeconds().toString().padStart(2, '0');
-  //     const orderId = new Date().toISOString().slice(0, 19).replace('T', ' ');
-  //     const bankCode = 'NCB';
-
-  //     const orderInfo = "pay for wallet";
-  //     const orderType = 'topup';
-  //     const locale = 'vn';
-  //     const currCode = 'VND';
-
-  //     let vnp_Params = {};
-  //     vnp_Params['vnp_Version'] = '2.1.0';
-  //     vnp_Params['vnp_Command'] = 'pay';
-  //     vnp_Params['vnp_TmnCode'] = tmnCode;
-  //     // vnp_Params['vnp_Merchant'] = ''
-  //     vnp_Params['vnp_Locale'] = locale;
-  //     vnp_Params['vnp_CurrCode'] = currCode;
-  //     vnp_Params['vnp_TxnRef'] = user._id + new Date();
-  //     vnp_Params['vnp_OrderInfo'] = user._id;
-  //     vnp_Params['vnp_OrderType'] = orderType;
-  //     vnp_Params['vnp_Amount'] = amount * 100;
-  //     vnp_Params['vnp_ReturnUrl'] = returnUrl;
-  //     vnp_Params['vnp_IpAddr'] = ipAddr;
-  //     vnp_Params['vnp_CreateDate'] = createDate;
-  //     if (bankCode !== null && bankCode !== '') {
-  //       vnp_Params['vnp_BankCode'] = bankCode;
-  //     }
-
-  //     vnp_Params = sortObject(vnp_Params);
-  //     const querystring = require('qs');
-  //     let signData = querystring.stringify(vnp_Params, { encode: false });
-  //     const crypto = require("crypto");
-  //     const hmac = crypto.createHmac("sha512", secretKey);
-  //     const signed = hmac.update(new Buffer(signData, 'utf-8')).digest("hex");
-  //     vnp_Params['vnp_SecureHash'] = signed;
-  //     vnpUrl += '?' + querystring.stringify(vnp_Params, { encode: false });
-
-  //     return res.json({ paymentUrl: vnpUrl });
-  //   } catch (error) {
-  //     next(error);
-  //   }
-  // }
-
-  //[POST] user/contract/:contractId/cancel-by-renter
-
+  // [POST] user/contract/:contractId/cancel-by-renter
   async cancelByRenter(req, res, next) {
     try {
       const { userId } = req.auth;
