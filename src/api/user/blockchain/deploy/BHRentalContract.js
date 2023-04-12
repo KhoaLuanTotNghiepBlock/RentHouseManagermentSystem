@@ -208,6 +208,7 @@ const RentalContract = {
     },
 
     payForRentMonth: async (renterAddress, roomUid, invoice, invoiceAmount, rentAmount) => {
+        console.log("🚀 ~ file: BHRentalContract.js:211 ~ payForRentMonth: ~  invoiceAmount, rentAmount:", invoiceAmount, rentAmount)
         const { wallet, _id, username } = await User.getUserByWallet(renterAddress);
         const signRenter = await RentalContract.createSigner(renterAddress);
         // convert payment to ether

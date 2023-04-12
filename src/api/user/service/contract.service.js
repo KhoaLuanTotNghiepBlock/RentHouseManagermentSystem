@@ -160,8 +160,8 @@ class ContractService {
         });
 
         return {
-            request,
-            notification
+            requestId: request._id,
+            roomId: contract.room?._id
         };
     }
 

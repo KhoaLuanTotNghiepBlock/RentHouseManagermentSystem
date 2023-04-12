@@ -35,7 +35,7 @@ const invoiceSchema = new mongoose.Schema(
       },
     ],
     paymentDate: { type: Date, default: null },
-    startDate: Date,
+    startDate: { type: Date, default: new Date() },
     endDate: { type: Date, },
     enable: { type: Boolean, default: true },
     hash: { type: String },

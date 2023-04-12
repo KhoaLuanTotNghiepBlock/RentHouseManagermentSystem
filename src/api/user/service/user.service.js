@@ -162,7 +162,8 @@ class UserService {
     }
 
     return {
-      notification, request
+      requestId: request._id,
+      roomId: contract.room
     }
   }
 

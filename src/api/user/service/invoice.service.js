@@ -21,7 +21,6 @@ class InvoiceService {
             throw new ArgumentError('invoice service ==>');
 
         const contract = await Contract.getOne(contractId);
-        console.log("🚀 ~ file: invoice.service.js:24 ~ InvoiceService ~ createInvoice ~ contract:", contract)
 
         const { period, payMode, dateRent, lessor, renter, payment } = contract;
 
@@ -37,9 +36,13 @@ class InvoiceService {
             throw new MyError('invoice service ==> listServiceDemand ');
         }
         let amountDemand = 0;
+        console.log("🚀 ~ file: invoice.service.js:39 ~ InvoiceService ~ createInvoice ~ amountDemand:", amountDemand)
         for (let i = 0; i < serviceDemands.length; i++) {
             const { amount } = await ServiceDemand.findById(serviceDemands[i]);
+            console.log("🚀 ~ file: invoice.service.js:42 ~ InvoiceService ~ createInvoice ~ amount:", amount, typeof (amount))
             amountDemand += amount;
+            console.log("🚀 ~ file: invoice.service.js:39 ~ InvoiceService ~ createInvoice ~ amountDemand:", amountDemand, typeof (amount))
+
         }
 
         let invoice = await Invoice.create({
@@ -50,7 +53,7 @@ class InvoiceService {
             startDate: paymentDay,
             endDate,
             enable: true,
-            amount: amountDemand,
+            amount: amountDemand / 100,
             serviceDemands
         });
         let notification = {};
