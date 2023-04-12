@@ -55,6 +55,7 @@ class ServiceDemandService {
         return serviceDemands;
 
     }
+
     async createServiceDemandForRoom(contractId) {
         if (!(contractId))
             throw new ArgumentError('invoice service ==>');
@@ -68,6 +69,7 @@ class ServiceDemandService {
         let { expiredDate, services } = ServiceDemandValidate.validateCreateDemandForRoom({ room, period, dateRent });
 
         const listDemand = [];
+
         for (let serDemand of services) {
             for (let i = rentalDate.month; i <= expiredDate.month; i++) {
                 let atYear = rentalDate.year;
@@ -89,10 +91,6 @@ class ServiceDemandService {
     async updateServiceDemandInvoice(roomId, demandInfo) {
         // get time to find list service Demand of room
         const room = await roomValidate.validRoom(roomId);
-        // const contract = await Contract.findOne(
-        //     room: roomId,
-        //     status: "avaia"
-        // );
         if (!demandInfo)
             throw new ArgumentError('service demand ==> demandInfo ');
 
@@ -111,9 +109,9 @@ class ServiceDemandService {
             }
         }
 
-        const listServiceDemands = listDemand.map((val) => {
-            return val._id
-        })
+        await Room.updateOne({ _id: roomId }, { demandAt: atMonth + 1 });
+
+        const listServiceDemands = listDemand.map((val) => { return val._id });
         return {
             listServiceDemands
         };

@@ -67,6 +67,7 @@ const roomSchema = new mongoose.Schema(
     textSearch: { type: String, default: "" },
     totalStars: { type: Number, default: 0 },
     totalReport: { type: Number, default: 0 },
+    demandAt: { type: Number, default: 0 },
   },
   {
     timestamps: true,

@@ -78,7 +78,7 @@ const RentalContract = {
 
         await userWalletService.changeBalance(
             _id,
-            userPay,
+            rentAmount + depositAmount,
             signTransactionHash,
             USER_TRANSACTION_ACTION.SIGN_CONTRACT
         );
@@ -466,10 +466,11 @@ const RentalContract = {
     },
 
     extendsContract: async (ownerAddress, roomUid, contractHash) => {
-        if (!ownerAddress || !roomId || !contractHash) throw new MyError('missing parameter');
+        if (!ownerAddress || !roomUid || !contractHash) throw new MyError('missing parameter');
         const { wallet, _id } = await User.getUserByWallet(ownerAddress);
+        const signOwner = await RentalContract.createSigner(ownerAddress);
 
-        const extendRent = ContractRentalHouse.methods.ExtendRentalRoom(roomUid, contractHash).encodeABI();
+        const extendRent = ContractRentalHouse.methods.extendRentalRoom(roomUid, contractHash).encodeABI();
         const tx = {
             from: signOwner.address,
             to: CONTRACT_ADDRESS,

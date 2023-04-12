@@ -73,7 +73,7 @@ const userRouter = (io) => {
   router.post('/contract/:contractId/cancel-by-renter', userController.cancelByRenter);
   router.post('/contract/:contractId/extend-by-renter', userController.sendRequestToExtend);
   router.post('/contract/accept/:requestId', userController.acceptRequest);
-  router.post('/contract/continuous', userController.continuesContract)
+  router.post('/contract/accept-extend/:requestId', userController.acceptRequestExtendContract);
   router.post('/payment-test', userController.testPayment)
   router.get('/contract/:roomId', userController.getContractOfRoom);
 

@@ -45,7 +45,7 @@ RequestService.excuteCancelContract = async (requestId) => {
 };
 
 RequestService.excuteExtendsContract = async (ownerId, requestId) => {
-
+    return await userService.extendContract(requestId);
 };
 
 RequestService.executeRequestInDue = async () => {

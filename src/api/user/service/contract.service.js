@@ -16,6 +16,7 @@ const commonHelper = require('../../../utils/common.helper');
 const Room = require('../../../model/room.model');
 const Notification = require('../../../model/user/notification.model');
 const { ADMIN } = require('../../../config/default');
+const { Promise } = require('mongoose');
 
 class ContractService {
 
@@ -165,18 +166,20 @@ class ContractService {
     }
 
     async continueContract(renterId, contractId, newPeriod) {
+        if (!renterId || !contractId || !newPeriod) throw new MyError('missing parameter');
+
         const renter = await User.getById(renterId);
         const contract = await Contract.findOne({ _id: contractId })
-            .populate[
-            {
-                path: 'room',
-                select: '_id name description roomUid'
-            },
-            {
-                path: 'lessor',
-                select: '_id wallet'
-            }
-        ].lean();
+            .populate([
+                {
+                    path: 'room',
+                    select: '_id name description roomUid'
+                },
+                {
+                    path: 'lessor',
+                    select: '_id wallet'
+                }
+            ]).lean();
 
         if (renter._id === contract.lessor._id) throw new MyError('just for renter!');
         //check contract due
@@ -193,16 +196,22 @@ class ContractService {
 
         const data = await RentalContract.extendsContract(lessor.wallet.walletAddress, room.roomUid, hash);
 
-        await HashContract.findOneAndUpdate(
-            { contractId: contract._id },
-            {
-                txHash: data?.txHash,
-                hash: data?.contractHash
-            }
-        );
-
-        await contract.save();
-
+        const [hashUpdate, contractUpdate] = await Promise.all([
+            HashContract.findOneAndUpdate(
+                { contractId: contract._id },
+                {
+                    txHash: data?.txHash,
+                    hash: data?.contractHash
+                }
+            ),
+            Contract.updateOne(
+                { _id: contract._id },
+                {
+                    period: convertToNumber(newPeriod),
+                    dateRent: date,
+                    payTime: date
+                }),
+        ]);
         const renterNotificaiton = await Notification.create({
             userOwner: ADMIN._id,
             tag: [renter._id],

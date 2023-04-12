@@ -149,23 +149,6 @@ class UserController {
     }
   }
 
-  //[POST] user/contract/continuous
-  async continuesContract(req, res, next) {
-    try {
-      const { userId } = req.auth;
-      const { contractId, newPeriod } = req.body;
-
-      const data = await contractService.continueContract(userId, contractId, newPeriod);
-
-      return res.status(200).json({
-        message: "sucess",
-        errorCode: 200,
-        data
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
 
   //[POST] user/contract/accept
   async acceptRequest(req, res, next) {
@@ -655,13 +638,13 @@ class UserController {
     }
   }
 
-  //[POST]/users/:requestId/extend
+  //[POST]/users/contract/accept-extend/:requestId
   async acceptRequestExtendContract(req, res, next) {
     try {
       const { userId } = req.auth;
-      const contractId = req.params.contractId;
+      const requestId = req.params.requestId;
 
-      const data = await userService.extendContract(userId, contractId);
+      const data = await userService.extendContract(requestId);
 
       return res.status(200).json({
         message: 'send request success!',

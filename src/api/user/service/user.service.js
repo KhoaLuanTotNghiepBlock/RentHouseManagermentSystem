@@ -146,12 +146,20 @@ class UserService {
       tag: [renter._id, contract.lessor]
     });
 
-    const request = await Request.create({
-      from: renter._id,
-      to: contract.lessor,
+    let request = await Request.findOne({
       type: 'CONTINUE_RENTAL',
-      data: { contract, newPeriod }
+      from: renter._id,
+      to: contract.lessor._id
     });
+
+    if (!request) {
+      request = await Request.create({
+        from: renter._id,
+        to: contract.lessor,
+        type: 'CONTINUE_RENTAL',
+        data: { contract, newPeriod }
+      });
+    }
 
     return {
       notification, request
@@ -167,8 +175,9 @@ class UserService {
 
     if (!request) throw new MyError('request not found');
 
-    const result = await contractService.continueContract(data?.renter?._id, data?._id, data?.newPeriod);
+    const result = await contractService.continueContract(data.contract?.renter?._id, data?.contract?._id, data?.newPeriod);
 
+    await Request.deleteOne({ _id: requestId });
     return result;
   }
 
@@ -257,7 +266,6 @@ class UserService {
   }
 
   async withdrawMoney(userId, amount) {
-    console.log("🚀 ~ file: user.service.js:242 ~ UserService ~ withdrawMoney ~ userId, amount:", userId, amount)
     if (!userId || amount < 0)
       throw new MyError('missing parameter');
 

@@ -71,14 +71,12 @@ contract RentalContract {
         uint256 _roomId,
         string memory _contractHash
     ) public payable {
-        require(rooms[_roomId].forRent, "!for rent");
         require(
             msg.value >=
                 rooms[_roomId].rentAmountPerMonth +
                     rooms[_roomId].depositAmount,
             "!balance"
         );
-        require(!rooms[_roomId].signed, "Room rented");
         rooms[_roomId].signed = true;
         rooms[_roomId].renter = payable(msg.sender);
         rooms[_roomId].contractHash = _contractHash;
