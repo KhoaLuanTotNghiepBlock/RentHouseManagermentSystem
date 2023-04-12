@@ -22,7 +22,7 @@ RequestService.getAll = async (
         return requets;
     })
     return {
-        array
+        ...array
     };
 };
 
