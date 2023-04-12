@@ -4,20 +4,15 @@ const RequestService = {};
 
 RequestService.getAll = async (
     conditions = {},
-    pagination,
-    projection,
     sort = {}
 ) => {
     const filter = { ...conditions };
-    const { limit, page, skip } = pagination;
     delete filter.limit;
     delete filter.page;
 
     const [items, total] = await Promise.all([
-        Request.find(filter, projection)
+        Request.find(filter)
             .sort(sort)
-            .skip(skip)
-            .limit(limit)
             .lean(),
         Request.countDocuments(filter),
     ]);
@@ -27,11 +22,7 @@ RequestService.getAll = async (
         return requets;
     })
     return {
-        items: array,
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
+        array
     };
 };
 

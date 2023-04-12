@@ -515,15 +515,13 @@ class UserController {
       };
       const sort = { createdAt: -1 };
 
-      const { items, total, page, limit, totalPages } = await requestService.getAll(
+      const data = await requestService.getAll(
         conditions,
-        commonHelper.getPagination(req.query),
-        {},
         sort,
       );
 
       return res.status(200).json({
-        data: { items, total, page, limit, totalPages },
+        data,
         message: "success",
         errorCode: 200
       });
