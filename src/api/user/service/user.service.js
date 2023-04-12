@@ -84,7 +84,6 @@ class UserService {
 
     const user = User.getById(_id);
     if (!user) {
-      console.log("🚀 ~ file: user.service.js:74 ~ UserService ~ changeAvatar ~ user", user);
       throw new Error("Not found user");
     }
 
@@ -130,7 +129,7 @@ class UserService {
     }
   }
 
-  async extendContract(renterId, contractId) {
+  async extendRentalByRenter(renterId, contractId, newPeriod) {
 
     const renter = await User.getById(renterId);
 
@@ -141,21 +140,36 @@ class UserService {
     if (!contract) throw new MyError('Contract not found');
 
     const notification = await Notification.create({
-      user: renter._id,
-      type: "NOTIFICATION",
-      content: 'end rent room',
+      user: ADMIN._id,
+      type: "CONTINUE_RENTAL",
+      content: `extend rent room`,
       tag: [renter._id, contract.lessor]
     });
 
     const request = await Request.create({
       from: renter._id,
       to: contract.lessor,
-      type: 'CANCEL_RENTAL',
-      data: contract
+      type: 'CONTINUE_RENTAL',
+      data: { contract, ...newPeriod }
     });
+
     return {
       notification, request
     }
+  }
+
+  async extendContract(requestId) {
+    const request = await Request.findOne({
+      _id: requestId
+    })
+
+    const { data } = request;
+
+    if (!request) throw new MyError('request not found');
+
+    const result = await contractService.continueContract(data?.renter?._id, data?._id, data?.newPeriod);
+
+    return result;
   }
 
   async acceptCancelRentalRoom(ownerId, requestId) {

@@ -39,8 +39,6 @@ class ContractController {
             next(error);
         }
     }
-
-
     // [GET] bh/contract/:renterId 
     async getContractByRenter(req, res, next) {
         try {

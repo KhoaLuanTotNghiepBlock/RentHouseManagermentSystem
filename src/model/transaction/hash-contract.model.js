@@ -15,6 +15,7 @@ const hashContractSchema = new mongoose.Schema(
         hash: {
             type: String
         },
+        txHash: { type: String, default: "" }
     },
     {
         timestamps: true,

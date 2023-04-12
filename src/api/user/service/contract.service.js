@@ -171,12 +171,18 @@ class ContractService {
     async continueContract(renterId, contractId, newPeriod) {
         const renter = await User.getById(renterId);
         const contract = await Contract.findOne({ _id: contractId })
-            .populate[{
+            .populate[
+            {
                 path: 'room',
-                select: '_id name description'
-            }].lean();
+                select: '_id name description roomUid'
+            },
+            {
+                path: 'lessor',
+                select: '_id wallet'
+            }
+        ].lean();
 
-        if (renter._id === contract.lessor) throw new MyError('just for renter!');
+        if (renter._id === contract.lessor._id) throw new MyError('just for renter!');
         //check contract due
         const date = new Date();
         // in due
@@ -186,6 +192,19 @@ class ContractService {
         contract.period = convertToNumber(newPeriod);
         contract.dateRent = date;
         contract.payTime = date;
+        const hash = crypto.hash(contract);
+        const { lessor, room } = contract;
+
+        const data = await RentalContract.extendsContract(lessor.wallet.walletAddress, room.roomUid, hash);
+
+        await HashContract.findOneAndUpdate(
+            { contractId: contract._id },
+            {
+                txHash: data?.txHash,
+                hash: data?.contractHash
+            }
+        );
+
         await contract.save();
 
         const renterNotificaiton = await Notification.create({

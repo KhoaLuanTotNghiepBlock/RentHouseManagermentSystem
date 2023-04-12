@@ -464,5 +464,30 @@ const RentalContract = {
         const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction).catch((error) => { throw new MyError(error) });
         return txReceipt;
     },
+
+    extendsContract: async (ownerAddress, roomUid, contractHash) => {
+        if (!ownerAddress || !roomId || !contractHash) throw new MyError('missing parameter');
+        const { wallet, _id } = await User.getUserByWallet(ownerAddress);
+
+        const extendRent = ContractRentalHouse.methods.ExtendRentalRoom(roomUid, contractHash).encodeABI();
+        const tx = {
+            from: signOwner.address,
+            to: CONTRACT_ADDRESS,
+            gasLimit: 300000,
+            value: 0,
+            data: extendRent
+        };
+
+        const signedTx = await web3.eth.accounts.signTransaction(tx, wallet.walletPrivateKey).catch((error) => { throw new MyError(error) });
+        const txReceipt = await web3.eth.sendSignedTransaction(signedTx.rawTransaction).catch((error) => { throw new MyError(error) });
+        const signTransactionHash = txReceipt.transactionHash;
+        console.log(txReceipt);
+
+        await setTimeout(() => { console.log('Waited 1 seconds.') }, 2000);
+
+        const event = await RentalContract.getGetEventFromTransaction(signTransactionHash, ContractRentalHouse)
+            .catch((error) => { throw new MyError(error) });
+        return { txHash: signTransactionHash, roomUid, contractHash }
+    }
 }
 module.exports = RentalContract;

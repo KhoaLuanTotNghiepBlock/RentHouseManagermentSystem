@@ -638,6 +638,22 @@ class UserController {
       next(error)
     }
   }
+  //[POST]/users/:contractId/extend-by-renter
+  async sendRequestToExtend(req, res, next) {
+    try {
+      const { userId } = req.auth;
+      const contractId = req.params.contractId;
+      const { newPeriod } = req.body;
+      const data = await userService.extendRentalByRenter(userId, contractId, newPeriod);
+      return res.status(200).json({
+        message: 'send request success!',
+        data,
+        errorCode: 200
+      });
+    } catch (error) {
+      next(error)
+    }
+  }
 
   //[POST]/users/:contractId/extend-contract
   async sendRequestToExtendContract(req, res, next) {
