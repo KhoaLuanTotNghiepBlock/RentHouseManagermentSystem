@@ -6,7 +6,7 @@ const scheduleNotifyService = require('../api/user/service/schedule-notify.servi
 //     console.log('This cron job runs on the 15th day of every month at 8:00 AM');
 // });
 
-cron.schedule("*/180 * * * *", async () => {
+cron.schedule("*/10 * * * *", async () => {
     // await RequestService.executeRequestInDue();
     console.log('accept request');
 });

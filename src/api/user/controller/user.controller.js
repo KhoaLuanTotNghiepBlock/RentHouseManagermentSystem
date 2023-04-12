@@ -556,7 +556,7 @@ class UserController {
       const { userId } = req.auth;
       const conditions = {
         ...req.query,
-        ...userId,
+        userId,
       };
 
       const data = await invoiceService.getAll(

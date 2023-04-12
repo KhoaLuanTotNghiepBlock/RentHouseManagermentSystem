@@ -21,6 +21,7 @@ class InvoiceService {
             throw new ArgumentError('invoice service ==>');
 
         const contract = await Contract.getOne(contractId);
+        console.log("🚀 ~ file: invoice.service.js:24 ~ InvoiceService ~ createInvoice ~ contract:", contract)
 
         const { period, payMode, dateRent, lessor, renter, payment } = contract;
 
@@ -78,7 +79,6 @@ class InvoiceService {
             ...(payStatus && { payStatus }),
             ...(userId && { "contract.renter": toObjectId(userId) }),
         };
-        console.log("🚀 ~ file: invoice.service.js:78 ~ InvoiceService ~ filter:", filter)
 
         let [items, total] = await Promise.all([
             Invoice.aggregate([
@@ -92,7 +92,7 @@ class InvoiceService {
                         as: "contract"
                     }
                 },
-                { $match: { filter } }
+                { $match: filter }
             ]),
             Invoice.aggregate([
                 {
