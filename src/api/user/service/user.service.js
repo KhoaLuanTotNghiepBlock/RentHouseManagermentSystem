@@ -149,7 +149,7 @@ class UserService {
     let request = await Request.findOne({
       type: 'CONTINUE_RENTAL',
       from: renter._id,
-      to: contract.lessor._id
+      "data.contract.room": contract.room
     });
 
     if (!request) {

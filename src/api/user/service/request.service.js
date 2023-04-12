@@ -23,7 +23,7 @@ RequestService.getAll = async (
     ]);
 
     const array = items.map((val) => {
-        const requets = { requestId: val._id, roomId: val?.data?.contract?.room === undefined ? val?.data?.room._id : val?.data?.contract?.room }
+        const requets = { requestId: val._id, roomId: val?.data?.contract?.room === undefined ? val?.data?.room._id : val?.data?.contract?.room, type: val.type }
         return requets;
     })
     return {

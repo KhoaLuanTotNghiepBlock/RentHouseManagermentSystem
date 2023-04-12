@@ -140,7 +140,7 @@ class ContractService {
         let request = await Request.findOne({
             type: 'CANCEL_RENTAL',
             from: renter._id,
-            to: contract.lessor._id
+            "data.room._id": contract.room
         });
 
         if (!request) {
