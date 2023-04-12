@@ -201,7 +201,7 @@ class UserService {
     }
     // const penaltyFee = (data.payment * 50) / 100;
     result = await RentalContract.endRentInDue(data?.lessor?.wallet.walletAddress, data.room, data?.renter?.wallet.walletAddress);
-
+    await Request.deleteOne({ _id: requestId });
     return result;
   }
 
