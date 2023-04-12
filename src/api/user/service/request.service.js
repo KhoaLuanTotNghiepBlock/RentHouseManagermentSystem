@@ -17,13 +17,11 @@ RequestService.getAll = async (
         Request.countDocuments(filter),
     ]);
 
-    const array = items.map((val) => {
+    return items.map((val) => {
         const requets = { requestId: val._id, roomId: val?.data?.contract?.room === undefined ? val?.data?.room._id : val?.data?.contract?.room, type: val.type }
         return requets;
     })
-    return {
-        ...array
-    };
+
 };
 
 RequestService.excuteCancelContract = async (requestId) => {
