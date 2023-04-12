@@ -117,7 +117,7 @@ const RentalContract = {
         const event = await RentalContract.getGetEventFromTransaction(transactionHash, ContractRentalHouse);
         console.log("🚀 ~ file: BHRentalContract.js:166 ~ setRoomForRent: ~ event:", event)
 
-        await setTimeout(() => { console.log('Waited 2 seconds.') }, 2000);
+        await setTimeout(() => { console.log('Waited 2 seconds.') }, 3000);
 
         if (event.length === 0) throw new MyError('event not found');
         const { returnValues } = event[0];

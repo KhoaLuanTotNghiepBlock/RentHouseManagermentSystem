@@ -36,13 +36,9 @@ class InvoiceService {
             throw new MyError('invoice service ==> listServiceDemand ');
         }
         let amountDemand = 0;
-        console.log("🚀 ~ file: invoice.service.js:39 ~ InvoiceService ~ createInvoice ~ amountDemand:", amountDemand)
         for (let i = 0; i < serviceDemands.length; i++) {
             const { amount } = await ServiceDemand.findById(serviceDemands[i]);
-            console.log("🚀 ~ file: invoice.service.js:42 ~ InvoiceService ~ createInvoice ~ amount:", amount, typeof (amount))
             amountDemand += amount;
-            console.log("🚀 ~ file: invoice.service.js:39 ~ InvoiceService ~ createInvoice ~ amountDemand:", amountDemand, typeof (amount))
-
         }
 
         let invoice = await Invoice.create({

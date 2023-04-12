@@ -18,21 +18,16 @@ RequestService.getAll = async (
             .sort(sort)
             .skip(skip)
             .limit(limit)
-            .populate([
-                {
-                    path: "from",
-                    select: '-updatedAt'
-                },
-                {
-                    path: "to",
-                    select: '-updatedAt'
-                },
-            ])
             .lean(),
         Request.countDocuments(filter),
     ]);
+
+    const array = items.map((val) => {
+        const requets = { requestId: val._id, roomId: val?.data?.contract?.room === undefined ? val?.data?.room._id : val?.data?.contract?.room }
+        return requets;
+    })
     return {
-        items,
+        items: array,
         total,
         page,
         limit,
