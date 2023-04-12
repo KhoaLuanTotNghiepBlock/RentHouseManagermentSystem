@@ -26,10 +26,6 @@ class ContractService {
 
         // validate contract info 
         let contract = await contractValidate.validateContractInfo(contractInfo);
-        contract = await Contract.findOne({
-            renter: renter._id,
-
-        });
         if (!contract)
             throw new MyError('contract service => contract invalid!');
 
@@ -186,8 +182,8 @@ class ContractService {
         //check contract due
         const date = new Date();
         // in due
-        const inDue = await this.checkContractStatus(date, data._id);
-        if (inDue) throw new MyError('the contract due in the period');
+        // const inDue = await this.checkContractStatus(date, data._id);
+        // if (inDue) throw new MyError('the contract due in the period');
 
         contract.period = convertToNumber(newPeriod);
         contract.dateRent = date;

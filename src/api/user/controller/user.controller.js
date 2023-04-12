@@ -655,8 +655,8 @@ class UserController {
     }
   }
 
-  //[POST]/users/:contractId/extend-contract
-  async sendRequestToExtendContract(req, res, next) {
+  //[POST]/users/:requestId/extend
+  async acceptRequestExtendContract(req, res, next) {
     try {
       const { userId } = req.auth;
       const contractId = req.params.contractId;

@@ -71,6 +71,7 @@ const userRouter = (io) => {
   router.get('/invoices/:invoiceId', userController.getInvoiceById);
 
   router.post('/contract/:contractId/cancel-by-renter', userController.cancelByRenter);
+  router.post('/contract/:contractId/extend-by-renter', userController.sendRequestToExtend);
   router.post('/contract/accept/:requestId', userController.acceptRequest);
   router.post('/contract/continuous', userController.continuesContract)
   router.post('/payment-test', userController.testPayment)

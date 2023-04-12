@@ -150,7 +150,7 @@ class UserService {
       from: renter._id,
       to: contract.lessor,
       type: 'CONTINUE_RENTAL',
-      data: { contract, ...newPeriod }
+      data: { contract, newPeriod }
     });
 
     return {
