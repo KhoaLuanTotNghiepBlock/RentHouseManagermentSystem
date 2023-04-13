@@ -38,6 +38,6 @@ const io = socketio(server);
 socket(io);
 routers(app, io);
 cron.sendMailToNotifyAboutServiceDemand('0 8 30 * *');
-server.listen(PORT, HOST, () => {
+server.listen(8000, HOST, () => {
   console.log(`User server is running in http://${HOST}:${PORT}`);
 });
