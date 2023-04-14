@@ -10,201 +10,189 @@ const contractService = require("./contract.service");
 const User = require("../../../model/user/user.model");
 const RentalContract = require("../blockchain/deploy/BHRentalContract");
 const Room = require("../../../model/room.model");
-const { toObjectId } = require("../../../utils/common.helper");
+const {toObjectId} = require("../../../utils/common.helper");
 const Notification = require("../../../model/user/notification.model");
 const Request = require("../../../model/user/request.model");
 const ServiceDemand = require("../../../model/service/service-demand.model");
+const {compare} = require("../../../utils/object.helper");
 class InvoiceService {
-  async createInvoice(userId, contractId, invoiceInfo) {
-    if (!(contractId && invoiceInfo && userId))
-      throw new ArgumentError("invoice service ==>");
+    async createInvoice(userId, contractId, invoiceInfo) {
+        if (!(contractId && invoiceInfo && userId)) throw new ArgumentError("invoice service ==>");
 
-    const contract = await Contract.getOne(contractId);
+        const contract = await Contract.getOne(contractId);
 
-    const { period, payMode, dateRent, lessor, renter, payment } = contract;
+        const {period, payMode, dateRent, lessor, renter, payment} = contract;
 
-    // if (userId !== lessor._id)
-    //     throw new MyError('Unauthorize to create invoices');
+        // if (userId !== lessor._id)
+        //     throw new MyError('Unauthorize to create invoices');
 
-    let paymentDay = this.checkDueInvoiceDay(dateRent, new Date(), period);
-    let endDate = new Date(paymentDay.getTime() + 2 * 24 * 60 * 60 * 1000);
+        let paymentDay = this.checkDueInvoiceDay(dateRent, new Date(), period);
+        let endDate = new Date(paymentDay.getTime() + 2 * 24 * 60 * 60 * 1000);
 
-    const serviceDemands = invoiceInfo.listServiceDemands;
-    if (!serviceDemands || !serviceDemands.length) {
-      throw new MyError("invoice service ==> listServiceDemand ");
+        const serviceDemands = invoiceInfo.listServiceDemands;
+        if (!serviceDemands || !serviceDemands.length) {
+            throw new MyError("invoice service ==> listServiceDemand ");
+        }
+        let amountDemand = 0;
+        for (let i = 0; i < serviceDemands.length; i++) {
+            const {amount} = await ServiceDemand.findById(serviceDemands[i]);
+            amountDemand += amount;
+        }
+
+        let invoice = await Invoice.create({
+            contract: contract._id,
+            creationDate: paymentDay,
+            payStatus: "Pending",
+            paymentMethod: payMode,
+            startDate: paymentDay,
+            endDate,
+            enable: true,
+            amount: amountDemand / 100,
+            serviceDemands,
+        });
+        let notification = {};
+
+        if (invoice) {
+            notification = await Notification.create({
+                userOwner: lessor._id,
+                type: "INVOICE_TO_PAY",
+                content: "bạn có hoá đơn cần thanh toán!",
+                tag: [lessor._id, renter._id],
+            });
+        }
+        return {
+            invoice,
+            notification,
+        };
     }
-    let amountDemand = 0;
-    for (let i = 0; i < serviceDemands.length; i++) {
-      const { amount } = await ServiceDemand.findById(serviceDemands[i]);
-      amountDemand += amount;
+
+    async getAll(conditions = {}, pagination, projection = {}) {
+        let {payStatus, userId} = conditions;
+        const {limit, page, skip} = pagination;
+        const filter = {
+            ...(payStatus && {payStatus}),
+            ...(userId && {"contract.renter": toObjectId(userId)}),
+        };
+
+        let [items, total] = await Promise.all([
+            Invoice.aggregate([
+                {
+                    $lookup: {
+                        from: "contracts",
+                        let: {contractId: "$contract"},
+                        pipeline: [{$match: {$expr: {$eq: ["$_id", "$$contractId"]}}}],
+                        as: "contract",
+                    },
+                },
+                {$match: filter},
+            ]),
+            Invoice.aggregate([
+                {
+                    $lookup: {
+                        from: "contracts",
+                        let: {contractId: "$contract"},
+                        pipeline: [{$match: {$expr: {$eq: ["$_id", "$$contractId"]}}}],
+                        as: "contract",
+                    },
+                },
+                {$match: {filter}},
+                {$count: "totalValue"},
+            ]),
+        ]);
+
+        total = total.length > 0 ? total[0].totalValue : 0;
+        return {
+            items,
+            total,
+            page,
+            limit,
+            totalPages: Math.ceil(total / limit),
+        };
     }
 
-    let invoice = await Invoice.create({
-      contract: contract._id,
-      creationDate: paymentDay,
-      payStatus: "Pending",
-      paymentMethod: payMode,
-      startDate: paymentDay,
-      endDate,
-      enable: true,
-      amount: amountDemand / 100,
-      serviceDemands,
-    });
-    let notification = {};
+    async getOne(conditions) {
+        let {payStatus, invoiceId} = conditions;
+        const filter = {
+            ...(invoiceId && {_id: invoiceId}),
+            ...(payStatus && {payStatus}),
+        };
 
-    if (invoice) {
-      notification = await Notification.create({
-        userOwner: lessor._id,
-        type: "INVOICE_TO_PAY",
-        content: "bạn có hoá đơn cần thanh toán!",
-        tag: [lessor._id, renter._id],
-      });
+        const invoice = await Invoice.findOne(filter, projection).populate([
+            {
+                path: "contract",
+                select: "-updatedAt",
+                populate: [
+                    {
+                        path: "room",
+                        select: "-updatedAt",
+                    },
+                    {
+                        path: "renter",
+                        select: "_id username name avatar phone email",
+                    },
+                    {
+                        path: "renter",
+                        select: "_id username name avatar phone email",
+                    },
+                ],
+            },
+        ]);
+
+        if (!invoice) throw new MyError("invoice not found!");
+        return invoice;
     }
-    return {
-      invoice,
-      notification,
-    };
-  }
 
-  async getAll(conditions = {}, pagination, projection = {}) {
-    let { payStatus, userId } = conditions;
-    const { limit, page, skip } = pagination;
-    const filter = {
-      ...(payStatus && { payStatus }),
-      ...(userId && { "contract.renter": toObjectId(userId) }),
-    };
+    checkDueInvoiceDay(dateRent, paymentDay, period) {
+        if (!(dateRent && paymentDay)) throw new ArgumentError("invoice service ==> date rent, payment day ");
 
-    let [items, total] = await Promise.all([
-      Invoice.aggregate([
-        {
-          $lookup: {
-            from: "contracts",
-            let: { contractId: "$contract" },
-            pipeline: [
-              { $match: { $expr: { $eq: ["$_id", "$$contractId"] } } },
-            ],
-            as: "contract",
-          },
-        },
-        { $match: filter },
-      ]),
-      Invoice.aggregate([
-        {
-          $lookup: {
-            from: "contracts",
-            let: { contractId: "$contract" },
-            pipeline: [
-              { $match: { $expr: { $eq: ["$_id", "$$contractId"] } } },
-            ],
-            as: "contract",
-          },
-        },
-        { $match: { filter } },
-        { $count: "totalValue" },
-      ]),
-    ]);
+        if (InvoiceValidate.checkDateRentExpired(dateRent, paymentDay, period)) throw new MyError("Period of contract has expired!");
 
-    total = total.length > 0 ? total[0].totalValue : 0;
-    return {
-      items,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
-  }
+        return paymentDay;
+    }
 
-  async getOne(conditions) {
-    let { payStatus, invoiceId } = conditions;
-    const filter = {
-      ...(invoiceId && { _id: invoiceId }),
-      ...(payStatus && { payStatus }),
-    };
+    async payForRentEachMonth(renterId, invoiceId) {
+        // get renter info
+        const renter = await User.getById(renterId);
+        // get invoice info { contract, amount, startDate, endDate }
+        const invoice = await Invoice.getOne(invoiceId);
 
-    const invoice = await Invoice.findOne(filter, projection).populate([
-      {
-        path: "contract",
-        select: "-updatedAt",
-        populate: [
-          {
-            path: "room",
-            select: "-updatedAt",
-          },
-          {
-            path: "renter",
-            select: "_id username name avatar phone email",
-          },
-          {
-            path: "renter",
-            select: "_id username name avatar phone email",
-          },
-        ],
-      },
-    ]);
+        const room = await Room.findOne({
+            _id: invoice.contract.room,
+            status: "already-rent",
+        });
 
-    if (!invoice) throw new MyError("invoice not found!");
-    return invoice;
-  }
+        if (compare(renter._id, room.owner)) throw new MyError("chỉ có người thuê mới được thanh toán!");
 
-  checkDueInvoiceDay(dateRent, paymentDay, period) {
-    if (!(dateRent && paymentDay))
-      throw new ArgumentError("invoice service ==> date rent, payment day ");
+        if (!room) throw new MyError("room not found");
+        // check date to pay
+        const datePay = new Date();
+        let penaltyFee = 0;
+        if (datePay > invoice.endDate) penaltyFee = invoice.amount * 0.05;
 
-    if (InvoiceValidate.checkDateRentExpired(dateRent, paymentDay, period))
-      throw new MyError("Period of contract has expired!");
+        const rentAmount = room.basePrice;
+        const invoiceFee = invoice.amount - rentAmount + penaltyFee;
 
-    return paymentDay;
-  }
+        const data = await RentalContract.payForRentMonth(renter.wallet.walletAddress, room.roomUid, invoice, invoiceFee, rentAmount);
 
-  async payForRentEachMonth(renterId, invoiceId) {
-    // get renter info
-    const renter = await User.getById(renterId);
-    // get invoice info { contract, amount, startDate, endDate }
-    const invoice = await Invoice.getOne(invoiceId);
+        return data;
+    }
 
-    const room = await Room.findOne({
-      _id: invoice.contract.room,
-      status: "already-rent",
-    });
+    async extendsPaymentDayInvoice(renterId, invoiceId) {
+        // get renter info
+        const renter = await User.getById(renterId);
+        const invoice = await Invoice.findOne({
+            _id: invoiceId,
+            status: "Pending",
+        });
+        const endDate = new Date(invoice.endDate.getTime() + 15 * 24 * 60 * 60 * 1000);
+        invoice.endDate = endDate;
+        invoice.isExtends = true;
+        invoice.save({new: true});
 
-    if (!room) throw new MyError("room not found");
-    // check date to pay
-    const datePay = new Date();
-    let penaltyFee = 0;
-    if (datePay > invoice.endDate) penaltyFee = invoice.amount * 0.05;
-
-    const rentAmount = room.basePrice;
-    const invoiceFee = invoice.amount - rentAmount + penaltyFee;
-
-    const data = await RentalContract.payForRentMonth(
-      renter.wallet.walletAddress,
-      room.roomUid,
-      invoice,
-      invoiceFee,
-      rentAmount
-    );
-
-    return data;
-  }
-
-  async extendsPaymentDayInvoice(renterId, invoiceId) {
-    // get renter info
-    const renter = await User.getById(renterId);
-    const invoice = await Invoice.findOne({
-      _id: invoiceId,
-      status: "Pending",
-    });
-    const endDate = new Date(
-      invoice.endDate.getTime() + 15 * 24 * 60 * 60 * 1000
-    );
-    invoice.endDate = endDate;
-    invoice.isExtends = true;
-    invoice.save({ new: true });
-
-    const notification = await Notification.create([]);
-    return {
-      invoice,
-    };
-  }
+        const notification = await Notification.create([]);
+        return {
+            invoice,
+        };
+    }
 }
 module.exports = new InvoiceService();

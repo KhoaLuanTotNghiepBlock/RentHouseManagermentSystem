@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "npx jest src/api/user/test/cron.test.js",
+    "cronjob": "nodemon src/api/user/cronjob.js",
     "start-user": "nodemon src/api/user/server.js",
     "start": "node/src/api/user/test.js",
     "start-admin": "nodemon src/api/admin/server.js",
