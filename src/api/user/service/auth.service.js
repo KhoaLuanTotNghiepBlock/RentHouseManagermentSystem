@@ -5,7 +5,7 @@ const User = require("../../../model/user/user.model");
 const Token = require("../../../model/user/token.model");
 const mailHelper = require("../../../utils/nodemailer.helper");
 const crypto = require("../../../utils/crypto.hepler");
-const web3 = require('../blockchain/config/web3-init');
+const web3 = require("../blockchain/config/web3-init");
 const commonHelper = require("../../../utils/common.helper");
 const userValidation = require("../validate/user.validation");
 
@@ -23,20 +23,18 @@ const { isEmpty } = require("../../../utils/common.helper");
 const UserTransaction = require("../../../model/transaction/user-transaction");
 
 class AuthService {
-
   async registry(userInfo) {
     if (!userInfo) {
       return {
-        message: "Registry value underfine",
+        message: "thông tin đăng ký không hợp lệ!",
         errorCode: 400,
         data: {},
       };
     }
 
     try {
-      const {
-        username, password, contactInfo, identity, error, email
-      } = await userValidation.checkRegistryInfo(userInfo);
+      const { username, password, contactInfo, identity, error, email } =
+        await userValidation.checkRegistryInfo(userInfo);
       if (!isEmpty(error)) {
         return {
           data: {},
@@ -55,25 +53,24 @@ class AuthService {
           remainingTime: Date.now(),
         },
         phone: "",
-        email
+        email,
       });
 
       newUser.phone = contactInfo;
 
       // create wallet
       const { address, privateKey } = await this.createWallet();
-      newUser.wallet =
-      {
+      newUser.wallet = {
         walletAddress: address,
-        walletPrivateKey: privateKey
-      }
+        walletPrivateKey: privateKey,
+      };
       await newUser.save();
 
       this.sendOTP(newUser._id, contactInfo);
 
       return {
         data: {},
-        message: "Account is create succesful",
+        message: "tài khoản được tạo thành công!",
         errorCode: 200,
       };
     } catch (error) {
@@ -88,7 +85,15 @@ class AuthService {
   async login(userInfo) {
     try {
       const { username, password } = userInfo;
-      if (!(userValidation.validateEmail(username) || userValidation.validateUsername(username) || userValidation.validatePhone(username))) { throw new Error("Info Login invalid"); }
+      if (
+        !(
+          userValidation.validateEmail(username) ||
+          userValidation.validateUsername(username) ||
+          userValidation.validatePhone(username)
+        )
+      ) {
+        throw new Error("Info Login invalid");
+      }
       // get user
       const user = await User.findOne({
         $or: [{ username }, { email: username }, { phone: username }],
@@ -99,7 +104,9 @@ class AuthService {
       if (!user) throw new Error("user not found!");
 
       // check password
-      if (!crypto.match(user.auth.password, password)) { throw new Error("password is wrong"); }
+      if (!crypto.match(user.auth.password, password)) {
+        throw new Error("password is wrong");
+      }
 
       const { phone, email } = user;
       // check account is already verify yet
@@ -108,9 +115,12 @@ class AuthService {
 
         return {
           status: true,
-          message: "Already send otp!",
+          message: "đã gửi mã otp!",
           data: {
-            userId: user._id, username, phone, email
+            userId: user._id,
+            username,
+            phone,
+            email,
           },
           errorCode: 200,
         };
@@ -120,9 +130,12 @@ class AuthService {
       if (!user.auth.isAuthorize) {
         return {
           status: true,
-          message: "You must update your identity!",
+          message: "bạn cần cập nhật thông tin căn cước!",
           data: {
-            userId: user._id, username, phone, email
+            userId: user._id,
+            username,
+            phone,
+            email,
           },
           errorCode: 200,
         };
@@ -154,7 +167,7 @@ class AuthService {
 
       return {
         status: true,
-        message: "login success",
+        message: "đăng nhập thành công!",
         errorCode: 200,
         data: {
           accessToken,
@@ -187,21 +200,19 @@ class AuthService {
     // find user
     const user = User.findOne({ _id: userId });
 
-    if (!user) { throw new Error("send_otp ==> user not found!"); }
+    if (!user) {
+      throw new Error("send_otp ==> user not found!");
+    }
 
     await User.updateOne({ _id: userId }, { otp, otpTime });
 
     // type = false -> email
     if (!type) {
       // create token verify by email with userID and mail
-      const token = jwt.sign(
-        { userId, username },
-        SECRET_KEY,
-        {
-          expiresIn: REQUEST_VERIFY_TOKEN_LIFE,
-          subject: "verify-email",
-        },
-      );
+      const token = jwt.sign({ userId, username }, SECRET_KEY, {
+        expiresIn: REQUEST_VERIFY_TOKEN_LIFE,
+        subject: "verify-email",
+      });
 
       mailHelper.sendVerify({
         to: username,
@@ -236,7 +247,9 @@ class AuthService {
 
   async resetOTP(username) {
     try {
-      if (!userValidation.validateUsername(username)) { throw new Error("reset otp ==> username invalid"); }
+      if (!userValidation.validateUsername(username)) {
+        throw new Error("reset otp ==> username invalid");
+      }
 
       // find user
       const user = await User.findOne({ username });
@@ -251,7 +264,7 @@ class AuthService {
       // return status
       return {
         errorCode: 200,
-        message: "OTP already send!",
+        message: "OTP đã được gửi!",
         data: {},
       };
     } catch (error) {
@@ -275,7 +288,9 @@ class AuthService {
 
       if (!user) throw new Error("confirm_account ==> not found User");
 
-      if (!user || user.auth.isVerified) { throw new Error("confirm_account ==>  Account is already confirm"); } else {
+      if (!user || user.auth.isVerified) {
+        throw new Error("confirm_account ==>  Account is already confirm");
+      } else {
         const { otp, otpTime } = user;
 
         // check otp
@@ -288,7 +303,7 @@ class AuthService {
       }
       return {
         errorCode: 200,
-        message: "Account confirm successful",
+        message: "xác nhận tài khoản thành công!",
         data: {},
       };
     } catch (error) {
@@ -327,7 +342,7 @@ class AuthService {
             await user.save();
           }
         }
-      },
+      }
     );
   }
 
@@ -340,34 +355,32 @@ class AuthService {
 
     return {
       address,
-      privateKey
-    }
+      privateKey,
+    };
   }
 
   async initTransaction(userId) {
     const { wallet } = await User.getById(userId);
 
-    const transaction = new UserTransaction({
-
-    });
+    const transaction = new UserTransaction({});
   }
 
   async updateProfileByIndentity(userId, userInfo) {
-    if (!userInfo)
-      throw new ArgumentError('update profile => missing');
+    if (!userInfo) throw new ArgumentError("update profile => missing");
 
-    const { name, dob, sex, id, identityImg, home, address_entities } = userInfo;
+    const { name, dob, sex, id, identityImg, home, address_entities } =
+      userInfo;
     let user = await User.findOne({ _id: userId });
     user.name = name;
-    user.gender = sex === 'N/A' ? 'Other' : sex;
+    user.gender = sex === "N/A" ? "Other" : sex;
     user.dob = dob;
     user.identity = id;
     user.identityImg = identityImg?.length !== 0 ? identityImg : [];
     user.address = {};
-    user.address.city = address_entities?.province?.toLowerCase() || '';
-    user.address.district = address_entities?.district?.toLowerCase() || '';
-    user.address.ward = address_entities?.ward?.toLowerCase() || '';
-    user.address.street = address_entities?.street?.toLowerCase() || '';
+    user.address.city = address_entities?.province?.toLowerCase() || "";
+    user.address.district = address_entities?.district?.toLowerCase() || "";
+    user.address.ward = address_entities?.ward?.toLowerCase() || "";
+    user.address.street = address_entities?.street?.toLowerCase() || "";
     user.auth.isAuthorize = true;
     await user.save();
 
@@ -397,7 +410,7 @@ class AuthService {
 
     return {
       status: true,
-      message: "update success",
+      message: "cập nhật thành công",
       errorCode: 200,
       data: {
         accessToken,
@@ -405,8 +418,6 @@ class AuthService {
         user,
       },
     };
-
   }
-
 }
 module.exports = new AuthService();

@@ -36,7 +36,10 @@ class AuthController {
     const { username, otp } = req.body;
 
     try {
-      const { message, errorCode, data } = await authService.confirmAccount(username, `${otp}`);
+      const { message, errorCode, data } = await authService.confirmAccount(
+        username,
+        `${otp}`
+      );
 
       return res.status(errorCode).json({
         message,
@@ -68,12 +71,14 @@ class AuthController {
   async verifyEmail(req, res, next) {
     try {
       const { token } = req.params;
-      if (!token) { throw new Error("verify_email==> missing parameter"); }
+      if (!token) {
+        throw new Error("verify_email==> missing parameter");
+      }
 
       await authService.verifyEmail(token);
 
       return res.status(200).json({
-        message: "Verify account success!",
+        message: "xác thực tài khoản thành công!",
         errorCode: 200,
         data: {},
       });
@@ -88,14 +93,24 @@ class AuthController {
 
   //[PUT] bh/auth/verify-info
   async verifyInfoUser(req, res, next) {
-    const { userId, name, dob, sex, id, home, address_entities, identityImg } = req.body;
+    const { userId, name, dob, sex, id, home, address_entities, identityImg } =
+      req.body;
     try {
-      const data = await authService.updateProfileByIndentity(userId, { ...identityImg, name, dob, sex, id, identityImg, home, address_entities });
+      const data = await authService.updateProfileByIndentity(userId, {
+        ...identityImg,
+        name,
+        dob,
+        sex,
+        id,
+        identityImg,
+        home,
+        address_entities,
+      });
 
       res.status(200).json({
-        message: "Update user profile success",
+        message: "cập nhật thông tin user thành công.",
         errorCode: 200,
-        data
+        data,
       });
     } catch (error) {
       next(error);
