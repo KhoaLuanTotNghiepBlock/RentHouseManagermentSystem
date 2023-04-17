@@ -10,18 +10,18 @@ const contractService = require("./contract.service");
 const User = require("../../../model/user/user.model");
 const RentalContract = require("../blockchain/deploy/BHRentalContract");
 const Room = require("../../../model/room.model");
-const {toObjectId} = require("../../../utils/common.helper");
+const { toObjectId } = require("../../../utils/common.helper");
 const Notification = require("../../../model/user/notification.model");
 const Request = require("../../../model/user/request.model");
 const ServiceDemand = require("../../../model/service/service-demand.model");
-const {compare} = require("../../../utils/object.helper");
+const { compare } = require("../../../utils/object.helper");
 class InvoiceService {
     async createInvoice(userId, contractId, invoiceInfo) {
         if (!(contractId && invoiceInfo && userId)) throw new ArgumentError("invoice service ==>");
 
         const contract = await Contract.getOne(contractId);
 
-        const {period, payMode, dateRent, lessor, renter, payment} = contract;
+        const { period, payMode, dateRent, lessor, renter, payment } = contract;
 
         // if (userId !== lessor._id)
         //     throw new MyError('Unauthorize to create invoices');
@@ -35,7 +35,7 @@ class InvoiceService {
         }
         let amountDemand = 0;
         for (let i = 0; i < serviceDemands.length; i++) {
-            const {amount} = await ServiceDemand.findById(serviceDemands[i]);
+            const { amount } = await ServiceDemand.findById(serviceDemands[i]);
             amountDemand += amount;
         }
 
@@ -67,11 +67,11 @@ class InvoiceService {
     }
 
     async getAll(conditions = {}, pagination, projection = {}) {
-        let {payStatus, userId} = conditions;
-        const {limit, page, skip} = pagination;
+        let { payStatus, userId } = conditions;
+        const { limit, page, skip } = pagination;
         const filter = {
-            ...(payStatus && {payStatus}),
-            ...(userId && {"contract.renter": toObjectId(userId)}),
+            ...(payStatus && { payStatus }),
+            ...(userId && { "contract.renter": toObjectId(userId) }),
         };
 
         let [items, total] = await Promise.all([
@@ -79,24 +79,24 @@ class InvoiceService {
                 {
                     $lookup: {
                         from: "contracts",
-                        let: {contractId: "$contract"},
-                        pipeline: [{$match: {$expr: {$eq: ["$_id", "$$contractId"]}}}],
+                        let: { contractId: "$contract" },
+                        pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$contractId"] } } }],
                         as: "contract",
                     },
                 },
-                {$match: filter},
+                { $match: filter },
             ]),
             Invoice.aggregate([
                 {
                     $lookup: {
                         from: "contracts",
-                        let: {contractId: "$contract"},
-                        pipeline: [{$match: {$expr: {$eq: ["$_id", "$$contractId"]}}}],
+                        let: { contractId: "$contract" },
+                        pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$contractId"] } } }],
                         as: "contract",
                     },
                 },
-                {$match: {filter}},
-                {$count: "totalValue"},
+                { $match: { filter } },
+                { $count: "totalValue" },
             ]),
         ]);
 
@@ -111,10 +111,10 @@ class InvoiceService {
     }
 
     async getOne(conditions) {
-        let {payStatus, invoiceId} = conditions;
+        let { payStatus, invoiceId } = conditions;
         const filter = {
-            ...(invoiceId && {_id: invoiceId}),
-            ...(payStatus && {payStatus}),
+            ...(invoiceId && { _id: invoiceId }),
+            ...(payStatus && { payStatus }),
         };
 
         const invoice = await Invoice.findOne(filter, projection).populate([
@@ -170,7 +170,7 @@ class InvoiceService {
         if (datePay > invoice.endDate) penaltyFee = invoice.amount * 0.05;
 
         const rentAmount = room.basePrice;
-        const invoiceFee = invoice.amount - rentAmount + penaltyFee;
+        const invoiceFee = invoice.amount + penaltyFee;
 
         const data = await RentalContract.payForRentMonth(renter.wallet.walletAddress, room.roomUid, invoice, invoiceFee, rentAmount);
 
@@ -187,7 +187,7 @@ class InvoiceService {
         const endDate = new Date(invoice.endDate.getTime() + 15 * 24 * 60 * 60 * 1000);
         invoice.endDate = endDate;
         invoice.isExtends = true;
-        invoice.save({new: true});
+        invoice.save({ new: true });
 
         const notification = await Notification.create([]);
         return {

@@ -116,9 +116,8 @@ const RentalContract = {
       userOwner: ADMIN._id,
       type: "NOTIFICATION",
       tag: [_id],
-      content: `bạn đã trả phí cho ký xác nhận với khoản tiền ${
-        rentAmount + depositAmount
-      }`,
+      content: `bạn đã trả phí cho ký xác nhận với khoản tiền ${rentAmount + depositAmount
+        }`,
     });
     return { room, notification };
   },
@@ -258,8 +257,8 @@ const RentalContract = {
   getGetEventFromTransaction: async (txHash, contract) => {
     try {
       const transaction = await web3.eth.getTransaction(txHash);
-      const blockNumber = transaction.blockNumber;
-
+      const blockNumber = transaction?.blockNumber;
+      if (!blockNumber) return;
       const events = await contract.getPastEvents("allEvents", {
         fromBlock: blockNumber,
         toBlock: blockNumber,
@@ -290,9 +289,7 @@ const RentalContract = {
 
     const val = new BN(convertBalanceToWei(valueInvoiceFee));
     const invoiceHash = crypto.hash(invoice);
-    const payRenter = ContractRentalHouse.methods
-      .payForRentByMonth(roomUid, invoiceHash, val)
-      .encodeABI();
+    const payRenter = ContractRentalHouse.methods.payForRentByMonth(roomUid, invoiceHash, val).encodeABI();
     const value = convertBalanceToWei(valueInvoiceFee + valuePay);
 
     const tx = {
@@ -318,7 +315,7 @@ const RentalContract = {
 
     await setTimeout(() => {
       console.log("Waited 2 seconds.");
-    }, 2000);
+    }, 3000);
 
     const event = await RentalContract.getGetEventFromTransaction(
       signTransactionHash,
@@ -353,9 +350,8 @@ const RentalContract = {
       userOwner: ADMIN._id,
       type: "NOTIFICATION",
       tag: [_id],
-      content: `bạn đã thanh toán hoá đơn với khoản ${
-        valueInvoiceFee + valuePay
-      } thành công!`,
+      content: `bạn đã thanh toán hoá đơn với khoản ${valueInvoiceFee + valuePay
+        } thành công!`,
     });
     // // update owner balance
     await userWalletService.changeBalance(
@@ -369,9 +365,8 @@ const RentalContract = {
       userOwner: ADMIN._id,
       type: "NOTIFICATION",
       tag: [invoice.contract.lessor],
-      content: `You receive from ${username} ${
-        valueInvoiceFee + valuePay
-      } for invoice`,
+      content: `You receive from ${username} ${valueInvoiceFee + valuePay
+        } for invoice`,
     });
 
     const notification = await Notification.create({

@@ -10,7 +10,6 @@ const datetimeHelper = require("../../../utils/datetime.helper");
 const objectHelper = require("../../../utils/object.helper");
 const ServiceDemandValidate = require("../validate/demand.validate");
 const roomValidate = require("../validate/room.validaste");
-const contractService = require("./contract.service");
 
 class ServiceDemandService {
   async createServiceDemand(serviceId, serviceDemandInfo) {
@@ -65,17 +64,13 @@ class ServiceDemandService {
     if (!contractId) throw new ArgumentError("invoice service ==>");
 
     const contract = await Contract.getOne(contractId);
+    console.log("🚀 ~ file: demand.service.js:68 ~ ServiceDemandService ~ createServiceDemandForRoom ~ contract:", contract);
 
     let { room, period, dateRent } = contract;
 
     const rentalDate = datetimeHelper.toObject(dateRent);
 
-    let { expiredDate, services } =
-      ServiceDemandValidate.validateCreateDemandForRoom({
-        room,
-        period,
-        dateRent,
-      });
+    let { expiredDate, services } = ServiceDemandValidate.validateCreateDemandForRoom({ room, period, dateRent });
 
     const listDemand = [];
 

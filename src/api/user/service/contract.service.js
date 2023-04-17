@@ -19,6 +19,7 @@ const { ADMIN } = require("../../../config/default");
 const { Promise } = require("mongoose");
 
 class ContractService {
+
   async createContract(renterId, contractInfo) {
     // get owner
     const renter = await User.getById(renterId);
@@ -32,7 +33,8 @@ class ContractService {
     const owner = await User.getById(contract.lessor);
     await contract.save();
 
-    await demandService.createServiceDemandForRoom(contract._id);
+    await demandService.createServiceDemandForRoom(contract?._id);
+
     // create contract hash
     const contractHash = await this.hashContract(contract._id);
 
@@ -42,6 +44,7 @@ class ContractService {
       tag: [owner._id, renter._id],
       content: "tạo hợp đồng thành công!",
     });
+
     return {
       contract,
       contractHash,
