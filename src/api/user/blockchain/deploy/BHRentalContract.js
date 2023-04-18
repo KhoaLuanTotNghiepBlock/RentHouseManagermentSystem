@@ -116,8 +116,7 @@ const RentalContract = {
       userOwner: ADMIN._id,
       type: "NOTIFICATION",
       tag: [_id],
-      content: `bạn đã trả phí cho ký xác nhận với khoản tiền ${rentAmount + depositAmount
-        }`,
+      content: `bạn đã trả phí cho ký xác nhận với khoản tiền ${rentAmount + depositAmount}`,
     });
     return { room, notification };
   },
@@ -350,8 +349,7 @@ const RentalContract = {
       userOwner: ADMIN._id,
       type: "NOTIFICATION",
       tag: [_id],
-      content: `bạn đã thanh toán hoá đơn với khoản ${valueInvoiceFee + valuePay
-        } thành công!`,
+      content: `bạn đã thanh toán hoá đơn với khoản ${invoiceAmount + rentAmount} thành công!`,
     });
     // // update owner balance
     await userWalletService.changeBalance(
@@ -365,8 +363,7 @@ const RentalContract = {
       userOwner: ADMIN._id,
       type: "NOTIFICATION",
       tag: [invoice.contract.lessor],
-      content: `You receive from ${username} ${valueInvoiceFee + valuePay
-        } for invoice`,
+      content: `You receive from ${username} ${invoiceAmount + rentAmount} for invoice`,
     });
 
     const notification = await Notification.create({

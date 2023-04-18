@@ -34,6 +34,7 @@ class InvoiceService {
             throw new MyError("invoice service ==> listServiceDemand ");
         }
         let amountDemand = 0;
+        console.log("🚀 ~ file: invoice.service.js:37 ~ InvoiceService ~ createInvoice ~ amountDemand:", amountDemand)
         for (let i = 0; i < serviceDemands.length; i++) {
             const { amount } = await ServiceDemand.findById(serviceDemands[i]);
             amountDemand += amount;
@@ -47,7 +48,7 @@ class InvoiceService {
             startDate: paymentDay,
             endDate,
             enable: true,
-            amount: amountDemand / 100,
+            amount: amountDemand,
             serviceDemands,
         });
         let notification = {};
