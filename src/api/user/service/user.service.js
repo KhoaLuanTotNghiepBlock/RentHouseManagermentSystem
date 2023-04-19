@@ -13,379 +13,322 @@ const Notification = require("../../../model/user/notification.model");
 const Request = require("../../../model/user/request.model");
 const RentalContract = require("../blockchain/deploy/BHRentalContract");
 const contractService = require("./contract.service");
-const { compare } = require("../../../utils/object.helper");
-const {
-  ACTION_FUNCTION,
-  USER_TRANSACTION_ACTION,
-} = require("../../../config/user-transaction");
-const { ACTION_TRANSFER, ADMIN } = require("../../../config/default");
+const {compare} = require("../../../utils/object.helper");
+const {ACTION_FUNCTION, USER_TRANSACTION_ACTION} = require("../../../config/user-transaction");
+const {ACTION_TRANSFER, ADMIN} = require("../../../config/default");
 const userWalletService = require("./user-wallet.service");
-const { toObjectId } = require("../../../utils/common.helper");
+const {toObjectId} = require("../../../utils/common.helper");
 const Room = require("../../../model/room.model");
 const FeedBack = require("../../../model/user/feedback.model");
 const ReportRoom = require("../../../model/user/report.model");
 
 class UserService {
-  checkImage(file) {
-    const { mimetype } = file;
+    checkImage(file) {
+        const {mimetype} = file;
 
-    if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
-      throw new MyError("Image invalid");
+        if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
+            throw new MyError("Image invalid");
+        }
     }
-  }
 
-  async cityData() {
-    const listDitrict = await addressService.getDitrictsFromDatabase();
-    const city = await City.findOne({ _id: "6415ee77cc372ede59b64c1a" });
+    async cityData() {
+        const listDitrict = await addressService.getDitrictsFromDatabase();
+        const city = await City.findOne({_id: "6415ee77cc372ede59b64c1a"});
 
-    for (let i = 0; i < listDitrict.length; i++) {
-      const list = await addressService.getWardByDitrict(listDitrict[i].name);
-      for (let j = 0; j < list.length; j++) {
-        const ward = new Ward({
-          name: list[j].name,
-          type: list[j].pre,
-          typename: `${list[j].pre} ${list[j].name}`,
-          parent_code: listDitrict[i]._id,
-          parent_code_city: city._id,
+        for (let i = 0; i < listDitrict.length; i++) {
+            const list = await addressService.getWardByDitrict(listDitrict[i].name);
+            for (let j = 0; j < list.length; j++) {
+                const ward = new Ward({
+                    name: list[j].name,
+                    type: list[j].pre,
+                    typename: `${list[j].pre} ${list[j].name}`,
+                    parent_code: listDitrict[i]._id,
+                    parent_code_city: city._id,
+                });
+                await ward.save();
+            }
+        }
+    }
+
+    // [GET] /bh/user/me/profile
+    async getProfile(_id) {
+        await tokens.save();
+        const user = await User.findById(_id, {auth: 0})
+            .select("-updateAt")
+            .lean()
+            .then((data) => data)
+            .catch((err) => err);
+
+        if (!user) {
+            throw new Error("User ==> not found user!");
+        }
+        return user;
+    }
+
+    async updateProfile(_id, profile) {
+        if (!profile) {
+            throw new Error("Profile in valid!");
+        }
+
+        const validProfile = await userValidate.validateProfile(_id, profile);
+        const modifieUser = await User.updateOne({_id}, {...validProfile});
+
+        if (modifieUser.modifiedCount < 1) throw new Error("Update user data fail!");
+    }
+
+    async changeAvatar(_id, file) {
+        this.checkImage(file);
+
+        const user = User.getById(_id);
+        if (!user) {
+            throw new Error("Not found user");
+        }
+
+        const {avatar} = user;
+        if (avatar) {
+            awsS3ServiceHelper.deleteFile(avatar);
+        }
+
+        const avatarUrl = await awsS3ServiceHelper.uploadFile(file);
+        const updateUser = await User.updateOne(
+            {_id},
+            {
+                avatar: avatarUrl,
+            }
+        );
+        if (updateUser.modifiedCount < 1) throw new Error("Update data fail!");
+        return user;
+    }
+
+    async cancelRentalByRenter(renterId, contractId) {
+        const renter = await User.getById(renterId);
+
+        const contract = await Contract.findOne({
+            _id: contractId,
         });
-        await ward.save();
-      }
-    }
-  }
 
-  // [GET] /bh/user/me/profile
-  async getProfile(_id) {
-    await tokens.save();
-    const user = await User.findById(_id, { auth: 0 })
-      .select("-updateAt")
-      .lean()
-      .then((data) => data)
-      .catch((err) => err);
+        if (!contract) throw new MyError("Contract not found");
 
-    if (!user) {
-      throw new Error("User ==> not found user!");
-    }
-    return user;
-  }
+        const notification = await Notification.create({
+            user: renter._id,
+            type: "CANCEL_CONTRACT",
+            content: "huỷ hợp đồng thuê phòng!",
+            tag: [renter._id, contract.lessor],
+        });
 
-  async updateProfile(_id, profile) {
-    if (!profile) {
-      throw new Error("Profile in valid!");
+        const request = await Request.create({
+            from: renter._id,
+            to: contract.lessor,
+            type: "CANCEL_RENTAL",
+            data: contract,
+        });
+        return {
+            notification,
+            request,
+        };
     }
 
-    const validProfile = await userValidate.validateProfile(_id, profile);
+    async extendRentalByRenter(renterId, contractId, newPeriod) {
+        const renter = await User.getById(renterId);
 
-    const modifieUser = await User.updateOne(
-      { _id },
-      {
-        ...validProfile,
-      }
-    );
+        const contract = await Contract.findOne({
+            _id: contractId,
+        });
 
-    if (modifieUser.modifiedCount < 1)
-      throw new Error("Update user data fail!");
-  }
+        if (!contract) throw new MyError("Contract not found");
 
-  async changeAvatar(_id, file) {
-    this.checkImage(file);
+        const notification = await Notification.create({
+            user: ADMIN._id,
+            type: "CONTINUE_RENTAL",
+            content: `extend rent room`,
+            tag: [renter._id, contract.lessor],
+        });
 
-    const user = User.getById(_id);
-    if (!user) {
-      throw new Error("Not found user");
+        let request = await Request.findOne({
+            type: "CONTINUE_RENTAL",
+            from: renter._id,
+            "data.contract.room": contract.room,
+        });
+
+        if (!request) {
+            request = await Request.create({
+                from: renter._id,
+                to: contract.lessor,
+                type: "CONTINUE_RENTAL",
+                data: {contract, newPeriod},
+            });
+        }
+
+        return {
+            requestId: request._id,
+            roomId: contract.room,
+        };
     }
 
-    const { avatar } = user;
-    if (avatar) {
-      awsS3ServiceHelper.deleteFile(avatar);
+    async extendContract(requestId) {
+        const request = await Request.findOne({
+            _id: requestId,
+        });
+
+        const {data} = request;
+
+        if (!request) throw new MyError("request not found");
+
+        const result = await contractService.continueContract(data.contract?.renter?._id, data?.contract?._id, data?.newPeriod);
+
+        await Request.deleteOne({_id: requestId});
+        return result;
     }
 
-    const avatarUrl = await awsS3ServiceHelper.uploadFile(file);
-    const updateUser = await User.updateOne(
-      { _id },
-      {
-        avatar: avatarUrl,
-      }
-    );
-    if (updateUser.modifiedCount < 1) throw new Error("Update data fail!");
-    return user;
-  }
+    async acceptCancelRentalRoom(ownerId, requestId) {
+        const request = await Request.findOne({
+            _id: requestId,
+        });
 
-  async cancelRentalByRenter(renterId, contractId) {
-    const renter = await User.getById(renterId);
+        const {data} = request;
 
-    const contract = await Contract.findOne({
-      _id: contractId,
-    });
+        if (!request) throw new MyError("request not found");
+        //check contract due
+        const dateEnd = new Date();
+        // in due
+        const inDue = await contractService.checkContractStatus(dateEnd, data._id);
+        let result;
 
-    if (!contract) throw new MyError("Contract not found");
-
-    const notification = await Notification.create({
-      user: renter._id,
-      type: "CANCEL_CONTRACT",
-      content: "huỷ hợp đồng thuê phòng!",
-      tag: [renter._id, contract.lessor],
-    });
-
-    const request = await Request.create({
-      from: renter._id,
-      to: contract.lessor,
-      type: "CANCEL_RENTAL",
-      data: contract,
-    });
-    return {
-      notification,
-      request,
-    };
-  }
-
-  async extendRentalByRenter(renterId, contractId, newPeriod) {
-    const renter = await User.getById(renterId);
-
-    const contract = await Contract.findOne({
-      _id: contractId,
-    });
-
-    if (!contract) throw new MyError("Contract not found");
-
-    const notification = await Notification.create({
-      user: ADMIN._id,
-      type: "CONTINUE_RENTAL",
-      content: `extend rent room`,
-      tag: [renter._id, contract.lessor],
-    });
-
-    let request = await Request.findOne({
-      type: "CONTINUE_RENTAL",
-      from: renter._id,
-      "data.contract.room": contract.room,
-    });
-
-    if (!request) {
-      request = await Request.create({
-        from: renter._id,
-        to: contract.lessor,
-        type: "CONTINUE_RENTAL",
-        data: { contract, newPeriod },
-      });
+        if (!inDue) {
+            result = await RentalContract.endRent(data?.lessor?.wallet.walletAddress, data.room, data?.renter?.wallet.walletAddress);
+        }
+        // const penaltyFee = (data.payment * 50) / 100;
+        result = await RentalContract.endRentInDue(data?.lessor?.wallet.walletAddress, data.room, data?.renter?.wallet.walletAddress);
+        await Request.deleteOne({_id: requestId});
+        return result;
     }
 
-    return {
-      requestId: request._id,
-      roomId: contract.room,
-    };
-  }
+    async cancelContractByLessor(ownerId, contractId) {
+        const contract = await Contract.findOne({_id: contractId, status: "available"}).populate([
+            {
+                path: "renter",
+                select: "_id wallet",
+            },
+            {
+                path: "lessor",
+                select: "_id wallet",
+            },
+            {
+                path: "room",
+                select: "-updatedAt",
+            },
+        ]);
+        if (!contract) throw new MyError("contract not found");
 
-  async extendContract(requestId) {
-    const request = await Request.findOne({
-      _id: requestId,
-    });
+        const {renter, lessor, room, penaltyFeeEndRent} = contract;
 
-    const { data } = request;
+        //check contract due
+        const dateEnd = new Date();
+        // in due
+        const inDue = await contractService.checkContractStatus(dateEnd, contractId);
 
-    if (!request) throw new MyError("request not found");
+        const result = await RentalContract.endRent(lessor?.wallet.walletAddress, room, renter?.wallet?.walletAddress);
 
-    const result = await contractService.continueContract(
-      data.contract?.renter?._id,
-      data?.contract?._id,
-      data?.newPeriod
-    );
-
-    await Request.deleteOne({ _id: requestId });
-    return result;
-  }
-
-  async acceptCancelRentalRoom(ownerId, requestId) {
-    const request = await Request.findOne({
-      _id: requestId,
-    });
-
-    const { data } = request;
-
-    if (!request) throw new MyError("request not found");
-    //check contract due
-    const dateEnd = new Date();
-    // in due
-    const inDue = await contractService.checkContractStatus(dateEnd, data._id);
-    let result;
-
-    if (!inDue) {
-      result = await RentalContract.endRent(
-        data?.lessor?.wallet.walletAddress,
-        data.room,
-        data?.renter?.wallet.walletAddress
-      );
+        if (inDue) {
+            const data = this.transferBalance(lessor._id, renter._id, penaltyFeeEndRent, ACTION_TRANSFER.TRANSFER);
+            await userWalletService.changeBalance(renter._id, penaltyFeeEndRent, data, USER_TRANSACTION_ACTION.PAYMENT);
+            const notification = Notification.create({
+                userOwner: ADMIN._id,
+                tag: [renter._id],
+                content: `bạn nhận được khoản tiền đền bù từ phòng ${room.name} cho việc huỷ hợp đồng trước hạn!`,
+            });
+        }
+        return {
+            result,
+        };
     }
-    // const penaltyFee = (data.payment * 50) / 100;
-    result = await RentalContract.endRentInDue(
-      data?.lessor?.wallet.walletAddress,
-      data.room,
-      data?.renter?.wallet.walletAddress
-    );
-    await Request.deleteOne({ _id: requestId });
-    return result;
-  }
 
-  async cancelContractByLessor(ownerId, contractId) {
-    const contract = await Contract.findOne({
-      _id: contractId,
-      status: "available",
-    }).populate([
-      {
-        path: "renter",
-        select: "_id wallet",
-      },
-      {
-        path: "lessor",
-        select: "_id wallet",
-      },
-      {
-        path: "room",
-        select: "-updatedAt",
-      },
-    ]);
-    if (!contract) throw new MyError("contract not found");
+    async transferBalance(fromUserId, toUserId, amount, action) {
+        const from = await User.getById(fromUserId);
+        const to = await User.getById(toUserId);
 
-    const { renter, lessor, room, penaltyFeeEndRent } = contract;
+        if (amount < 0) throw new MyError("amount not invalid!");
 
-    //check contract due
-    const dateEnd = new Date();
-    // in due
-    const inDue = await contractService.checkContractStatus(
-      dateEnd,
-      contractId
-    );
-
-    const result = await RentalContract.endRent(
-      lessor?.wallet.walletAddress,
-      room.renter?.wallet.walletAddress
-    );
-
-    if (inDue) {
-      const data = this.transferBalance(
-        lessor._id,
-        renter._id,
-        penaltyFeeEndRent,
-        ACTION_TRANSFER.TRANSFER
-      );
-
-      await userWalletService.changeBalance(
-        renter._id,
-        penaltyFeeEndRent,
-        data,
-        USER_TRANSACTION_ACTION.PAYMENT
-      );
-
-      const notification = Notification.create({
-        userOwner: ADMIN._id,
-        tag: [renter._id],
-        content: `bạn nhận được khoản tiền đền bù từ phòng ${room.name} cho việc huỷ hợp đồng trước hạn!`,
-      });
+        if (compare(from._id, to._id)) throw new MyError("can not transfer for self");
+        const result = await RentalContract.transferBalance(from?.wallet?.walletAddress, to?.wallet?.walletAddress, amount, action);
+        return result;
     }
-    return {
-      result,
-    };
-  }
 
-  async transferBalance(fromUserId, toUserId, amount, action) {
-    const from = await User.getById(fromUserId);
-    const to = await User.getById(toUserId);
+    async withdrawMoney(userId, amount) {
+        if (!userId || amount < 0) throw new MyError("missing parameter");
 
-    if (amount < 0) throw new MyError("amount not invalid!");
+        const {_id, wallet} = await User.findOne({_id: toObjectId(userId)});
+        if (wallet?.balance < amount) throw new MyError("not enough balance!");
 
-    if (compare(from._id, to._id))
-      throw new MyError("can not transfer for self");
-    const result = await RentalContract.transferBalance(
-      from?.wallet?.walletAddress,
-      to?.wallet?.walletAddress,
-      amount,
-      action
-    );
-    return result;
-  }
+        await userWalletService.changeBalance(_id, amount, {}, USER_TRANSACTION_ACTION.WITHDRAW);
 
-  async withdrawMoney(userId, amount) {
-    if (!userId || amount < 0) throw new MyError("missing parameter");
+        const notification = await Notification.create({
+            user: ADMIN._id,
+            type: "NOTIFICATION",
+            content: `bạn rút: ${amount} thành công`,
+            tag: [_id],
+        });
 
-    const { _id, wallet } = await User.findOne({ _id: toObjectId(userId) });
-    if (wallet?.balance < amount) throw new MyError("not enough balance!");
+        return {notification};
+    }
 
-    await userWalletService.changeBalance(
-      _id,
-      amount,
-      {},
-      USER_TRANSACTION_ACTION.WITHDRAW
-    );
+    async feedBackRoom(roomId, userId, data) {
+        /**
+         * Flow:
+         * 1. check user has rented room
+         * 2.
+         */
+        if (!roomId || !userId) throw new MyError("missing parameter");
 
-    const notification = await Notification.create({
-      user: ADMIN._id,
-      type: "NOTIFICATION",
-      content: `bạn rút: ${amount} thành công`,
-      tag: [_id],
-    });
+        let [roomFind, feedBack] = await Promise.all([Room.findOne({_id: roomId}), FeedBack.findOne({room: roomId, user: userId})]);
 
-    return { notification };
-  }
+        if (feedBack) return {message: "bạn đã đánh giá phòng này rồi!"};
 
-  async feedBackRoom(roomId, userId, data) {
-    /**
-     * Flow:
-     * 1. check user has rented room
-     * 2.
-     */
-    if (!roomId || !userId) throw new MyError("missing parameter");
+        const {content, rating, images} = data;
 
-    let [roomFind, feedBack] = await Promise.all([
-      Room.findOne({ _id: roomId }),
-      FeedBack.findOne({ room: roomId, user: userId }),
-    ]);
+        feedBack = await FeedBack.create({
+            user: userId,
+            content,
+            rating,
+            room: roomFind._id,
+            images,
+        });
 
-    if (feedBack) return { message: "bạn đã đánh giá phòng này rồi!" };
+        await Notification.create({
+            user: ADMIN._id,
+            type: "NOTIFICATION",
+            content: ` phòng ${roomFind.name} vừa nhận một đánh giá!`,
+            tag: [roomFind.owner],
+        });
 
-    const { content, rating, images } = data;
+        await Notification.create({
+            user: ADMIN._id,
+            type: "NOTIFICATION",
+            content: `cám ơn về đánh giá của bạn cho phòng: ${roomFind.name}`,
+            tag: [userId],
+        });
 
-    feedBack = await FeedBack.create({
-      user: userId,
-      content,
-      rating,
-      room: roomFind._id,
-      images,
-    });
+        return {
+            feedBack,
+        };
+    }
 
-    await Notification.create({
-      user: ADMIN._id,
-      type: "NOTIFICATION",
-      content: ` phòng ${roomFind.name} vừa nhận một đánh giá!`,
-      tag: [roomFind.owner],
-    });
-
-    await Notification.create({
-      user: ADMIN._id,
-      type: "NOTIFICATION",
-      content: `cám ơn về đánh giá của bạn cho phòng: ${roomFind.name}`,
-      tag: [userId],
-    });
-
-    return {
-      feedBack,
-    };
-  }
-
-  async reportRoom(roomId, userId, data) {
-    /**
-     * Flow:
-     * 1. check user has rented room
-     * 2.
-     */
-    if (!roomId || !userId) throw new MyError("missing parameter");
-    const report = await ReportRoom.create({
-      user: userId,
-      room: roomId,
-      ...data,
-    });
-    return {
-      report,
-    };
-  }
+    async reportRoom(roomId, userId, data) {
+        /**
+         * Flow:
+         * 1. check user has rented room
+         * 2.
+         */
+        if (!roomId || !userId) throw new MyError("missing parameter");
+        const report = await ReportRoom.create({
+            user: userId,
+            room: roomId,
+            ...data,
+        });
+        return {
+            report,
+        };
+    }
 }
 
 module.exports = new UserService();
