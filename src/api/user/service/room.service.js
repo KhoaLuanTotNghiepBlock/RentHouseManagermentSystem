@@ -101,7 +101,10 @@ class RoomService {
             ];
         }
 
-        const [items, total] = await Promise.all([Room.find(filter, projection).sort(sort).skip(skip).limit(limit).populate(populate).lean(), Room.countDocuments(filter)]);
+        const [items, total] = await Promise.all([
+            Room.find(filter, projection).sort(sort).skip(skip).limit(limit).populate(populate).lean(),
+            Room.countDocuments(filter),
+        ]);
         const array = items.map((val) => ({room: val}));
         return {
             items: array,
@@ -226,9 +229,14 @@ class RoomService {
                 };
             });
 
-            const {listServiceDemands} = await demandService.updateServiceDemandInvoice(contract?.room._id, {atMonth: date.getMonth() + 1, demands: datas});
+            const {listServiceDemands} = await demandService.updateServiceDemandInvoice(contract?.room._id, {
+                atMonth: date.getMonth() + 1,
+                demands: datas,
+            });
 
-            const invoice = await invoiceService.createInvoice(contract?.lessor, (contract?._id).toString(), {listServiceDemands: listServiceDemands.map((val) => val.toString())});
+            const invoice = await invoiceService.createInvoice(contract?.lessor, (contract?._id).toString(), {
+                listServiceDemands: listServiceDemands.map((val) => val.toString()),
+            });
         }
     }
 }
