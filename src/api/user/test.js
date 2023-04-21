@@ -56,3 +56,54 @@ const postData = JSON.stringify({
 req.write(postData);
 
 req.end();
+
+
+const express = require('express');
+const app = express();
+
+// Define your total supply and circulating supply data
+const totalSupply = 1000000;
+const circulatingSupply = 800000;
+
+// Define the route handler for /supply
+app.get('/supply', (req, res) => {
+  const q = req.query.q;
+
+  if (q === 'totalSupply') {
+    res.json({ supply: totalSupply });
+  } else if (q === 'circulating') {
+    res.json({ supply: circulatingSupply });
+  } else {
+    res.status(400).json({ error: 'Invalid query parameter q. Please provide either totalSupply or circulating.' });
+  }
+});
+
+// Start the server
+app.listen(3000, () => {
+  console.log('Server is running on port 3000');
+});
+
+const { key } = req.query;
+const { mainTokenChainId } = await AppConfig.Main.get();
+const rpc = (await ChainService.findByChainId(mainTokenChainId)).rpcs[0];
+const { tokenA, claimToken } = await AppConfig.Contract.get();
+
+StatisticHandler.getSupply = async (req) => {
+  try {
+    const { key } = req.query;
+    const { mainTokenChainId } = await AppConfig.Main.get();
+    const rpc = (await ChainService.findByChainId(mainTokenChainId)).rpcs[0];
+    const { tokenA, claimToken } = await AppConfig.Contract.get();
+    const totalSupply = await Web3Services.getTotalSupply({ rpc, contractAddress: tokenA });
+
+    if (key === "circulating") {
+      const balanceTokenA = await Web3Services.getTokenBalance({ rpc, contractAddress: tokenA, userAddress: claimToken });
+      return convertWeiToBalance(calculateNumber(totalSupply, balanceTokenA, "minus", "string") || 0);
+    }
+
+    return convertWeiToBalance(totalSupply || 0);
+  } catch (error) {
+    console.log("Error in getSupply:", error);
+    // Return appropriate fallback value or error message
+  }
+};
