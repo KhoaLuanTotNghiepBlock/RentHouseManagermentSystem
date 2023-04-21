@@ -7,14 +7,14 @@ const invoiceRouter = require("../routes/invoice");
 const imageRouter = require("./image");
 const adminRouter = require("./admin");
 const authenJWTMiddleWare = require("../middlewares/authenJWT.middleware").api;
-const withdraw = require("../routes/withdraw");
+// const withdraw = require("../routes/withdraw");
 const router = (app, io) => {
     const userRouter = require("./user")(io);
     const unAuthorizeRouter = require("./unauthorize")(io);
     app.use("/bh/auth", authRouter);
     app.use("/bh", unAuthorizeRouter);
     app.use("/bh", imageRouter);
-    app.use("/bh", withdraw);
+    // app.use("/bh", withdraw);
     app.use("/admin", adminRouter);
     app.use("/bh/users", authenJWTMiddleWare, userRouter);
     app.use("/bh/room", authenJWTMiddleWare, roomRouter);
