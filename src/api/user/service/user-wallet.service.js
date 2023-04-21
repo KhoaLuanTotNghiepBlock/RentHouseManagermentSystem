@@ -1,21 +1,21 @@
 const User = require("../../../model/user/user.model");
-const { bugId } = require('../../../config/default');
+const {bugId} = require("../../../config/default");
 const MyError = require("../../../exception/MyError");
-const UserTransaction = require('../../../model/transaction/user-transaction');
+const UserTransaction = require("../../../model/transaction/user-transaction");
 const commonHelper = require("../../../utils/common.helper");
-const { USER_TRANSACTION_ACTION, ACTION_FUNCTION } = require('../../../config/user-transaction');
-const { compare } = require("../../../utils/object.helper");
+const {USER_TRANSACTION_ACTION, ACTION_FUNCTION} = require("../../../config/user-transaction");
+const {compare} = require("../../../utils/object.helper");
 
 const calculate = (action, num1, num2) => {
-    if (ACTION_FUNCTION[action] === 'plus') {
+    if (ACTION_FUNCTION[action] === "plus") {
         return num1 + num2;
     } else {
         return num1 - num2;
     }
-}
+};
 class UserWalletService {
     async getBalance(userId) {
-        const { wallet } = await User.getById(userId);
+        const {wallet} = await User.getById(userId);
 
         return wallet;
     }
@@ -26,9 +26,8 @@ class UserWalletService {
          * get user amount
          * calculate amout
          */
-        const userBalance = await User.findOne({ _id: userId }).select('wallet');
-        if (!userBalance)
-            throw new MyError('user not found');
+        const userBalance = await User.findOne({_id: userId}).select("wallet");
+        if (!userBalance) throw new MyError("user not found");
 
         amount = commonHelper.convertToNumber(amount);
         let newAmount = commonHelper.convertToNumber(Math.abs(userBalance.wallet.balance));
@@ -52,27 +51,18 @@ class UserWalletService {
             });
         }
         return {
-            userBalance
-        }
+            userBalance,
+        };
     }
 
-    async getTransactionHistory(
-        conditions = {},
-        pagination,
-        projection = {},
-        populate = [],
-        sort = {}
-    ) {
-        const { limit, page, skip } = pagination;
-        const {
-            userId,
-            actions,
-        } = conditions;
+    async getTransactionHistory(conditions = {}, pagination, projection = {}, populate = [], sort = {}) {
+        const {limit, page, skip} = pagination;
+        const {userId, actions} = conditions;
 
         const filter = {
             isDeleted: false,
         };
-        userId && (filter.userId = userId)
+        userId && (filter.userId = userId);
 
         const [items, total] = await Promise.all([
             UserTransaction.find(filter, projection).populate(populate).sort(sort).skip(skip).limit(limit),
@@ -87,6 +77,6 @@ class UserWalletService {
             totalPages: Math.ceil(total / limit),
         };
     }
-};
+}
 
 module.exports = new UserWalletService();

@@ -1,3 +1,4 @@
+const Room = require("../../../model/room.model");
 const Contract = require("../../../model/transaction/contract.model");
 const Invoice = require("../../../model/transaction/invoice.model");
 const invoiceService = require("./invoice.service");
@@ -38,6 +39,15 @@ CronService.autoPayForInvoice = async () => {
         }
     } catch (error) {
         console.log("🚀 ~ file: cron.service.js:40 ~ CronService.autoPayForInvoice= ~ error:", error);
+    }
+};
+
+CronService.deleteRoomFail = async () => {
+    try {
+        const deleteRoom = await Room.deleteMany({roomUid: -1});
+        return deleteRoom.deletedCount;
+    } catch (error) {
+        console.log(error);
     }
 };
 module.exports = CronService;

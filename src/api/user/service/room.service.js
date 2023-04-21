@@ -13,8 +13,14 @@ const ReportRoom = require("../../../model/user/report.model");
 const Contract = require("../../../model/transaction/contract.model");
 const demandService = require("./demand.service");
 const invoiceService = require("./invoice.service");
+const CREATE_ROOM_FEE = 5000;
 class RoomService {
     async createRoom(_id, roomInfo) {
+        // set owner
+        const userOwner = await User.getById(_id);
+        if (!userOwner) throw new NotFoundError("room servce=> not found user");
+        if (userOwner?.wallet.balance < CREATE_ROOM_FEE) throw new MyError("bạn không đủ tiền để tạo phòng!");
+
         let room = await roomValidate.validCreateRoom(_id, roomInfo);
         const {amentilities, services, cityName, ditrictName, streetName, wardName, addressDetail} = roomInfo;
 
@@ -32,10 +38,6 @@ class RoomService {
 
         if (!amentilities || !services) throw new ArgumentError("room service ==> missing parameter");
 
-        // set owner
-        const userOwner = await User.getById(_id);
-        if (!userOwner) throw new NotFoundError("room servce=> not found user");
-
         room.owner = userOwner._id;
         // //set unity
         room.amentilities = amentilities;
@@ -48,6 +50,7 @@ class RoomService {
         await serviceApartment.createRoomService(room._id, services);
 
         const roomTransaction = await rentalContract.setRoomForRent(room._id, userOwner.wallet.walletAddress, room.basePrice, room.deposit);
+
         return {
             data: {
                 room,

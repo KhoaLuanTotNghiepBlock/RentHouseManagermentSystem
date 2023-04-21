@@ -60,9 +60,11 @@ class UserController {
                     data: {},
                 });
             }
-            const ipAddr = req.headers["x-forwarded-for"] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
+            const ipAddr =
+                req.headers["x-forwarded-for"] || req.connection.remoteAddress || req.socket.remoteAddress || req.connection.socket.remoteAddress;
 
             const user = await User.getUserByWallet(walletAddress);
+
             const tmnCode = vnp_TmnCode;
             let secretKey = vnp_HashSecret;
             let vnpUrl = vnp_Url;
@@ -79,7 +81,7 @@ class UserController {
             const orderId = new Date().toISOString().slice(0, 19).replace("T", " ");
             const bankCode = "NCB";
 
-            const orderInfo = "pay for wallet";
+            const orderInfo = "top up money";
             const orderType = "topup";
             const locale = "vn";
             const currCode = "VND";
@@ -88,7 +90,6 @@ class UserController {
             vnp_Params["vnp_Version"] = "2.1.0";
             vnp_Params["vnp_Command"] = "pay";
             vnp_Params["vnp_TmnCode"] = tmnCode;
-            // vnp_Params['vnp_Merchant'] = ''
             vnp_Params["vnp_Locale"] = locale;
             vnp_Params["vnp_CurrCode"] = currCode;
             vnp_Params["vnp_TxnRef"] = user._id + new Date();
@@ -185,26 +186,24 @@ class UserController {
                 userOwner: ADMIN._id,
                 tag: [userId],
                 type: "NOTIFICATION",
-                content: `bạn rút tiền về thành công: ${amount}`,
+                content: `bạn nhận được: ${amount / 100}`,
             });
 
             vnp_Params = sortObject(vnp_Params);
-            const tmnCode = vnp_TmnCode;
             let secretKey = vnp_HashSecret;
 
             const querystring = require("qs");
-            const signData = querystring.stringify(vnp_Params, {encode: false});
             const crypto = require("crypto");
+            const signData = querystring.stringify(vnp_Params, {encode: false});
             const hmac = crypto.createHmac("sha512", secretKey);
-            const signed = hmac.update(new Buffer(signData, "utf-8")).digest("hex");
 
             res.status(200).json({
                 message: "thành công",
                 errorCode: 200,
                 data: {
                     ...data,
-                    ...notification,
-                    ...result,
+                    notification,
+                    result,
                 },
             });
         } catch (error) {
@@ -216,8 +215,8 @@ class UserController {
         try {
             console.log("test pay ment");
             const from = await User.getById(ADMIN._id);
-            const to = await User.getById("6431120c24fe4bc8bc0b828a");
-            const amount = 50000;
+            const to = await User.getById("643be838d9788e0dd54c5b42");
+            const amount = 23000;
             if (amount < 0) throw new MyError("amount not invalid!");
 
             // if (compare(from._id, to._id)) throw new MyError('can not transfer for self');
@@ -284,8 +283,10 @@ class UserController {
     // [GET] /user/me/transaction-history
     async getTransactionHistory(req, res, next) {
         try {
+            const {userId} = req.auth;
             const conditions = {
                 ...req.query,
+                userId,
             };
             const sort = {
                 createdAt: -1,
@@ -396,7 +397,13 @@ class UserController {
                 },
             ];
 
-            const {items, total, page, limit, totalPages} = await roomService.getAllRoom(conditions, commonHelper.getPagination(req.query), {}, populate, {createdAt: -1});
+            const {items, total, page, limit, totalPages} = await roomService.getAllRoom(
+                conditions,
+                commonHelper.getPagination(req.query),
+                {},
+                populate,
+                {createdAt: -1}
+            );
 
             return res.status(200).json({
                 data: {items, total, page, limit, totalPages},
