@@ -13,18 +13,18 @@ const Notification = require("../../../model/user/notification.model");
 const Request = require("../../../model/user/request.model");
 const RentalContract = require("../blockchain/deploy/BHRentalContract");
 const contractService = require("./contract.service");
-const {compare} = require("../../../utils/object.helper");
-const {ACTION_FUNCTION, USER_TRANSACTION_ACTION} = require("../../../config/user-transaction");
-const {ACTION_TRANSFER, ADMIN} = require("../../../config/default");
+const { compare } = require("../../../utils/object.helper");
+const { ACTION_FUNCTION, USER_TRANSACTION_ACTION } = require("../../../config/user-transaction");
+const { ACTION_TRANSFER, ADMIN } = require("../../../config/default");
 const userWalletService = require("./user-wallet.service");
-const {toObjectId} = require("../../../utils/common.helper");
+const { toObjectId } = require("../../../utils/common.helper");
 const Room = require("../../../model/room.model");
 const FeedBack = require("../../../model/user/feedback.model");
 const ReportRoom = require("../../../model/user/report.model");
 
 class UserService {
     checkImage(file) {
-        const {mimetype} = file;
+        const { mimetype } = file;
 
         if (mimetype !== "image/jpeg" && mimetype !== "image/png") {
             throw new MyError("Image invalid");
@@ -33,7 +33,7 @@ class UserService {
 
     async cityData() {
         const listDitrict = await addressService.getDitrictsFromDatabase();
-        const city = await City.findOne({_id: "6415ee77cc372ede59b64c1a"});
+        const city = await City.findOne({ _id: "6415ee77cc372ede59b64c1a" });
 
         for (let i = 0; i < listDitrict.length; i++) {
             const list = await addressService.getWardByDitrict(listDitrict[i].name);
@@ -53,7 +53,7 @@ class UserService {
     // [GET] /bh/user/me/profile
     async getProfile(_id) {
         await tokens.save();
-        const user = await User.findById(_id, {auth: 0})
+        const user = await User.findById(_id, { auth: 0 })
             .select("-updateAt")
             .lean()
             .then((data) => data)
@@ -71,7 +71,7 @@ class UserService {
         }
 
         const validProfile = await userValidate.validateProfile(_id, profile);
-        const modifieUser = await User.updateOne({_id}, {...validProfile});
+        const modifieUser = await User.updateOne({ _id }, { ...validProfile });
 
         if (modifieUser.modifiedCount < 1) throw new Error("Update user data fail!");
     }
@@ -84,14 +84,14 @@ class UserService {
             throw new Error("Not found user");
         }
 
-        const {avatar} = user;
+        const { avatar } = user;
         if (avatar) {
             awsS3ServiceHelper.deleteFile(avatar);
         }
 
         const avatarUrl = await awsS3ServiceHelper.uploadFile(file);
         const updateUser = await User.updateOne(
-            {_id},
+            { _id },
             {
                 avatar: avatarUrl,
             }
@@ -155,7 +155,7 @@ class UserService {
                 from: renter._id,
                 to: contract.lessor,
                 type: "CONTINUE_RENTAL",
-                data: {contract, newPeriod},
+                data: { contract, newPeriod },
             });
         }
 
@@ -170,13 +170,13 @@ class UserService {
             _id: requestId,
         });
 
-        const {data} = request;
+        const { data } = request;
 
         if (!request) throw new MyError("request not found");
 
         const result = await contractService.continueContract(data.contract?.renter?._id, data?.contract?._id, data?.newPeriod);
 
-        await Request.deleteOne({_id: requestId});
+        await Request.deleteOne({ _id: requestId });
         return result;
     }
 
@@ -185,7 +185,7 @@ class UserService {
             _id: requestId,
         });
 
-        const {data} = request;
+        const { data } = request;
 
         if (!request) throw new MyError("request not found");
         //check contract due
@@ -199,12 +199,12 @@ class UserService {
         }
         // const penaltyFee = (data.payment * 50) / 100;
         result = await RentalContract.endRentInDue(data?.lessor?.wallet.walletAddress, data.room, data?.renter?.wallet.walletAddress);
-        await Request.deleteOne({_id: requestId});
+        await Request.deleteOne({ _id: requestId });
         return result;
     }
 
     async cancelContractByLessor(ownerId, contractId) {
-        const contract = await Contract.findOne({_id: contractId, status: "available"}).populate([
+        const contract = await Contract.findOne({ _id: contractId, status: "available" }).populate([
             {
                 path: "renter",
                 select: "_id wallet",
@@ -220,7 +220,7 @@ class UserService {
         ]);
         if (!contract) throw new MyError("contract not found");
 
-        const {renter, lessor, room, penaltyFeeEndRent} = contract;
+        const { renter, lessor, room, penaltyFeeEndRent } = contract;
 
         //check contract due
         const dateEnd = new Date();
@@ -257,7 +257,7 @@ class UserService {
     async withdrawMoney(userId, amount) {
         if (!userId || amount < 0) throw new MyError("missing parameter");
 
-        const {_id, wallet} = await User.findOne({_id: toObjectId(userId)});
+        const { _id, wallet } = await User.findOne({ _id: toObjectId(userId) });
         if (wallet?.balance < amount) throw new MyError("not enough balance!");
 
         await userWalletService.changeBalance(_id, amount, {}, USER_TRANSACTION_ACTION.WITHDRAW);
@@ -269,7 +269,7 @@ class UserService {
             tag: [_id],
         });
 
-        return {notification};
+        return { notification };
     }
 
     async feedBackRoom(roomId, userId, data) {
@@ -280,11 +280,11 @@ class UserService {
          */
         if (!roomId || !userId) throw new MyError("missing parameter");
 
-        let [roomFind, feedBack] = await Promise.all([Room.findOne({_id: roomId}), FeedBack.findOne({room: roomId, user: userId})]);
+        let [roomFind, feedBack] = await Promise.all([Room.findOne({ _id: roomId }), FeedBack.findOne({ room: roomId, user: userId })]);
 
-        if (feedBack) return {message: "bạn đã đánh giá phòng này rồi!"};
+        if (feedBack) return { message: "bạn đã đánh giá phòng này rồi!" };
 
-        const {content, rating, images} = data;
+        const { content, rating, images } = data;
 
         feedBack = await FeedBack.create({
             user: userId,
