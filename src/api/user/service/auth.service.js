@@ -300,7 +300,7 @@ class AuthService {
                 const {otp, otpTime} = user;
 
                 // check otp
-                this.checkOTP(otpPhone, otp, otpTime);
+                // this.checkOTP(otpPhone, otp, otpTime);
 
                 user.auth.isVerified = true;
                 user.auth.remainingTime = undefined;
