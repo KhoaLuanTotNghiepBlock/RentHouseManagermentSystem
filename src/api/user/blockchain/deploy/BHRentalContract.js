@@ -209,6 +209,7 @@ RentalContract.getGetEventFromTransaction = async (txHash, contract) => {
         throw new MyError(error);
     }
 };
+
 RentalContract.payForRentMonth = async (renterAddress, roomUid, invoice, invoiceAmount, rentAmount) => {
     const {wallet, _id, username} = await User.getUserByWallet(renterAddress);
     const signRenter = await RentalContract.createSigner(renterAddress);
@@ -332,6 +333,7 @@ RentalContract.endRent = async (ownerAddress, room, renterAddress) => {
             {
                 status: "not-available",
                 lstTransaction: signTransactionHash,
+                $inc: {nbCurrentPeople: -1},
             }
         ),
         Contract.updateOne(
@@ -406,6 +408,7 @@ RentalContract.endRentInDue = async (ownerAddress, room, renterAddress, penaltyF
             {
                 status: "not-available",
                 lstTransaction: signTransactionHash,
+                $inc: {nbCurrentPeople: -1},
             }
         ),
         Contract.updateOne(
@@ -443,6 +446,7 @@ RentalContract.getUserBalance = async (address) => {
     const balanceEth = web3.utils.fromWei(balanceWei, "ether");
     return balanceEth;
 };
+
 RentalContract.transferBalance = async (fromAddress, toAddress, amount, action = "transfer") => {
     const from = await RentalContract.createSigner(fromAddress);
     const {wallet} = await User.getUserByWallet(fromAddress);

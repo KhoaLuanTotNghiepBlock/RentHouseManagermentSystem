@@ -7,16 +7,13 @@ const demandService = require("./demand.service");
 const NotFoundError = require("../../../exception/NotFoundError");
 const crypto = require("../../../utils/crypto.hepler");
 const HashContract = require("../../../model/transaction/hash-contract.model");
-const { toObjectId, convertToNumber } = require("../../../utils/common.helper");
+const {toObjectId, convertToNumber} = require("../../../utils/common.helper");
 const ArgumentError = require("../../../exception/ArgumentError");
 const RentalContract = require("../blockchain/deploy/BHRentalContract");
 const datetimeHelper = require("../../../utils/datetime.helper");
-const roomService = require("./room.service");
-const commonHelper = require("../../../utils/common.helper");
 const Room = require("../../../model/room.model");
 const Notification = require("../../../model/user/notification.model");
-const { ADMIN } = require("../../../config/default");
-const { Promise } = require("mongoose");
+const {ADMIN} = require("../../../config/default");
 
 class ContractService {
     async createContract(renterId, contractInfo) {
@@ -37,12 +34,15 @@ class ContractService {
         // create contract hash
         const contractHash = await this.hashContract(contract._id);
 
-        const notification = await Notification.create({
-            userOwner: ADMIN._id,
-            type: "NOTIFICATION",
-            tag: [owner._id, renter._id],
-            content: "tạo hợp đồng thành công!",
-        });
+        await Promise.all([
+            Room.updateOne({_id: toObjectId(contract?.room)}, {$inc: {nbCurrentPeople: 1}}),
+            Notification.create({
+                userOwner: ADMIN._id,
+                type: "NOTIFICATION",
+                tag: [owner._id, renter._id],
+                content: "tạo hợp đồng thành công!",
+            }),
+        ]);
 
         return {
             contract,
@@ -59,8 +59,8 @@ class ContractService {
     }
 
     async getAllContract(conditions = {}, pagination) {
-        const filter = { ...conditions };
-        const { limit, page, skip } = pagination;
+        const filter = {...conditions};
+        const {limit, page, skip} = pagination;
         delete filter.limit;
         delete filter.page;
 
@@ -80,7 +80,7 @@ class ContractService {
                         select: "-updatedAt -lstTransaction",
                     },
                 ])
-                .sort({ createdAt: -1 })
+                .sort({createdAt: -1})
                 .skip(skip)
                 .limit(limit)
                 .lean(),
@@ -99,10 +99,10 @@ class ContractService {
         if (!userId || !contractHash || !roomId) throw new ArgumentError("sign by renter missing");
 
         const contract = await HashContract.getByHash(contractHash);
-        const { contractId } = contract;
+        const {contractId} = contract;
         const value = contractId.room.deposit + contractId.payment;
         //  check payment
-        const { wallet } = await User.getById(userId);
+        const {wallet} = await User.getById(userId);
         if (value > wallet.balance) throw new MyError("Insufficient balance");
 
         return await RentalContract.signByRenter(
@@ -159,7 +159,7 @@ class ContractService {
         if (!renterId || !contractId || !newPeriod) throw new MyError("missing parameter");
 
         const renter = await User.getById(renterId);
-        const contract = await Contract.findOne({ _id: contractId })
+        const contract = await Contract.findOne({_id: contractId})
             .populate([
                 {
                     path: "room",
@@ -183,20 +183,20 @@ class ContractService {
         contract.dateRent = date;
         contract.payTime = date;
         const hash = crypto.hash(contract);
-        const { lessor, room } = contract;
+        const {lessor, room} = contract;
 
         const data = await RentalContract.extendsContract(lessor.wallet.walletAddress, room.roomUid, hash);
 
         await Promise.all([
             HashContract.findOneAndUpdate(
-                { contractId: contract._id },
+                {contractId: contract._id},
                 {
                     txHash: data?.txHash,
                     hash: data?.contractHash,
                 }
             ),
             Contract.updateOne(
-                { _id: contract._id },
+                {_id: contract._id},
                 {
                     period: convertToNumber(newPeriod),
                     dateRent: date,
@@ -216,7 +216,7 @@ class ContractService {
             content: ` gia hạn hợp đồng thuê của phòng ${contract?.room?.name} thành công`,
         });
 
-        return { renterNotificaiton, ownerNotificaiton };
+        return {renterNotificaiton, ownerNotificaiton};
     }
     //takes a parameter days that specifies the number of days in the future to look for contracts where payTime is due
     async getContractsDueIn(days) {
@@ -230,7 +230,7 @@ class ContractService {
 
     async checkContractStatus(date, contractId) {
         const contract = await Contract.getOne(contractId);
-        const { dateRent, period } = contract;
+        const {dateRent, period} = contract;
         const periodDate = datetimeHelper.periodDate(dateRent, period);
         if (!periodDate) throw new MyError("period date invalid!");
         return periodDate > date;
@@ -253,7 +253,7 @@ class ContractService {
     }
 
     async getContractByHash(hashContract) {
-        const { contractId, hash } = await HashContract.getByHash(hash);
+        const {contractId, hash} = await HashContract.getByHash(hash);
 
         const contract = await Contract.getOne(contractId);
         if (!contract) throw new NotFoundError("Contract not found!");
@@ -266,20 +266,20 @@ class ContractService {
     }
 
     async getAllRoomByRented(conditions = {}, pagination, projection, sort = {}) {
-        const filter = { ...conditions };
-        const { limit, page, skip } = pagination;
+        const filter = {...conditions};
+        const {limit, page, skip} = pagination;
         delete filter.limit;
         delete filter.page;
-        const { renter } = filter;
+        const {renter} = filter;
         renter && (filter.renter = toObjectId(renter));
 
         const userLookup = [
             {
                 $lookup: {
                     from: "users",
-                    let: { userId: "$owner" },
+                    let: {userId: "$owner"},
                     pipeline: [
-                        { $match: { $expr: { $eq: ["$_id", "$$userId"] } } },
+                        {$match: {$expr: {$eq: ["$_id", "$$userId"]}}},
                         {
                             $project: {
                                 avatar: 1,
@@ -294,19 +294,19 @@ class ContractService {
                     as: "owner",
                 },
             },
-            { $unwind: "$owner" },
+            {$unwind: "$owner"},
         ];
 
         const servicesLookup = [
             {
                 $lookup: {
                     from: "services",
-                    let: { serviceIds: "$services" },
+                    let: {serviceIds: "$services"},
                     pipeline: [
                         {
-                            $match: { $expr: { $and: [{ $in: ["$_id", "$$serviceIds"] }] } },
+                            $match: {$expr: {$and: [{$in: ["$_id", "$$serviceIds"]}]}},
                         },
-                        { $project: { name: 1, description: 1, basePrice: 1 } },
+                        {$project: {name: 1, description: 1, basePrice: 1}},
                     ],
                     as: "services",
                 },
@@ -317,31 +317,30 @@ class ContractService {
             {
                 $lookup: {
                     from: "rooms",
-                    let: { roomId: "$room" },
-                    pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$roomId"] } } }, ...userLookup, ...servicesLookup],
+                    let: {roomId: "$room"},
+                    pipeline: [{$match: {$expr: {$eq: ["$_id", "$$roomId"]}}}, ...userLookup, ...servicesLookup],
                     as: "room",
                 },
             },
-            {
-                $unwind: "$room",
-            },
+            {$sort: {createdAt: -1}},
+            {$unwind: "$room"},
         ];
         let [items, total] = await Promise.all([
             Contract.aggregate([
-                { $match: { renter: filter.renter } },
+                {$match: {renter: filter.renter}},
                 ...roomLookup,
                 {
                     $group: {
                         _id: "$room._id",
-                        room: { $first: "$room" },
+                        room: {$first: "$room"},
                     },
                 },
-                { $sort: { createdAt: -1 } },
-                { $project: { _id: 0, room: 1 } },
-                { $skip: skip },
-                { $limit: limit },
+                {$sort: {createdAt: -1}},
+                {$project: {_id: 0, room: 1}},
+                {$skip: skip},
+                {$limit: limit},
             ]),
-            Contract.aggregate([{ $match: { renter: filter.renter } }, { $group: { _id: "$room" } }, { $count: "totalValue" }]),
+            Contract.aggregate([{$match: {renter: filter.renter}}, {$group: {_id: "$room"}}, {$count: "totalValue"}]),
         ]);
 
         total = total.length !== 0 ? total[0].totalValue : 0;
@@ -355,19 +354,19 @@ class ContractService {
     }
 
     async getAllRoomLessor(conditions = {}, pagination, projection, sort = {}) {
-        const filter = { ...conditions };
-        const { limit, page, skip } = pagination;
+        const filter = {...conditions};
+        const {limit, page, skip} = pagination;
         delete filter.limit;
         delete filter.page;
-        const { lessor } = filter;
+        const {lessor} = filter;
         lessor && (filter.lessor = toObjectId(lessor));
         const userLookup = [
             {
                 $lookup: {
                     from: "users",
-                    let: { userId: "$owner" },
+                    let: {userId: "$owner"},
                     pipeline: [
-                        { $match: { $expr: { $eq: ["$_id", "$$userId"] } } },
+                        {$match: {$expr: {$eq: ["$_id", "$$userId"]}}},
                         {
                             $project: {
                                 avatar: 1,
@@ -382,19 +381,19 @@ class ContractService {
                     as: "owner",
                 },
             },
-            { $unwind: "$owner" },
+            {$unwind: "$owner"},
         ];
 
         const servicesLookup = [
             {
                 $lookup: {
                     from: "services",
-                    let: { serviceIds: "$services" },
+                    let: {serviceIds: "$services"},
                     pipeline: [
                         {
-                            $match: { $expr: { $and: [{ $in: ["$_id", "$$serviceIds"] }] } },
+                            $match: {$expr: {$and: [{$in: ["$_id", "$$serviceIds"]}]}},
                         },
-                        { $project: { name: 1, description: 1, basePrice: 1 } },
+                        {$project: {name: 1, description: 1, basePrice: 1}},
                     ],
                     as: "services",
                 },
@@ -405,8 +404,8 @@ class ContractService {
             {
                 $lookup: {
                     from: "rooms",
-                    let: { roomId: "$room" },
-                    pipeline: [{ $match: { $expr: { $eq: ["$_id", "$$roomId"] } } }, ...userLookup, ...servicesLookup],
+                    let: {roomId: "$room"},
+                    pipeline: [{$match: {$expr: {$eq: ["$_id", "$$roomId"]}}}, ...userLookup, ...servicesLookup],
                     as: "room",
                 },
             },
@@ -417,20 +416,20 @@ class ContractService {
 
         let [items, total] = await Promise.all([
             Contract.aggregate([
-                { $match: { lessor: filter.lessor } },
+                {$match: {lessor: filter.lessor}},
                 ...roomLookup,
                 {
                     $group: {
                         _id: "$room._id",
-                        room: { $first: "$room" },
+                        room: {$first: "$room"},
                     },
                 },
-                { $sort: { createdAt: -1 } },
-                { $project: { _id: 0, room: 1 } },
-                { $skip: skip },
-                { $limit: limit },
+                {$sort: {"room.createdAt": -1}},
+                {$project: {_id: 0, room: 1}},
+                {$skip: skip},
+                {$limit: limit},
             ]),
-            Contract.aggregate([{ $match: { lessor: filter.lessor } }, { $group: { _id: "$room" } }, { $count: "totalValue" }]),
+            Contract.aggregate([{$match: {lessor: filter.lessor}}, {$group: {_id: "$room"}}, {$count: "totalValue"}]),
         ]);
 
         total = total.length !== 0 ? total[0].totalValue : 0;

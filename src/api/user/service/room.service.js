@@ -22,7 +22,7 @@ class RoomService {
         if (userOwner?.wallet.balance < CREATE_ROOM_FEE) throw new MyError("bạn không đủ tiền để tạo phòng!");
 
         let room = await roomValidate.validCreateRoom(_id, roomInfo);
-        const {amentilities, services, cityName, ditrictName, streetName, wardName, addressDetail} = roomInfo;
+        const {amentilities, services, cityName, ditrictName, streetName, wardName, addressDetail, period} = roomInfo;
 
         const address = await validateAddress.validAddress({
             cityName,
