@@ -36,8 +36,11 @@ class InvoiceService {
         let amountDemand = 0;
         for (let i = 0; i < serviceDemands.length; i++) {
             const {amount} = await ServiceDemand.findById(serviceDemands[i]);
+            console.log("🚀 ~ file: invoice.service.js:39 ~ InvoiceService ~ createInvoice ~ serviceDemands[i]:", serviceDemands[i]);
+            console.log("🚀 ~ file: invoice.service.js:39 ~ InvoiceService ~ createInvoice ~ amount:", amount);
             amountDemand += amount;
         }
+        console.log("🚀 ~ file: invoice.service.js:37 ~ InvoiceService ~ createInvoice ~ amountDemand:", amountDemand);
 
         let invoice = await Invoice.create({
             contract: contract._id,

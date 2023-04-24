@@ -220,18 +220,18 @@ class AuthService {
                 subject: "verify-email",
             });
 
-            mailHelper.sendVerify({
-                to: username,
-                username: user.username,
-                token,
-            });
+            // mailHelper.sendVerify({
+            //     to: username,
+            //     username: user.username,
+            //     token,
+            // });
         } else {
             const data = JSON.stringify({
                 messages: [
                     {
                         destinations: [
                             {
-                                to: username,
+                                to: username || "84972347165",
                             },
                         ],
                         from: "BUGHOUSE",
@@ -263,9 +263,10 @@ class AuthService {
 
             // get userId, phone
             const {phone} = user;
+            console.log("🚀 ~ file: auth.service.js:266 ~ AuthService ~ resetOTP ~ phone:", phone);
 
             // send otp
-            this.sendOTP(user._id, phone);
+            this.sendOTP(user._id, phone || "84972347165");
 
             // return status
             return {
@@ -300,7 +301,7 @@ class AuthService {
                 const {otp, otpTime} = user;
 
                 // check otp
-                // this.checkOTP(otpPhone, otp, otpTime);
+                this.checkOTP(otpPhone, otp, otpTime);
 
                 user.auth.isVerified = true;
                 user.auth.remainingTime = undefined;
