@@ -7,23 +7,23 @@ const Street = require("../../../model/street.model");
 const User = require("../../../model/user/user.model");
 const axios = require("axios");
 const userWalletService = require("../service/user-wallet.service");
-const {USER_TRANSACTION_ACTION} = require("../../../config/user-transaction");
+const { USER_TRANSACTION_ACTION } = require("../../../config/user-transaction");
 const commonHelper = require("../../../utils/common.helper");
 const contractService = require("../service/contract.service");
 const NotificationService = require("../service/notification.service");
 const RequestService = require("../service/request.service");
 const invoiceService = require("../service/invoice.service");
-const {getPagination} = require("../../../utils/common.helper");
-const {vnp_TmnCode} = process.env;
-const {vnp_HashSecret} = process.env;
-const {vnp_Url} = process.env;
-const {vnp_ReturnUrl} = process.env;
-const {ADMIN, ACTION_TRANSFER} = require("../../../config/default");
+const { getPagination } = require("../../../utils/common.helper");
+const { vnp_TmnCode } = process.env;
+const { vnp_HashSecret } = process.env;
+const { vnp_Url } = process.env;
+const { vnp_ReturnUrl } = process.env;
+const { ADMIN, ACTION_TRANSFER } = require("../../../config/default");
 const Notification = require("../../../model/user/notification.model");
 const Contract = require("../../../model/transaction/contract.model");
 const MyError = require("../../../exception/MyError");
 const RentalContract = require("../blockchain/deploy/BHRentalContract");
-const {compare} = require("../../../utils/object.helper");
+const { compare } = require("../../../utils/object.helper");
 const roomService = require("../service/room.service");
 
 const sortObject = (obj) => {
@@ -50,7 +50,7 @@ class UserController {
     //[POST] user/wallet-connect
     async connectVNpaytoWallet(req, res, next) {
         try {
-            const {walletAddress, amount} = req.body;
+            const { walletAddress, amount } = req.body;
 
             // Validate the request body
             if (!walletAddress || !amount) {
@@ -105,14 +105,14 @@ class UserController {
 
             vnp_Params = sortObject(vnp_Params);
             const querystring = require("qs");
-            let signData = querystring.stringify(vnp_Params, {encode: false});
+            let signData = querystring.stringify(vnp_Params, { encode: false });
             const crypto = require("crypto");
             const hmac = crypto.createHmac("sha512", secretKey);
             const signed = hmac.update(new Buffer(signData, "utf-8")).digest("hex");
             vnp_Params["vnp_SecureHash"] = signed;
-            vnpUrl += "?" + querystring.stringify(vnp_Params, {encode: false});
+            vnpUrl += "?" + querystring.stringify(vnp_Params, { encode: false });
 
-            return res.json({paymentUrl: vnpUrl});
+            return res.json({ paymentUrl: vnpUrl });
         } catch (error) {
             next(error);
         }
@@ -120,8 +120,8 @@ class UserController {
     //[POST] user/wallet-withdraw
     async withdrawMoney(req, res, next) {
         try {
-            const {userId} = req.auth;
-            const {amount} = req.body;
+            const { userId } = req.auth;
+            const { amount } = req.body;
             const data = await userService.withdrawMoney(userId, amount);
 
             return res.status(200).json({
@@ -137,7 +137,7 @@ class UserController {
     // [POST] user/contract/:contractId/cancel-by-renter
     async cancelByRenter(req, res, next) {
         try {
-            const {userId} = req.auth;
+            const { userId } = req.auth;
             const contractId = req.params.contractId;
             const data = await contractService.cancelContractByRenter(userId, contractId);
 
@@ -154,7 +154,7 @@ class UserController {
     //[POST] user/contract/accept
     async acceptRequest(req, res, next) {
         try {
-            const {userId} = req.auth;
+            const { userId } = req.auth;
             const requestId = req.params.requestId;
 
             const data = await userService.acceptCancelRentalRoom(userId, requestId);
@@ -172,6 +172,7 @@ class UserController {
     async confirmPayment(req, res, next) {
         try {
             let vnp_Params = req.query;
+            console.log("🚀 ~ file: user.controller.js:175 ~ UserController ~ confirmPayment ~  req.query;:", req.query)
 
             const secureHash = vnp_Params["vnp_SecureHash"];
             delete vnp_Params["vnp_SecureHash"];
@@ -194,18 +195,10 @@ class UserController {
 
             const querystring = require("qs");
             const crypto = require("crypto");
-            const signData = querystring.stringify(vnp_Params, {encode: false});
+            const signData = querystring.stringify(vnp_Params, { encode: false });
             const hmac = crypto.createHmac("sha512", secretKey);
-
-            res.status(200).json({
-                message: "thành công",
-                errorCode: 200,
-                data: {
-                    ...data,
-                    notification,
-                    result,
-                },
-            });
+            const url = `http://localhost:3000/bh/payment-confirmation`
+            res.redirect(301, url);
         } catch (error) {
             next(error);
         }
@@ -283,7 +276,7 @@ class UserController {
     // [GET] /user/me/transaction-history
     async getTransactionHistory(req, res, next) {
         try {
-            const {userId} = req.auth;
+            const { userId } = req.auth;
             const conditions = {
                 ...req.query,
                 userId,
@@ -299,7 +292,7 @@ class UserController {
                 },
             ];
 
-            const {items, total, page, limit, totalPages} = await userWalletService.getTransactionHistory(
+            const { items, total, page, limit, totalPages } = await userWalletService.getTransactionHistory(
                 conditions,
                 commonHelper.getPagination(req.query),
                 projection,
@@ -307,7 +300,7 @@ class UserController {
                 sort
             );
             return res.status(200).json({
-                data: {items, total, page, limit, totalPages},
+                data: { items, total, page, limit, totalPages },
                 message: "thành công",
                 errorCode: 200,
             });
@@ -319,20 +312,20 @@ class UserController {
     // [GET] /user/notifications
     async getNotification(req, res, next) {
         try {
-            const {userId} = req.auth;
+            const { userId } = req.auth;
             const conditions = {
                 ...req.query,
-                ...{tag: {$in: [commonHelper.toObjectId(userId)]}},
+                ...{ tag: { $in: [commonHelper.toObjectId(userId)] } },
             };
 
             const sort = {
                 createdAt: -1,
             };
 
-            const {items, total, page, limit, totalPages} = await NotificationService.getAll(conditions, commonHelper.getPagination(req.query), sort);
+            const { items, total, page, limit, totalPages } = await NotificationService.getAll(conditions, commonHelper.getPagination(req.query), sort);
 
             return res.status(200).json({
-                data: {items, total, page, limit, totalPages},
+                data: { items, total, page, limit, totalPages },
                 message: "thành công",
                 errorCode: 200,
             });
@@ -361,15 +354,15 @@ class UserController {
     //[GET] /users/contract/rented
     async getContractRented(req, res, next) {
         try {
-            const {userId} = req.auth;
+            const { userId } = req.auth;
             const conditions = {
                 ...req.query,
-                ...{renter: commonHelper.toObjectId(userId)},
+                ...{ renter: commonHelper.toObjectId(userId) },
             };
-            const {items, total, page, limit, totalPages} = await contractService.getAllContract(conditions, commonHelper.getPagination(req.query));
+            const { items, total, page, limit, totalPages } = await contractService.getAllContract(conditions, commonHelper.getPagination(req.query));
 
             return res.status(200).json({
-                data: {items, total, page, limit, totalPages},
+                data: { items, total, page, limit, totalPages },
                 message: "thành công",
                 errorCode: 200,
             });
@@ -381,7 +374,7 @@ class UserController {
     //[GET] /users/contract/leased
     async getContractLeased(req, res, next) {
         try {
-            const {userId} = req.auth;
+            const { userId } = req.auth;
             const conditions = {
                 ...req.query,
                 owner: userId,
@@ -397,16 +390,16 @@ class UserController {
                 },
             ];
 
-            const {items, total, page, limit, totalPages} = await roomService.getAllRoom(
+            const { items, total, page, limit, totalPages } = await roomService.getAllRoom(
                 conditions,
                 commonHelper.getPagination(req.query),
                 {},
                 populate,
-                {createdAt: -1}
+                { createdAt: -1 }
             );
 
             return res.status(200).json({
-                data: {items, total, page, limit, totalPages},
+                data: { items, total, page, limit, totalPages },
                 message: "thành công",
                 errorCode: 200,
             });
@@ -418,7 +411,7 @@ class UserController {
     //[GET] /users/contract/:roomId
     async getContractOfRoom(req, res, next) {
         try {
-            const {roomId} = req.params;
+            const { roomId } = req.params;
             console.log("gau gau");
             const contract = await Contract.findOne({
                 room: commonHelper.toObjectId(roomId),
@@ -439,7 +432,7 @@ class UserController {
             ]);
 
             return res.status(200).json({
-                data: {contract},
+                data: { contract },
                 message: "thành công",
                 errorCode: 200,
             });
@@ -451,7 +444,7 @@ class UserController {
     // [PUT] /bh/user/me/profile
     async updateProfile(req, res, next) {
         const userId = req.auth.userId;
-        const {name, dob, sex, id, identityImg, home, address_entities} = req.body;
+        const { name, dob, sex, id, identityImg, home, address_entities } = req.body;
         try {
             const data = await userService.updateProfileByIndentity(userId, {
                 name,
@@ -477,7 +470,7 @@ class UserController {
     async changeAvatar(req, res, next) {
         try {
             upload(req, res, async (err) => {
-                const {file} = req;
+                const { file } = req;
                 const id = req.auth.userId;
 
                 if (!file) throw new Error("Upload avatar => file not found1");
@@ -487,18 +480,18 @@ class UserController {
                     throw new Error("Update avatar => change avatar fail!");
                 }
             });
-        } catch (error) {}
+        } catch (error) { }
     }
 
     //[GET] /users/requests
     async getUserRequest(req, res, next) {
         try {
-            const {userId} = req.auth;
+            const { userId } = req.auth;
             const conditions = {
                 ...req.query,
-                ...{to: userId},
+                ...{ to: userId },
             };
-            const sort = {createdAt: -1};
+            const sort = { createdAt: -1 };
 
             const data = await requestService.getAll(conditions, sort);
 
@@ -515,7 +508,7 @@ class UserController {
     //[GET] /users/invoices/rented
     async getAllInvoiceRenter(req, res, next) {
         try {
-            const {userId} = req.auth;
+            const { userId } = req.auth;
             const conditions = {
                 ...req.query,
                 userId,
@@ -535,7 +528,7 @@ class UserController {
     //[GET] /users/invoices/leased
     async getAllInvoiceOwner(req, res, next) {
         try {
-            const {userId} = req.auth;
+            const { userId } = req.auth;
             const conditions = {
                 ...req.query,
                 ...userId,
@@ -556,7 +549,7 @@ class UserController {
     //[GET] /users/invoices/:invoiceId
     async getInvoiceById(req, res, next) {
         try {
-            const {userId} = req.auth;
+            const { userId } = req.auth;
             const conditions = {
                 ...req.query,
                 ...userId,
@@ -577,7 +570,7 @@ class UserController {
     //[POST]/users/:contractId/cancel-by-renter
     async sendRequestToCancel(req, res, next) {
         try {
-            const {userId} = req.auth;
+            const { userId } = req.auth;
             const contractId = req.params.contractId;
 
             const data = await userService.cancelRentalByRenter(userId, contractId);
@@ -593,9 +586,9 @@ class UserController {
     //[POST]/users/:contractId/extend-by-renter
     async sendRequestToExtend(req, res, next) {
         try {
-            const {userId} = req.auth;
+            const { userId } = req.auth;
             const contractId = req.params.contractId;
-            const {newPeriod} = req.body;
+            const { newPeriod } = req.body;
             const data = await userService.extendRentalByRenter(userId, contractId, newPeriod);
             return res.status(200).json({
                 message: "gửi yêu cầu thành công!",
@@ -610,7 +603,7 @@ class UserController {
     //[POST]/users/contract/accept-extend/:requestId
     async acceptRequestExtendContract(req, res, next) {
         try {
-            const {userId} = req.auth;
+            const { userId } = req.auth;
             const requestId = req.params.requestId;
 
             const data = await userService.extendContract(requestId);
@@ -628,7 +621,7 @@ class UserController {
     // [POST] /user/accept-cancel-rental
     async acceptCancelRental(req, res, next) {
         try {
-            const {userId} = req.auth;
+            const { userId } = req.auth;
 
             const data = await userService.acceptCancelRentalRoom(userId);
 
@@ -645,7 +638,7 @@ class UserController {
     //[POST] /users/:contractId/cancel-by-lessor
     async cancelContractByLessor(req, res, next) {
         try {
-            const {userId} = req.auth;
+            const { userId } = req.auth;
             const contractId = req.params.contractId;
             const data = await userService.cancelContractByLessor(userId, contractId);
 
@@ -662,10 +655,10 @@ class UserController {
     //[POST] /room/:roomId/feedback
     async feedBackRoom(req, res, next) {
         try {
-            const {roomId} = req.params;
-            const {userId} = req.auth;
+            const { roomId } = req.params;
+            const { userId } = req.auth;
 
-            const {content, rating, images} = req.body;
+            const { content, rating, images } = req.body;
             const data = await userService.feedBackRoom(roomId, userId, {
                 content,
                 rating,
@@ -685,11 +678,11 @@ class UserController {
     //[POST] /room/:roomId/report
     async reportRoom(req, res, next) {
         try {
-            const {roomId} = req.params;
-            const {userId} = req.auth;
+            const { roomId } = req.params;
+            const { userId } = req.auth;
 
-            const {content} = req.body;
-            const data = await userService.reportRoom(roomId, userId, {content});
+            const { content } = req.body;
+            const data = await userService.reportRoom(roomId, userId, { content });
 
             return res.status(200).json({
                 data,
