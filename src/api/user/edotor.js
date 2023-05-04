@@ -213,111 +213,110 @@ const createPayment = async (req, res) => {
     // }
 };
 
-// 3. Verify the payment information and retrieve the payment amount
-const capturePayment = async (req, res) => {
-    const {orderID, payerID} = req.query;
-    const request = new paypal.orders.OrdersCaptureRequest(orderID);
-    request.requestBody({payer_id: payerID});
+// // 3. Verify the payment information and retrieve the payment amount
+// const capturePayment = async (req, res) => {
+//     const {orderID, payerID} = req.query;
+//     const request = new paypal.orders.OrdersCaptureRequest(orderID);
+//     request.requestBody({payer_id: payerID});
 
-    try {
-        const response = await client.execute(request);
-        const amount = response.result.purchase_units[0].amount.value;
-        // 4. Use Web3.js to add the payment amount to the user's Metamask wallet
-        // Example code:
-        // const Web3 = require('web3');
-        // const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
-        // const address = '0x123456789abcdef';
-        // const value = web3.utils.toWei(amount, 'ether');
-        // const transactionHash = await web3.eth.sendTransaction({to: address, value: value});
-        return res.send("Payment successful");
-    } catch (error) {
-        console.error(error);
-        return res.status(500).send("Something went wrong");
-    }
-};
+//     try {
+//         const response = await client.execute(request);
+//         const amount = response.result.purchase_units[0].amount.value;
+//         // 4. Use Web3.js to add the payment amount to the user's Metamask wallet
+//         // Example code:
+//         // const Web3 = require('web3');
+//         // const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
+//         // const address = '0x123456789abcdef';
+//         // const value = web3.utils.toWei(amount, 'ether');
+//         // const transactionHash = await web3.eth.sendTransaction({to: address, value: value});
+//         return res.send("Payment successful");
+//     } catch (error) {
+//         console.error(error);
+//         return res.status(500).send("Something went wrong");
+//     }
+// };
 
-// 5. Return a response to the PayPal API to confirm the payment
-const success = (req, res) => {
-    return res.send("Payment successful");
-};
-module.exports = {
-    createPayment,
-    capturePayment,
-};
-// const cancel = (req, res)
+// // 5. Return a response to the PayPal API to confirm the payment
+// const success = (req, res) => {
+//     return res.send("Payment successful");
+// };
+// module.exports = {
+//     createPayment,
+//     capturePayment,
+// };
+// // const cancel = (req, res)
 
-const ExchangeNftService = require("./ExchangeNftService");
-const {BadRequest} = require("../exceptions");
+// // const ExchangeNftService = require("./ExchangeNftService");
+// // const {BadRequest} = require("../exceptions");
 
-handler.createExchangeNft = async (req) => {
-    const {packageId} = req.params;
-    const {nft, address, metadataURL} = req.payload;
+// handler.createExchangeNft = async (req) => {
+//     const {packageId} = req.params;
+//     const {nft, address, metadataURL} = req.payload;
 
-    // Retrieve the package with the given ID that is still active
-    const foundPackage = await ExchangeNftService.getOneOrFailPackage({
-        _id: packageId,
-        status: PackageStatus.ACTIVE,
-    });
+//     // Retrieve the package with the given ID that is still active
+//     const foundPackage = await ExchangeNftService.getOneOrFailPackage({
+//         _id: packageId,
+//         status: PackageStatus.ACTIVE,
+//     });
 
-    // Check for duplicate NFT IDs
-    const nftIds = new Set(nft.map((item) => item.id));
-    if (nftIds.size !== nft.length) {
-        throw new BadRequest("Duplicate NFT IDs");
-    }
+//     // Check for duplicate NFT IDs
+//     const nftIds = new Set(nft.map((item) => item.id));
+//     if (nftIds.size !== nft.length) {
+//         throw new BadRequest("Duplicate NFT IDs");
+//     }
 
-    // Create exchange NFT items for each NFT in the request payload
-    const exchangeNfts = await Promise.all(
-        nft.map(async (item) => {
-            const metadataUrl = `${metadataURL}/${item.id}`;
-            return ExchangeNftService.createExchangeNFTItem({
-                id: item.id,
-                address,
-                chainId: foundPackage.chainIds[0],
-                packageId,
-                price: item.price,
-                metadataURL: metadataUrl,
-            });
-        })
-    );
+//     // Create exchange NFT items for each NFT in the request payload
+//     const exchangeNfts = await Promise.all(
+//         nft.map(async (item) => {
+//             const metadataUrl = `${metadataURL}/${item.id}`;
+//             return ExchangeNftService.createExchangeNFTItem({
+//                 id: item.id,
+//                 address,
+//                 chainId: foundPackage.chainIds[0],
+//                 packageId,
+//                 price: item.price,
+//                 metadataURL: metadataUrl,
+//             });
+//         })
+//     );
 
-    return exchangeNfts;
-};
+//     return exchangeNfts;
+// };
 
-const ExchangeItem = require("./ExchangeItem");
-const axios = require("axios");
-const {BadRequest} = require("../exceptions");
-const {convertBalanceToWei} = require("../utils");
+// // const ExchangeItem = require("./ExchangeItem");
+// // const {BadRequest} = require("../exceptions");
+// // const {convertBalanceToWei} = require("../utils");
 
-const createExchangeNFTItem = async ({id, address, chainId, packageId, price, metadataURL}) => {
-    const existItem = await ExchangeItem.findOneAndDelete({
-        id,
-        address,
-        packageId: ObjectId(packageId),
-    });
-    const {data} = await axios.get(metadataURL);
-    if (!data || !data.image || !data.name) {
-        throw new BadRequest("Invalid metadata URL");
-    }
-    const dataItem = await ExchangeItem.findOneAndUpdate(
-        {status: 0, chainId},
-        {
-            $set: {
-                status: 1,
-                image: data.image,
-                name: data.name,
-                id,
-                address,
-                price,
-                chainId,
-                priceWei: convertBalanceToWei(price),
-                packageId: ObjectId(packageId),
-            },
-        },
-        {new: true, upsert: true}
-    );
-    return dataItem;
-};
+// const createExchangeNFTItem = async ({id, address, chainId, packageId, price, metadataURL}) => {
+//     const existItem = await ExchangeItem.findOneAndDelete({
+//         id,
+//         address,
+//         packageId: ObjectId(packageId),
+//     });
+//     const {data} = await axios.get(metadataURL);
+//     if (!data || !data.image || !data.name) {
+//         throw new BadRequest("Invalid metadata URL");
+//     }
+//     const dataItem = await ExchangeItem.findOneAndUpdate(
+//         {status: 0, chainId},
+//         {
+//             $set: {
+//                 status: 1,
+//                 image: data.image,
+//                 name: data.name,
+//                 id,
+//                 address,
+//                 price,
+//                 chainId,
+//                 priceWei: convertBalanceToWei(price),
+//                 packageId: ObjectId(packageId),
+//             },
+//         },
+//         {new: true, upsert: true}
+//     );
+//     return dataItem;
+// };
 
-module.exports = {
-    createExchangeNFTItem,
-};
+// module.exports = {
+//     createExchangeNFTItem,
+// };
