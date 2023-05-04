@@ -124,30 +124,6 @@ UserSchema.statics.getById = async (id) => {
         enable,
     };
 };
-UserSchema.statics.getUserByIndentity = async (identity) => {
-    if (!identity) throw new ArgumentError("user identity ==> ");
-
-    const user = await User.findOne({identity});
-
-    if (!user) {
-        throw new Error("user not found!");
-    }
-
-    const {_id, name, email, username, phone, gender, dob, avatar, enable} = user;
-
-    return {
-        _id,
-        name,
-        email,
-        username,
-        phone,
-        identity,
-        gender,
-        dob,
-        avatar,
-        enable,
-    };
-};
 
 UserSchema.statics.getUserByWallet = async (walletAddress) => {
     if (!walletAddress) throw new ArgumentError("user wallet address ==>");

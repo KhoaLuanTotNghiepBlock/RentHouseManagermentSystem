@@ -12,11 +12,9 @@ const userValidation = require("../validate/user.validation");
 const {SECRET_KEY} = process.env;
 const {REFRESH_SECRET_KEY} = process.env;
 const {REQUEST_VERIFY_TOKEN_LIFE} = process.env;
-// const { REQUEST_RESET_TOKEN_LIFE } = process.env;
 const TOKEN_LIFE = process.env.ACCESS_TOKEN_LIFE;
 const {REFRESH_TOKEN_LIFE} = process.env;
 const {OTP_EXPIRE_MINUTE} = process.env;
-const SIGNER_PRIVATE_KEY = process.env.SIGNER_PRIVATE_KEY;
 
 const sendMessage = require("../../../config/sendsms");
 const {isEmpty} = require("../../../utils/common.helper");
