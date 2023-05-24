@@ -176,8 +176,8 @@ class ContractService {
         //check contract due
         const date = new Date();
         // in due
-        const inDue = await this.checkContractStatus(date, contract._id);
-        if (inDue) throw new MyError("the contract due in the period");
+        // const inDue = await this.checkContractStatus(date, contract._id);
+        // if (inDue) throw new MyError("the contract due in the period");
 
         contract.period = convertToNumber(newPeriod);
         contract.dateRent = date;

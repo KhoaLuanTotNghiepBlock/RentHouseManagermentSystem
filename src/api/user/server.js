@@ -25,7 +25,7 @@ const server = require("http").Server(app);
 const routers = require("./routes");
 
 db.connect(process.env.DATABASE_CONNECTION);
-require("../../config/cron");
+// require("../../config/cron");
 
 app.use(cors());
 app.use(useragent.express());
