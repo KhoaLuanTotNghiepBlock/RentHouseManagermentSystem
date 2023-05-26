@@ -103,7 +103,7 @@ class RoomService {
                 },
             ];
         }
-
+        if (!owner) filter.status = "available";
         const [items, total] = await Promise.all([
             Room.find(filter, projection).sort(sort).skip(skip).limit(limit).populate(populate).lean(),
             Room.countDocuments(filter),
