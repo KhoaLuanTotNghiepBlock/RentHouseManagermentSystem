@@ -1,88 +1,51 @@
 require("dotenv").config();
 const axios = require("axios");
 const District = require("../../../model/ditrict.model");
+const chain = require("../../../model/chain");
 
 const { VIETNAM_DATASET_URL } = process.env;
 
 class AddressService {
-  async getCity() {
-    let data;
-    await axios.get(VIETNAM_DATASET_URL)
-      .then((response) => data = response.data)
-      .catch((error) => console.log(error));
-    return data;
-  }
-
-  async getDitrictList() {
+  async fetchCityData() {
     try {
-      const cityData = await this.getCity();
-
-      if (!cityData) { throw new Error("Get city data fail!"); }
-
-      const listDitrict = cityData.district.map((val) => ({
-        name: val.name,
-        pre: val.pre,
-      }));
-
-      if (!listDitrict) { throw new Error("Get ditrict fail!"); }
-      return listDitrict;
+      const response = await axios.get(VIETNAM_DATASET_URL);
+      return response.data;
     } catch (error) {
-      throw new Error(error.message);
+      throw new Error("Failed to fetch city data");
     }
   }
 
-  async getWardByDitrict(ditrictName) {
-    try {
-      const cityData = await this.getCity();
+  async getDistrictList() {
+    const cityData = await this.fetchCityData();
 
-      if (!cityData) { throw new Error("Get city data fail!"); }
-
-      let listWard = [];
-
-      cityData.district.map((val) => {
-        if (val.name === ditrictName) {
-          listWard = val.ward;
-        }
-      });
-      return listWard;
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    return cityData.district.map(({ name, pre }) => ({ name, pre }));
   }
 
-  async getStreetByDitrict(ditrictName) {
-    try {
-      const cityData = await this.getCity();
-
-      if (!cityData) { throw new Error("Get city data fail!"); }
-
-      let listSreet = [];
-
-      cityData.district.map((val) => {
-        if (val.name === ditrictName) { listSreet = val.street; }
-      });
-
-      return listSreet;
-    } catch (error) {
-      throw new Error(error.message);
-    }
+  async getEntitiesByDistrict(districtName, entityType) {
+    const cityData = await this.fetchCityData();
+    const district = cityData.district.find((d) => d.name === districtName);
+    return district ? district[entityType] : [];
   }
 
-  async getDitrictsFromDatabase() {
+  async getWardsByDistrict(districtName) {
+    return await this.getEntitiesByDistrict(districtName, "ward");
+  }
+
+  async getStreetsByDistrict(districtName) {
+    return await this.getEntitiesByDistrict(districtName, "street");
+  }
+
+  async getDistrictsFromDatabase() {
     const districts = await District.find();
-    const listDictric = districts.map(val => { return val.name });
-    return listDictric;
+    return districts.map(({ name }) => name);
   }
 
-  async getWardFromDatabase(ditrictName) {
-    const wards = await this.getWardByDitrict(ditrictName)
-    const wardList = wards.map(val => val.name);
-    return wardList;
+  async getWardsFromDatabase(districtName) {
+    return await this.getWardsByDistrict(districtName);
   }
 
-  async getStreetFromDatabase(ditrictName) {
-    const streets = await this.getStreetByDitrict(ditrictName);
-    return streets;
+  async getStreetsFromDatabase(districtName) {
+    return await this.getStreetsByDistrict(districtName);
   }
 }
 

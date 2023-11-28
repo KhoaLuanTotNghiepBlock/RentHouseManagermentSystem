@@ -1,50 +1,79 @@
 const addressService = require("../service/address.service");
 
-class Addresscontroller {
-    // [GET] bh/address/ditricts 
-    async getDitrict(req, res, next) {
-        try {
-            const listDitrict = await addressService.getDitrictsFromDatabase();
-            return res.status(200).json({
-                message: 'success',
-                errorCode: 200,
-                data: { listDitrict }
-            });
-        } catch (error) {
-            next(error);
-        }
+class AddressController {
+  // [GET] bh/address/ditricts
+  async getDistrict(req, res, next) {
+    try {
+      const listDistrict = await addressService.getDistrictsFromDatabase();
+      return res.status(200).json({
+        message: "success",
+        errorCode: 200,
+        data: { listDistrict },
+      });
+    } catch (error) {
+      next(error);
     }
+  }
 
-    // [GET] bh/address/wards/:ditrictName
-    async getWard(req, res, next) {
-        try {
-            const wards = await addressService.getWardFromDatabase(req.params.ditrictName);
+  async getDistrictDetail(req, res, next) {
+    try {
+      const districtName = req.params.districtName;
+      const wards = await addressService.getEntitiesByDistrict(
+        districtName,
+        "ward"
+      );
 
-            return res.status(200).json({
-                message: 'success',
-                errorCode: 200,
-                data: { wards }
-            })
-        } catch (error) {
-            next(error);
-        }
+      const streets = await addressService.getEntitiesByDistrict(
+        districtName,
+        "street"
+      );
+
+      return res.status(200).json({
+        message: "success",
+        errorCode: 200,
+        data: {
+          wards: wards || [],
+          streets: streets || [],
+        },
+      });
+    } catch (error) {
+      next(error);
     }
+  }
 
-    // [GET] bh/address/streets/:ditrictName
-    async getStreet(req, res, next) {
-        try {
-            const streets = await addressService.getStreetFromDatabase(req.params.ditrictName);
+  // [GET] bh/address/wards/:districtName
+  async getWard(req, res, next) {
+    try {
+      const wards = await addressService.getWardsFromDatabase(
+        req.params.districtName
+      );
 
-            return res.status(200).json({
-                message: 'success',
-                errorCode: 200,
-                data: { streets }
-            })
-        } catch (error) {
-            next(error);
-        }
+      return res.status(200).json({
+        message: "success",
+        errorCode: 200,
+        data: { wards },
+      });
+    } catch (error) {
+      next(error);
     }
+  }
 
-};
+  // [GET] bh/address/streets/:districtName
+  async getStreet(req, res, next) {
+    try {
+      const streets = await addressService.getStreetsFromDatabase(
+        req.params.districtName
+      );
 
-module.exports = new Addresscontroller();
+      return res.status(200).json({
+        message: "success",
+        errorCode: 200,
+        data: { streets },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+
+module.exports = new AddressController();
